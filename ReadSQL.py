@@ -90,6 +90,58 @@ def do_sql(sql):
             conn.commit()
         elif sql.startswith('---print:columns'):
             print(', '.join([str(c) for c in columns]))
+        elif sql.startswith('---print:'):
+            fromm_toos = sql[len('---print:'):].split(',')
+            #print(fromm_toos)
+            for ft in range(len(fromm_toos)):
+                fromm_too = fromm_toos[ft].split(':')
+                fromm, too, stepp = 1, len(data), 1
+                if len(fromm_too) == 1:
+                    if fromm_too[0].strip() != '':
+                        try:
+                            fromm = int(fromm_too[0])
+                            too = fromm
+                        except Exception as e:
+                            traceback.print_exc()
+                if len(fromm_too) == 2:
+                    if fromm_too[0].strip() != '':
+                        try:
+                            fromm = int(fromm_too[0])
+                        except Exception as e:
+                            traceback.print_exc()
+                    if fromm_too[1].strip() != '':
+                        try:
+                            too = int(fromm_too[1])
+                        except Exception as e:
+                            traceback.print_exc()
+                if len(fromm_too) > 2:
+                    if fromm_too[0].strip() != '':
+                        try:
+                            fromm = int(fromm_too[0])
+                        except Exception as e:
+                            traceback.print_exc()
+                    if fromm_too[1].strip() != '':
+                        try:
+                            too = int(fromm_too[1])
+                        except Exception as e:
+                            traceback.print_exc()
+                    if fromm_too[2].strip() != '':
+                        try:
+                            stepp = int(fromm_too[2])
+                        except Exception as e:
+                            traceback.print_exc()
+                #print(fromm, too, stepp)
+                row_format = "{:>15}" * (len(columns) + 1)
+                nrows = len(data)
+                if fromm <= 0: fromm = 1
+                if too <= 0: too = 1
+                if stepp <= 0: stepp = 1
+                if too > nrows: too = nrows
+                print('There are {} rows. Showing cases {} to {} step {}.'.format(str(nrows), str(fromm), str(too), str(stepp)), '\n')
+                print(row_format.format("(Row)", *columns))
+                for i, row in enumerate(data[fromm-1:too:stepp]):
+                    print(row_format.format(str(fromm+i*stepp), *[str(r) for r in row]))    # Null to None
+                print('\n')
 
     else:
         try:
