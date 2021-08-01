@@ -8,10 +8,6 @@ def parseArgv(argument_list):
 
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('database', metavar='Database_filename', type=str, nargs='?',
-                    help='Database filename (string)')
-    parser.set_defaults(database="")
-
     parser.add_argument('sql_files', metavar='(SQL_filenames)', type=str, nargs='*',
                     help='Optional list of *.sql filenames (strings) separated by space')
     parser.set_defaults(sql_files="")
@@ -52,11 +48,15 @@ def get_sql_queries_dict(lst):
 
 def do_sql(sql):
 
-    global conn, data, columns
+    global conn, data, columns, database_filename
 
     if sql.startswith('---'):
-        if sql.startswith('---sqlite3:') or sql.startswith('---use:'):
-            database_filename = sql.split(':')[1]
+        if sql.startswith('---sqlite3:'):
+            database_filename = sql[len('---sqlite3:'):]
+            print('\n' + 'Database:', database_filename, '\n')
+            conn = sqlite3.connect(database_filename)
+        elif sql.startswith('---use:'):
+            database_filename = sql[len('---use:'):]
             print('\n' + 'Database:', database_filename, '\n')
             conn = sqlite3.connect(database_filename)
         elif sql.startswith('---save:'):
@@ -188,14 +188,6 @@ def main(argv):
     for k,v in vars(namespace).items():
         print(k, v)
 
-    #assert len(vars(namespace)['database']) == 1, 'Database_filename error'
-    database_filename = vars(namespace)['database']
-    if database_filename != '':
-        print('\n' + 'Database:', database_filename, '\n')
-        conn = sqlite3.connect(database_filename)
-    else:
-        print('Database is not specified. Please use ---sqlite:filename for example.')
-
     if len(vars(namespace)['sql_files']) > 0:
         get_sql_queries_dict(vars(namespace)['sql_files'])
         #print(sqls, '\n')
@@ -207,7 +199,12 @@ def main(argv):
                 do_sql(sql)
 
     if len(vars(namespace)['sql_files']) == 0 and isinstance(vars(namespace)['interactive'], str) or vars(namespace)['interactive']:
-        print("Entering interactive mode. Type 'quit' to quit.", '\n')
+        print("\nEntering interactive mode. Type 'quit' to quit.")
+
+        if conn:
+            print('Using database filename {}. Use ---sqlite3:filename for change.'.format(database_filename), '\n')
+        else:
+            print('Database is not specified. Please use ---sqlite3:filename for example.', '\n')
 
         interactive_pass = 0
         sql = input('Sql: ')
