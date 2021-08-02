@@ -1,2 +1,2 @@
----use:a.db;
+---sqlite3:a.db;
 select * from sqlite_master;
