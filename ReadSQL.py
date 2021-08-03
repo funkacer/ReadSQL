@@ -79,14 +79,21 @@ def do_sql(sql):
         elif sql.startswith('---use:'):
             print("Command not used!!!")
         elif sql.startswith('---folder:'):
+            folder_old = folder
+            folder_name_old = folder_name
             folder_name = sql[len('---folder:'):]
             folder = os.path.isdir(folder_name)
             if folder:
-                print("Using folder '{}'".format(folder_name))
+                print("Using folder '{}'.".format(folder_name))
             else:
-                old_folder_name = folder_name
-                folder_name = os.getcwd()
-                print("Folder '{}' does not exist. Using current folder '{}'.".format(old_folder_name, folder_name))
+                if folder_old:
+                    print("Folder '{}' does not exist. Using current folder '{}'.".format(folder_name, folder_name_old))
+                    folder = folder_old
+                    folder_name = folder_name_old
+                else:
+                    # folder_name_old is None if sql imported file has wrong ---folder command
+                    print("Folder '{}' does not exist. Using working directory '{}'.".format(folder_name, os.getcwd()))
+                    folder_name = os.getcwd()
         elif sql.startswith('---import:'):
             sql_filename = sql[len('---import:'):]
             file_exists, full_filename = check_filename(sql_filename)
@@ -105,16 +112,20 @@ def do_sql(sql):
             else:
                 print("WARNING!!! SQL file '{}' does not exist!".format(full_filename))
         elif sql.startswith('---save:'):
-            save_filename = sql.split(':')[1]
-            print('\n' + 'Save:', save_filename)
-            with open(save_filename, 'w') as f:
-                for c in columns:
-                    f.write(str(c) + '\t')
-                f.write('\n')
-                for d in data:
-                    for c in d:
+            save_filename = sql[len('---save:'):]
+            file_exists, full_filename = check_filename(save_filename)
+            print("Save: '{}'".format(save_filename))
+            try:
+                with open(full_filename, 'w') as f:
+                    for c in columns:
                         f.write(str(c) + '\t')
                     f.write('\n')
+                    for d in data:
+                        for c in d:
+                            f.write(str(c) + '\t')
+                        f.write('\n')
+            except Exception as e:
+                traceback.print_exc()
         elif sql.startswith('---insert:'):
             save_tablename = sql.split(':')[1]
             print('\n' + 'Save:', save_tablename)
@@ -258,7 +269,7 @@ def main(argv):
             print("Using folder '{}'.".format(folder_name))
         else:
             folder_name = os.getcwd()
-            print("Folder is not specified. Using current folder '{}'.".format(folder_name))
+            print("Folder is not specified. Using working directory '{}'.".format(folder_name))
         print()
 
         interactive_pass = 0
