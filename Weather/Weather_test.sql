@@ -1,4 +1,5 @@
 ---folder:C:\#Git\ReadSQL\Weather;
+---folder:/home/jirka/#Git/ReadSQL/Weather;
 
 ---sqlite3:Weather_db_20200118.db;
 select * from sqlite_master;
