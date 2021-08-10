@@ -1,6 +1,7 @@
----use:Weather.db;
+---folder:Weather;
+---sqlite3:Weather.db;
 select distinct strftime('%Y-%m-%d', pubdate), count(*) from condition group by 1 order by 2 desc;
---odhali duplicity
+--odhali duplicity (každou hodinu má být maximálně jeden publikovaný záznam)
 select distinct strftime('%Y-%m-%d %H', pubdate), count(*) from condition group by 1 order by 2 desc;
 select * from condition where strftime('%Y-%m-%d', pubdate) = '2020-01-18';
 select * from condition where strftime('%Y-%m-%d', pubdate) = '2020-01-18' and  (creatat = '2020-01-18 20:23:40' or creatat = '2020-01-18 20:15:13');

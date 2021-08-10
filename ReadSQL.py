@@ -41,7 +41,7 @@ def get_sql_queries_dict(lst):
                 #print(sql.strip(), sql.count(';'))
                 parseSql(full_filename, sql)
         else:
-            print('WAWNING!!! SQL file:', sql_filename, 'does not exist!')
+            print('! SQL file:', sql_filename, 'does not exist !')
     return None
 
 def check_filename(filename):
@@ -58,8 +58,11 @@ def do_sql(sql):
 
     global conn, data, columns, database_filename, folder, folder_name
 
+    OK = 1
     if sql.startswith('---'):
-        if sql.startswith('---sqlite3::memory:'):
+        if sql.startswith('---quit'):
+            OK = 0
+        elif sql.startswith('---sqlite3::memory:'):
             print('\n' + 'Using database in memory. Save or loose!')
             try:
                 conn = sqlite3.connect(':memory:')
@@ -76,8 +79,6 @@ def do_sql(sql):
                 conn = sqlite3.connect(full_filename)
             except Exception as e:
                 traceback.print_exc()
-        elif sql.startswith('---use:'):
-            print("Command not used!!!")
         elif sql.startswith('---folder:'):
             folder_old = folder
             folder_name_old = folder_name
@@ -110,7 +111,7 @@ def do_sql(sql):
                     print()
                     do_sql(sql)
             else:
-                print("WARNING!!! SQL file '{}' does not exist!".format(full_filename))
+                print("! SQL file '{}' does not exist !".format(full_filename))
         elif sql.startswith('---save:'):
             save_filename = sql[len('---save:'):]
             file_exists, full_filename = check_filename(save_filename)
@@ -131,19 +132,22 @@ def do_sql(sql):
             print('\n' + 'Save:', save_tablename)
             part1 = ''
             part2 = ''
-            for i, c in enumerate(columns):
-                if i == 0:
-                    part1 += '{{0[{}]}}'.format(str(i))
-                    part2 += '?'.format(str(i))
-                else:
-                    part1 += ',{{0[{}]}}'.format(str(i))
-                    part2 += ',?'.format(str(i))
-            sql = '''insert into {} ({}) values ({})'''.format(save_tablename, part1, part2)
-            print(sql)
-            #print(columns, data)
-            c = conn.cursor()
-            c.executemany(sql.format(columns), data)
-            conn.commit()
+            try:
+                for i, c in enumerate(columns):
+                    if i == 0:
+                        part1 += '{{0[{}]}}'.format(str(i))
+                        part2 += '?'.format(str(i))
+                    else:
+                        part1 += ',{{0[{}]}}'.format(str(i))
+                        part2 += ',?'.format(str(i))
+                sql = '''insert into {} ({}) values ({})'''.format(save_tablename, part1, part2)
+                print(sql)
+                #print(columns, data)
+                c = conn.cursor()
+                c.executemany(sql.format(columns), data)
+                conn.commit()
+            except Exception as e:
+                traceback.print_exc()
         elif sql.startswith('---print:columns'):
             print(', '.join([str(c) for c in columns]))
         elif sql.startswith('---print:'):
@@ -198,7 +202,8 @@ def do_sql(sql):
                 for i, row in enumerate(data[fromm-1:too:stepp]):
                     print(row_format.format(str(fromm+i*stepp), *[str(r) for r in row]))    # Null to None
                 print('\n')
-
+        else:
+            print("! Command was not recognized !")
     else:
         try:
             c = conn.cursor()
@@ -222,12 +227,14 @@ def do_sql(sql):
                     print('\n','...','\n')
                     for i, row in enumerate(data[-10:]):
                         print(row_format.format(str(nrows-10+i+1), *[str(r) for r in row]))    # Null to None
+            else:
+                print('! There are no data returned from this sql query !')
             conn.commit()
             #conn.close()
         except Exception as e:
             traceback.print_exc()
-
     print()
+    return OK
 
 
 def main(argv):
@@ -252,13 +259,13 @@ def main(argv):
 
         for sql_filename in sqls.keys():
             for i, sql in enumerate(sqls[sql_filename]):
-                print("SQL file '{}' command no {}:".format(sql_filename, str(i+1)))
+                print("\n" + "? SQL file '{}' command no {}:".format(sql_filename, str(i+1)))
                 print(sql)
                 print()
                 do_sql(sql)
 
     if len(vars(namespace)['sql_files']) == 0 and isinstance(vars(namespace)['interactive'], str) or vars(namespace)['interactive']:
-        print("\nEntering interactive mode. Type 'quit' to quit.")
+        print("\nEntering interactive mode. Type '---quit' to quit.")
 
         if conn:
             print("Using database '{}'. Use '---sqlite3:filename' for change.".format(database_filename))
@@ -275,20 +282,25 @@ def main(argv):
         interactive_pass = 0
         sql = input('Sql: ')
 
-        while sql.lower().strip() != 'quit':
+        while sql.lower().strip() != '---quit':
 
             interactive_pass += 1
 
             sql_file = 'interactive pass ' + str(interactive_pass)
             parseSql(sql_file, sql)
             for i, sql in enumerate(sqls[sql_file]):
-                print("SQL file '{}' command no {}:".format(sql_file, str(i+1)))
+                print("\n" + "? SQL file '{}' command no {}:".format(sql_file, str(i+1)))
                 print(sql)
                 print()
                 do_sql(sql)
             sql = input('Sql: ')
 
-    conn.close()
+    try:
+        conn.close()
+    except Exception as e:
+        #traceback.print_exc()
+        pass
+    print()
 
 if __name__ == '__main__':
     main(sys.argv[1:])
