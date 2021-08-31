@@ -249,9 +249,10 @@ def main(argv):
     folder_name = None
 
     namespace = parseArgv(argv)
-
+    '''
     for k,v in vars(namespace).items():
         print(k, v)
+    '''
 
     if len(vars(namespace)['sql_files']) > 0:
         get_sql_queries_dict(vars(namespace)['sql_files'])
