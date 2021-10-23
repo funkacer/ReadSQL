@@ -205,7 +205,6 @@ def do_sql(sql):
         else:
             print("! Command was not recognized !")
     else:
-        print(sql + '\n')
         try:
             c = conn.cursor()
             c.execute('''{}'''.format(sql))
@@ -234,7 +233,7 @@ def do_sql(sql):
             #conn.close()
         except Exception as e:
             traceback.print_exc()
-    #print()
+    print()
     return OK
 
 
@@ -261,9 +260,9 @@ def main(argv):
 
         for sql_filename in sqls.keys():
             for i, sql in enumerate(sqls[sql_filename]):
-                print("\n------------" + " SQL file '{}' command no {} ".format(sql_filename, str(i+1)) + "------------")
-                #print(sql)
-                #print()
+                print("\n" + "? SQL file '{}' command no {}:".format(sql_filename, str(i+1)))
+                print(sql)
+                print()
                 do_sql(sql)
 
     if len(vars(namespace)['sql_files']) == 0 and isinstance(vars(namespace)['interactive'], str) or vars(namespace)['interactive']:
@@ -291,9 +290,9 @@ def main(argv):
             sql_file = 'interactive pass ' + str(interactive_pass)
             parseSql(sql_file, sql)
             for i, sql in enumerate(sqls[sql_file]):
-                print("\n------------" + " SQL file '{}' command no {} ".format(sql_file, str(i+1)) + "------------")
-                #print(sql)
-                #print()
+                print("\n" + "? SQL file '{}' command no {}:".format(sql_file, str(i+1)))
+                print(sql)
+                print()
                 do_sql(sql)
             sql = input('Sql: ')
 
