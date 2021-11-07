@@ -4,6 +4,8 @@ import argparse
 import sqlite3
 import traceback
 
+from okno import zobraz
+
 def parseArgv(argument_list):
 
     parser = argparse.ArgumentParser()
@@ -35,7 +37,7 @@ def get_sql_queries_dict(lst):
         file_exists, full_filename = check_filename(sql_filename)
         #print('Check if file exists:', sql_file_exists)
         if file_exists:
-            with open(full_filename, 'r') as f:
+            with open(full_filename, mode="r", encoding="utf-8") as f:
                 sql = f.read()
                 #print('SQL file query:')
                 #print(sql.strip(), sql.count(';'))
@@ -62,6 +64,39 @@ def do_sql(sql):
     if sql.startswith('---'):
         if sql.startswith('---quit'):
             OK = 0
+        elif sql.startswith('---pause:'):
+            if 'ask' in sql:
+                asked = ""
+                while asked != "c" and asked != "q":
+                    asked = input("Paused. C for continue, D for data view, Q for quit: ").lower()
+                    print(asked)
+                    if asked == "d":
+                        show = "Error"
+                        if data:
+                            #columns = [col[0] for col in c.description]
+                            row_format = "{:>15}" * (len(columns) + 1)
+                            nrows = len(data)
+                            if nrows > 0:   #< 100
+                                show = "There are {} rows. Showing all cases.".format(str(nrows))
+                                show += "\n"
+                                show += row_format.format("(Row)", *columns)
+                                show += "\n"
+                                for i, row in enumerate(data):
+                                    #print(row_format.format(str(i), *row)) # not posiible to pass None (Null in db)
+                                    show += row_format.format(str(i+1), *[str(r) if len(str(r)) <= 15 else str(r)[:13]+".." for r in row])    # Null to None
+                                    show += "\n"
+                            else:
+                                print('There are {} rows. Showing first / last {} cases.'.format(str(nrows), str(10)))
+                                print(row_format.format("(Row)", *columns))
+                                for i, row in enumerate(data[:10]):
+                                    print(row_format.format(str(i+1), *[str(r) for r in row]))    # Null to None
+                                print('\n','...','\n')
+                                for i, row in enumerate(data[-10:]):
+                                    print(row_format.format(str(nrows-10+i+1), *[str(r) for r in row]))
+                        zobraz(show)
+                    elif asked == "q":
+                        OK = 0
+
         elif sql.startswith('---sqlite3::memory:'):
             print('\n' + 'Using database in memory. Save or loose!')
             try:
@@ -260,11 +295,13 @@ def main(argv):
         #print(sqls)
 
         for sql_filename in sqls.keys():
+            #OK_returned = 1
             for i, sql in enumerate(sqls[sql_filename]):
                 print("\n------------" + " SQL file '{}' command no {} ".format(sql_filename, str(i+1)) + "------------")
                 #print(sql)
                 #print()
-                do_sql(sql)
+                OK_returned = do_sql(sql)
+                if OK_returned == 0: break
 
     if len(vars(namespace)['sql_files']) == 0 and isinstance(vars(namespace)['interactive'], str) or vars(namespace)['interactive']:
         print("\nEntering interactive mode. Type '---quit' to quit.")
@@ -290,12 +327,14 @@ def main(argv):
 
             sql_file = 'interactive pass ' + str(interactive_pass)
             parseSql(sql_file, sql)
+            #OK_returned = 1
             for i, sql in enumerate(sqls[sql_file]):
                 print("\n------------" + " SQL file '{}' command no {} ".format(sql_file, str(i+1)) + "------------")
                 #print(sql)
                 #print()
-                do_sql(sql)
-            sql = input('Sql: ')
+                OK_returned = do_sql(sql)
+                if OK_returned == 0: break
+            if OK_returned == 1: sql = input('Sql: ')
 
     try:
         conn.close()
