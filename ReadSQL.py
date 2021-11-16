@@ -64,7 +64,7 @@ def check_filename(filename):
 
 def do_sql(sql):
 
-    global conn, data, columns, db_filename, folder, folder_name, db_version
+    global conn, data, columns, db_filename, folder, folder_name, db_version, db_schema
 
     OK = 1
     if sql.startswith('---'):
@@ -113,9 +113,8 @@ def do_sql(sql):
 
         elif sql.startswith('---mysql:'):
             db_schema = sql[len('---mysql:'):]
-
             try:
-                print("mysqlclient version:", version("mysqlclient"))
+                print("Using mysqlclient version:", version("mysqlclient"))
                 import MySQLdb
                 #connpars = parse_connstring(connstring)
                 #print(connpars['server'])
@@ -190,16 +189,21 @@ def do_sql(sql):
                     columns_new = []
                     i = 0
                     data_line = f.readline()
+                    if data_line[-1:] == "\n": data_line = data_line[:-1]
                     while data_line:
                         row_new = []
                         for c in data_line.split(';'):
                             if i == 0:
                                 columns_new.append(c)
                             else:
-                                row_new.append(c)
+                                if c != "":
+                                    row_new.append(c)
+                                else:
+                                    row_new.append(None)
                         if i > 0: data_new.append(row_new)
                         i += 1
                         data_line = f.readline()
+                        if data_line[-1:] == "\n": data_line = data_line[:-1]
                     #print(data_new)
                     if len(data_new) > 0:
                         data = data_new
@@ -391,7 +395,12 @@ def main(argv):
         print("\nEntering interactive mode. Type '---quit' to quit.")
 
         if conn:
-            print("Using database '{}'. Use '---sqlite3:filename' for change.".format(db_filename))
+            if db_version[:7] == "Sqlite3":
+                print("Using Sqlite3 database '{}'. Use '---sqlite3:filename' for change.".format(db_filename))
+            elif db_version[:5] == "MySQL":
+                print("Using MySQL schema '{}'. Use '---mysql:schema' for change.".format(db_schema))
+            else:
+                print("Sorry, no db_version.")
         else:
             print("Database is not specified. Please use '---sqlite3:filename' for example.")
 
