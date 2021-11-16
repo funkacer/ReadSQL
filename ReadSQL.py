@@ -10,13 +10,6 @@ import sqlite3
 import traceback
 from importlib.metadata import version
 
-try:
-    print("mysqlclient version:", version("mysqlclient"))
-    import MySQLdb
-except Exception as e:
-    print("No MySQL support. Please run pip install mysqlclient")
-    traceback.print_exc()
-
 from okno import zobraz
 
 def parseArgv(argument_list):
@@ -114,25 +107,32 @@ def do_sql(sql):
             print('\n' + 'Using database in memory. Save or loose!')
             try:
                 conn = sqlite3.connect(':memory:')
-                db_version = "Sqlite3: memory: "
+                db_version = "Sqlite3 (memory): "
             except Exception as e:
                 traceback.print_exc()
 
         elif sql.startswith('---mysql:'):
             db_schema = sql[len('---mysql:'):]
-            #connpars = parse_connstring(connstring)
-            #print(connpars['server'])
-            #print(connpars['user'])
-            #print(connpars['password'])
+
             try:
-                conn = MySQLdb.connect("localhost", "root", "admin", use_unicode=True,charset='utf8')
-                c = conn.cursor()
-                c.execute('''use {}'''.format(db_schema))
-                conn.commit()
-                db_version = f"MySQL: {db_schema}: "
-                #cursor = conn.cursor()
-                #conn = sqlite3.connect(full_filename)
+                print("mysqlclient version:", version("mysqlclient"))
+                import MySQLdb
+                #connpars = parse_connstring(connstring)
+                #print(connpars['server'])
+                #print(connpars['user'])
+                #print(connpars['password'])
+                try:
+                    conn = MySQLdb.connect("localhost", "root", "admin", use_unicode=True,charset='utf8')
+                    c = conn.cursor()
+                    c.execute('''use {}'''.format(db_schema))
+                    conn.commit()
+                    db_version = f"MySQL ({db_schema}): "
+                    #cursor = conn.cursor()
+                    #conn = sqlite3.connect(full_filename)
+                except Exception as e:
+                    traceback.print_exc()
             except Exception as e:
+                print("No MySQL support. Please run pip install mysqlclient.\n")
                 traceback.print_exc()
 
         elif sql.startswith('---sqlite3:'):
@@ -144,7 +144,7 @@ def do_sql(sql):
                 print("Creating database '{}'.".format(full_filename))
             try:
                 conn = sqlite3.connect(full_filename)
-                db_version = f"Sqlite3: {full_filename}: "
+                db_version = f"Sqlite3 ({full_filename}): "
             except Exception as e:
                 traceback.print_exc()
         elif sql.startswith('---folder:'):
@@ -180,6 +180,50 @@ def do_sql(sql):
                     do_sql(sql)
             else:
                 print("! SQL file '{}' does not exist !".format(full_filename))
+        elif sql.startswith('---read:'):
+            read_filename = sql[len('---read:'):]
+            file_exists, full_filename = check_filename(read_filename)
+            print("Read: '{}'".format(read_filename))
+            try:
+                with open(full_filename, 'r', encoding = 'utf-8') as f:
+                    data_new = []
+                    columns_new = []
+                    i = 0
+                    data_line = f.readline()
+                    while data_line:
+                        row_new = []
+                        for c in data_line.split(';'):
+                            if i == 0:
+                                columns_new.append(c)
+                            else:
+                                row_new.append(c)
+                        if i > 0: data_new.append(row_new)
+                        i += 1
+                        data_line = f.readline()
+                    #print(data_new)
+                    if len(data_new) > 0:
+                        data = data_new
+                        columns = columns_new
+                        row_format = "{:>15}" * (len(columns) + 1)
+                        nrows = len(data)
+                        if nrows < 100:
+                            print('There are {} rows. Showing all cases.'.format(str(nrows)))
+                            print(row_format.format("(Row)", *columns))
+                            for i, row in enumerate(data):
+                                #print(row_format.format(str(i), *row)) # not posiible to pass None (Null in db)
+                                print(row_format.format(str(i+1), *[str(r) for r in row]))    # Null to None
+                        else:
+                            print('There are {} rows. Showing first / last {} cases.'.format(str(nrows), str(10)))
+                            print(row_format.format("(Row)", *columns))
+                            for i, row in enumerate(data[:10]):
+                                print(row_format.format(str(i+1), *[str(r) for r in row]))    # Null to None
+                            print('\n','...','\n')
+                            for i, row in enumerate(data[-10:]):
+                                print(row_format.format(str(nrows-10+i+1), *[str(r) for r in row]))    # Null to None
+                    else:
+                        print('! There are no data returned from this sql query !')
+            except Exception as e:
+                traceback.print_exc()
         elif sql.startswith('---save:'):
             save_filename = sql[len('---save:'):]
             file_exists, full_filename = check_filename(save_filename)
@@ -197,19 +241,23 @@ def do_sql(sql):
                 traceback.print_exc()
         elif sql.startswith('---insert:'):
             save_tablename = sql.split(':')[1]
-            print('\n' + 'Save:', save_tablename)
+            print('\n' + 'Insert:', save_tablename)
             part1 = ''
             part2 = ''
             try:
                 for i, c in enumerate(columns):
                     if i == 0:
                         part1 += '{{0[{}]}}'.format(str(i))
-                        #part2 += '?'.format(str(i))
-                        part2 += '%s'.format(str(i))
+                        if db_version[:7] == "Sqlite3":
+                            part2 += '?'.format(str(i))
+                        elif db_version[:5] == "MySQL":
+                            part2 += '%s'.format(str(i))
                     else:
                         part1 += ',{{0[{}]}}'.format(str(i))
-                        #part2 += ',?'.format(str(i))
-                        part2 += ',%s'.format(str(i))
+                        if db_version[:7] == "Sqlite3":
+                            part2 += ',?'.format(str(i))
+                        elif db_version[:5] == "MySQL":
+                            part2 += ',%s'.format(str(i))
                 sql = '''insert into {} ({}) values ({})'''.format(save_tablename, part1, part2)
                 print(sql)
                 #print(columns, data)
@@ -355,7 +403,7 @@ def main(argv):
         print()
 
         interactive_pass = 0
-        sql = input('Sql: ')
+        sql = input(db_version)
 
         while sql.lower().strip() != '---quit':
 
