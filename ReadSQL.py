@@ -1,8 +1,21 @@
+# TODO: command {command} was not recognized
+# TODO: no data returned must not delete global data
+# TODO: delete:data Command
+# TODO: pause: make clever
+
 import sys
 import os
 import argparse
 import sqlite3
 import traceback
+from importlib.metadata import version
+
+try:
+    print("mysqlclient version:", version("mysqlclient"))
+    import MySQLdb
+except Exception as e:
+    print("No MySQL support. Please run pip install mysqlclient")
+    traceback.print_exc()
 
 from okno import zobraz
 
@@ -58,7 +71,7 @@ def check_filename(filename):
 
 def do_sql(sql):
 
-    global conn, data, columns, database_filename, folder, folder_name
+    global conn, data, columns, db_filename, folder, folder_name, db_version
 
     OK = 1
     if sql.startswith('---'):
@@ -101,17 +114,37 @@ def do_sql(sql):
             print('\n' + 'Using database in memory. Save or loose!')
             try:
                 conn = sqlite3.connect(':memory:')
+                db_version = "Sqlite3: memory: "
             except Exception as e:
                 traceback.print_exc()
+
+        elif sql.startswith('---mysql:'):
+            db_schema = sql[len('---mysql:'):]
+            #connpars = parse_connstring(connstring)
+            #print(connpars['server'])
+            #print(connpars['user'])
+            #print(connpars['password'])
+            try:
+                conn = MySQLdb.connect("localhost", "root", "admin", use_unicode=True,charset='utf8')
+                c = conn.cursor()
+                c.execute('''use {}'''.format(db_schema))
+                conn.commit()
+                db_version = f"MySQL: {db_schema}: "
+                #cursor = conn.cursor()
+                #conn = sqlite3.connect(full_filename)
+            except Exception as e:
+                traceback.print_exc()
+
         elif sql.startswith('---sqlite3:'):
-            database_filename = sql[len('---sqlite3:'):]
-            file_exists, full_filename = check_filename(database_filename)
+            db_filename = sql[len('---sqlite3:'):]
+            file_exists, full_filename = check_filename(db_filename)
             if file_exists:
                 print("Using database '{}'.".format(full_filename))
             else:
                 print("Creating database '{}'.".format(full_filename))
             try:
                 conn = sqlite3.connect(full_filename)
+                db_version = f"Sqlite3: {full_filename}: "
             except Exception as e:
                 traceback.print_exc()
         elif sql.startswith('---folder:'):
@@ -171,10 +204,12 @@ def do_sql(sql):
                 for i, c in enumerate(columns):
                     if i == 0:
                         part1 += '{{0[{}]}}'.format(str(i))
-                        part2 += '?'.format(str(i))
+                        #part2 += '?'.format(str(i))
+                        part2 += '%s'.format(str(i))
                     else:
                         part1 += ',{{0[{}]}}'.format(str(i))
-                        part2 += ',?'.format(str(i))
+                        #part2 += ',?'.format(str(i))
+                        part2 += ',%s'.format(str(i))
                 sql = '''insert into {} ({}) values ({})'''.format(save_tablename, part1, part2)
                 print(sql)
                 #print(columns, data)
@@ -240,7 +275,7 @@ def do_sql(sql):
         else:
             print("! Command was not recognized !")
     else:
-        print(sql + '\n')
+        print(db_version + sql + '\n')
         try:
             c = conn.cursor()
             c.execute('''{}'''.format(sql))
@@ -275,7 +310,7 @@ def do_sql(sql):
 
 def main(argv):
 
-    global conn, sqls, data, columns, folder, folder_name
+    global conn, sqls, data, columns, folder, folder_name, db_version
 
     conn = None
     sqls = {}
@@ -283,6 +318,7 @@ def main(argv):
     columns = None
     folder = None
     folder_name = None
+    db_version = None
 
     namespace = parseArgv(argv)
     '''
@@ -307,7 +343,7 @@ def main(argv):
         print("\nEntering interactive mode. Type '---quit' to quit.")
 
         if conn:
-            print("Using database '{}'. Use '---sqlite3:filename' for change.".format(database_filename))
+            print("Using database '{}'. Use '---sqlite3:filename' for change.".format(db_filename))
         else:
             print("Database is not specified. Please use '---sqlite3:filename' for example.")
 
@@ -334,7 +370,7 @@ def main(argv):
                 #print()
                 OK_returned = do_sql(sql)
                 if OK_returned == 0: break
-            if OK_returned == 1: sql = input('Sql: ')
+            if OK_returned == 1: sql = input(db_version)
 
     try:
         conn.close()
