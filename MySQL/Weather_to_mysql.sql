@@ -1,5 +1,4 @@
----mysql:;
-use moje;
+---mysql:moje;
 
 DROP TABLE IF EXISTS condition_original;
 CREATE TABLE condition_original (id INTEGER PRIMARY KEY,_file TEXT,_id INTEGER,city TEXT,country TEXT,
@@ -10,6 +9,12 @@ DROP TABLE IF EXISTS forecast_original;
 CREATE TABLE forecast_original (id INTEGER PRIMARY KEY,_file TEXT,_id INTEGER,condate TEXT,day TEXT,
     date TEXT,code INTEGER,low INTEGER,high INTEGER,text TEXT,creatat TEXT,changeat TEXT);
 
+---folder:Weather\;
+---sqlite3:Weather.db;
+select *  from condition_original;
+
+---mysql:moje;
+---insert:condition_original;
 
 ---folder:Weather\;
 ---sqlite3:Weather.db;
@@ -17,6 +22,9 @@ select *  from forecast_original;
 
 ---mysql:moje;
 ---insert:forecast_original;
+
+select * from condition_original;
+---pause:ask;
 
 select * from forecast_original;
 ---pause:ask;

@@ -62,6 +62,24 @@ def check_filename(filename):
     #print(full_filename)
     return file_exists, full_filename
 
+def show_data():
+    row_format = "{:>15}" * (len(columns) + 1)
+    nrows = len(data)
+    if nrows <= show_cases*2:
+        print('There are {} rows. Showing all cases.'.format(str(nrows)))
+        print(row_format.format("(Row)", *columns))
+        for i, row in enumerate(data):
+            #print(row_format.format(str(i), *row)) # not posiible to pass None (Null in db)
+            print(row_format.format(str(i+1), *[str(r) for r in row]))    # Null to None
+    else:
+        print('There are {} rows. Showing first / last {} cases.'.format(str(nrows), str(show_cases)))
+        print(row_format.format("(Row)", *columns))
+        for i, row in enumerate(data[:show_cases]):
+            print(row_format.format(str(i+1), *[str(r) for r in row]))    # Null to None
+        print('\n','...','\n')
+        for i, row in enumerate(data[-show_cases:]):
+            print(row_format.format(str(nrows-show_cases+i+1), *[str(r) for r in row]))    # Null to None
+
 def do_sql(sql):
 
     global conn, data, columns, db_filename, folder, folder_name, db_version, db_schema
@@ -130,9 +148,11 @@ def do_sql(sql):
                     #conn = sqlite3.connect(full_filename)
                 except Exception as e:
                     traceback.print_exc()
+                    OK = 0
             except Exception as e:
                 print("No MySQL support. Please run pip install mysqlclient.\n")
                 traceback.print_exc()
+                OK = 0
 
         elif sql.startswith('---sqlite3:'):
             db_filename = sql[len('---sqlite3:'):]
@@ -208,22 +228,7 @@ def do_sql(sql):
                     if len(data_new) > 0:
                         data = data_new
                         columns = columns_new
-                        row_format = "{:>15}" * (len(columns) + 1)
-                        nrows = len(data)
-                        if nrows < 100:
-                            print('There are {} rows. Showing all cases.'.format(str(nrows)))
-                            print(row_format.format("(Row)", *columns))
-                            for i, row in enumerate(data):
-                                #print(row_format.format(str(i), *row)) # not posiible to pass None (Null in db)
-                                print(row_format.format(str(i+1), *[str(r) for r in row]))    # Null to None
-                        else:
-                            print('There are {} rows. Showing first / last {} cases.'.format(str(nrows), str(10)))
-                            print(row_format.format("(Row)", *columns))
-                            for i, row in enumerate(data[:10]):
-                                print(row_format.format(str(i+1), *[str(r) for r in row]))    # Null to None
-                            print('\n','...','\n')
-                            for i, row in enumerate(data[-10:]):
-                                print(row_format.format(str(nrows-10+i+1), *[str(r) for r in row]))    # Null to None
+                        show_data()
                     else:
                         print('! There are no data returned from this sql query !')
             except Exception as e:
@@ -328,41 +333,30 @@ def do_sql(sql):
             print("! Command was not recognized !")
     else:
         print(db_version + sql + '\n')
+        data_new = None
         try:
             c = conn.cursor()
             c.execute('''{}'''.format(sql))
-            data = c.fetchall()
-            if data:
+            data_new = c.fetchall()
+            if data_new:
+                data = data_new
                 columns = [col[0] for col in c.description]
-                row_format = "{:>15}" * (len(columns) + 1)
-                nrows = len(data)
-                if nrows < 100:
-                    print('There are {} rows. Showing all cases.'.format(str(nrows)))
-                    print(row_format.format("(Row)", *columns))
-                    for i, row in enumerate(data):
-                        #print(row_format.format(str(i), *row)) # not posiible to pass None (Null in db)
-                        print(row_format.format(str(i+1), *[str(r) for r in row]))    # Null to None
-                else:
-                    print('There are {} rows. Showing first / last {} cases.'.format(str(nrows), str(10)))
-                    print(row_format.format("(Row)", *columns))
-                    for i, row in enumerate(data[:10]):
-                        print(row_format.format(str(i+1), *[str(r) for r in row]))    # Null to None
-                    print('\n','...','\n')
-                    for i, row in enumerate(data[-10:]):
-                        print(row_format.format(str(nrows-10+i+1), *[str(r) for r in row]))    # Null to None
+                show_data()
             else:
                 print('! There are no data returned from this sql query !')
             conn.commit()
             #conn.close()
         except Exception as e:
             traceback.print_exc()
+            data = None
+            columns = None
     #print()
     return OK
 
 
 def main(argv):
 
-    global conn, sqls, data, columns, folder, folder_name, db_version
+    global conn, sqls, data, columns, folder, folder_name, db_version, show_cases
 
     conn = None
     sqls = {}
@@ -370,7 +364,8 @@ def main(argv):
     columns = None
     folder = None
     folder_name = None
-    db_version = None
+    db_version = "None: "
+    show_cases = 5
 
     namespace = parseArgv(argv)
     '''
