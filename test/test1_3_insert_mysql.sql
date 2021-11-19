@@ -1,5 +1,5 @@
 ---folder:test;
----mysql:moje;
+---mysql:test;
 
 show tables;
 

@@ -1,3 +1,4 @@
+# SELECT database();
 # TODO: command {command} was not recognized
 # TODO: no data returned must not delete global data
 # TODO: delete:data Command
@@ -134,25 +135,35 @@ def do_sql(sql):
             try:
                 print("Using mysqlclient version:", version("mysqlclient"))
                 import MySQLdb
+                #import mysql.connector
+                #from mysql.connector import errorcode
+                #can use errno
+
+                #cnx = mysql.connector.connect(user='scott', database='test')
+                #cursor = cnx.cursor()
                 #connpars = parse_connstring(connstring)
                 #print(connpars['server'])
                 #print(connpars['user'])
                 #print(connpars['password'])
                 try:
                     conn = MySQLdb.connect("localhost", "root", "admin", use_unicode=True,charset='utf8')
-                    c = conn.cursor()
-                    c.execute('''use {}'''.format(db_schema))
-                    conn.commit()
-                    db_version = f"MySQL ({db_schema}): "
-                    #cursor = conn.cursor()
-                    #conn = sqlite3.connect(full_filename)
+                    #conn = mysql.connector.connect(host = "localhost", user = "root", password="admin", use_unicode=True,charset='utf8')
+                    try:
+                        c = conn.cursor()
+                        c.execute('''use {}'''.format(db_schema))
+                        conn.commit()
+                        db_version = f"MySQL ({db_schema}): "
+                    except Exception as e:
+                        traceback.print_exc()
+                        db_version = f"MySQL (No schema!): "
+                        print(e.__class__)
+
                 except Exception as e:
                     traceback.print_exc()
-                    OK = 0
+
             except Exception as e:
-                print("No MySQL support. Please run pip install mysqlclient.\n")
+                print("No MySQL support. Please run 'pip install mysqlclient'.\n")
                 traceback.print_exc()
-                OK = 0
 
         elif sql.startswith('---sqlite3:'):
             db_filename = sql[len('---sqlite3:'):]
@@ -351,8 +362,19 @@ def do_sql(sql):
             data = None
             columns = None
     #print()
+    # this checks dtb
+    if db_version[:5] == "MySQL":
+        #print(conn.get_proto_info())
+        try:
+            c = conn.cursor()
+            c.execute('''{}'''.format("SELECT database();"))
+            data_new = c.fetchall()
+            db_schema = data_new[0][0]
+            db_version = f"MySQL ({db_schema}): "
+        except Exception as e:
+            traceback.print_exc()
+    sql = ""
     return OK
-
 
 def main(argv):
 
@@ -430,6 +452,7 @@ def main(argv):
         #traceback.print_exc()
         pass
     print()
+
 
 if __name__ == '__main__':
     main(sys.argv[1:])
