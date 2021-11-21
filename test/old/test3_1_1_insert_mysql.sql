@@ -1,5 +1,5 @@
-\folder test;
-\mysql test;
+---folder:test;
+---mysql:test;
 
 show tables;
 
@@ -9,8 +9,8 @@ create table test3_1 (r INTEGER PRIMARY KEY AUTO_INCREMENT, id INTEGER, id_p INT
     V integer, B integer, D text, DT text, UT text, SP REAL, SE REAL,
     E datetime, A datetime);
 
-\read:test3_1.csvx;
+---read:test3_1.csvx;
 
-\insert:test3_1;
+---insert:test3_1;
 
-\print:columns;
+---print:columns;

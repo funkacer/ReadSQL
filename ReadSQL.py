@@ -59,7 +59,8 @@ def parseCommand(command_line):
                         print(f"Unknown option '{cll[0]}'. I will not use your '{cll[1]}' request in no way.")
                 else:
                     if i < len (command_options[c]):
-                        print(f"I will use '{cl}' for option '{command_options[c][i]}'")
+                        print(f"I will use '{cl}' for option '{command_options[c][i]}'.")
+                        options[command_options[c][i]] = cl
                     else:
                         print(f"Too many options given. I will not use your '{cl}' request in no way.")
             break
@@ -160,8 +161,8 @@ def do_sql(sql):
             except Exception as e:
                 traceback.print_exc()
 
-        elif sql.startswith("\mysql:"):
-            db_schema = sql[len("\mysql:"):]
+        elif command == "mysql":
+            db_schema = options["schema"]
             try:
                 print("Using mysqlclient version:", version("mysqlclient"))
                 import MySQLdb
@@ -207,10 +208,11 @@ def do_sql(sql):
                 db_version = f"Sqlite3 ({full_filename}): "
             except Exception as e:
                 traceback.print_exc()
-        elif sql.startswith("\folder:"):
+        elif command == "folder":
             folder_old = folder
             folder_name_old = folder_name
-            folder_name = sql[len("\folder:"):]
+            #folder_name = sql[len("\folder:"):]
+            folder_name = options["foldername"]
             folder = os.path.isdir(folder_name)
             if folder:
                 print("Using folder '{}'.".format(folder_name))
@@ -425,6 +427,8 @@ def main(argv):
     command_options["folder"].append("testname")
     command_options["sqlite3"] = []
     command_options["sqlite3"].append("filename")
+    command_options["mysql"] = []
+    command_options["mysql"].append("schema")
 
     namespace = parseArgv(argv)
     """
