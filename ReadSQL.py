@@ -38,6 +38,35 @@ def parseSql(sql_filename, sql):
         sqls[sql_filename].append(sql.strip())
     return None
 
+def parseCommand(command_line):
+    command = ""
+    options = {}
+    command_line = command_line.replace(" ", "")
+    command_line = command_line[1:].lower() #no slash
+    print (command_line)
+    for c in command_options:
+        #print(c)
+        if command_line[:len(c)] == c:
+            command = c
+            command_line_list = command_line[len(c):].split(",")
+            for i, cl in enumerate(command_line_list):
+                if "=" in cl:
+                    cll = cl.split("=")
+                    for o in command_options[c]:
+                        if cll[0] == o:
+                            options[o] = cll[1]
+                    if cll[0] not in options:
+                        print(f"Unknown option '{cll[0]}'. I will not use your '{cll[1]}' request in no way.")
+                else:
+                    if i < len (command_options[c]):
+                        print(f"I will use '{cl}' for option '{command_options[c][i]}'")
+                    else:
+                        print(f"Too many options given. I will not use your '{cl}' request in no way.")
+            break
+
+    print (command, options)
+    return command, options
+
 def get_sql_queries_dict(lst):
     for sql_filename in lst:
         #print("SQL file:", sql_file)
@@ -87,6 +116,7 @@ def do_sql(sql):
 
     OK = 1
     if sql.startswith("\\"):
+        command, options = parseCommand(sql)
         if sql.startswith("\quit"):
             OK = 0
         elif sql.startswith("\pause:"):
@@ -378,7 +408,7 @@ def do_sql(sql):
 
 def main(argv):
 
-    global conn, sqls, data, columns, folder, folder_name, db_version, show_cases
+    global conn, sqls, data, columns, folder, folder_name, db_version, show_cases, command_options
 
     conn = None
     sqls = {}
@@ -388,6 +418,13 @@ def main(argv):
     folder_name = None
     db_version = "None: "
     show_cases = 5
+
+    command_options = {}
+    command_options["folder"] = []
+    command_options["folder"].append("foldername")
+    command_options["folder"].append("testname")
+    command_options["sqlite3"] = []
+    command_options["sqlite3"].append("filename")
 
     namespace = parseArgv(argv)
     """
