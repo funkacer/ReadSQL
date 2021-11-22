@@ -11,6 +11,8 @@ import sqlite3
 import traceback
 from importlib.metadata import version
 
+import time
+
 from okno import zobraz
 
 def parseArgv(argument_list):
@@ -52,20 +54,32 @@ def parseCommand(command_line):
             for i, cl in enumerate(command_line_list):
                 if "=" in cl:
                     cll = cl.split("=")
-                    for o in command_options[c]:
+                    for o in command_options[c]["names"]:
                         if cll[0] == o:
                             options[o] = cll[1]
                     if cll[0] not in options:
-                        print(f"Unknown option '{cll[0]}'. I will not use your '{cll[1]}' request in no way.")
-                else:
-                    if i < len (command_options[c]):
-                        print(f"I will use '{cl}' for option '{command_options[c][i]}'.")
-                        options[command_options[c][i]] = cl
+                        print(f'''Unknown option '{cll[0]}'. I will not use your '{cll[1]}' value in any way.''')
+                elif cl != "":
+                    if i < len (command_options[c]["names"]):
+                        print(f'''I will use '{cl}' for option '{command_options[c]["names"][i]}'.''')
+                        options[command_options[c]["names"][i]] = cl
                     else:
-                        print(f"Too many options given. I will not use your '{cl}' request in no way.")
+                        print(f'''Too many options given. I will not use your '{cl}' value in any way.''')
             break
 
-    print (command, options)
+    print (f'''Comand '{command}' with options {', '.join([str(op + "='" + options[op] + "'") for op in options])}.''')
+
+    for i, r in enumerate(command_options[command]["required"]):
+        execute = True
+        if r:
+            #assert command_options[command]["names"][i] in options
+            if command_options[command]["names"][i] not in options:
+                print(f'''Missing required argument '{command_options[command]["names"][i]}'. Command won't be executed.''')
+                execute = False
+                command = ""
+                options = []
+                break
+
     return command, options
 
 def get_sql_queries_dict(lst):
@@ -83,9 +97,25 @@ def get_sql_queries_dict(lst):
             print("! SQL file:", sql_filename, "does not exist !")
     return None
 
+def check_foldername(foldername, foldername_old):
+    folder_exists = False
+    full_foldername = None
+    if not os.path.isabs(foldername):
+        if foldername_old:
+            full_foldername = os.path.join(foldername_old, foldername)
+            folder_exists = os.path.isdir(full_foldername)
+        else:
+            full_foldername = os.path.join(os.getcwd(), foldername)
+            folder_exists = os.path.isdir(full_foldername)
+    else:
+        folder_exists = os.path.isdir(foldername)
+        full_foldername = foldername
+    return folder_exists, full_foldername
+
 def check_filename(filename):
     file_exists = False
-    if folder and not os.path.isabs(filename):
+    full_filename = None
+    if folder_exists and not os.path.isabs(filename):
         full_filename = os.path.realpath(os.path.join(folder_name, os.path.expanduser(filename)))
     else:
         full_filename = filename
@@ -113,53 +143,36 @@ def show_data():
 
 def do_sql(sql):
 
-    global conn, data, columns, db_filename, folder, folder_name, db_version, db_schema
+    global conn, data, columns, db_filename, folder_exists, folder_name, db_version, db_schema
+
+    time.sleep(1)
 
     OK = 1
     if sql.startswith("\\"):
         command, options = parseCommand(sql)
-        if sql.startswith("\quit"):
+        if command == "quit" or command == "q":
             OK = 0
-        elif sql.startswith("\pause:"):
-            if "ask" in sql:
-                asked = ""
-                while asked != "c" and asked != "q":
-                    asked = input("Paused. C for continue, D for data view, Q for quit: ").lower()
-                    print(asked)
-                    if asked == "d":
-                        show = "Error"
-                        if data:
-                            #columns = [col[0] for col in c.description]
-                            row_format = "{:>15}" * (len(columns) + 1)
-                            nrows = len(data)
-                            if nrows > 0:   #< 100
-                                show = "There are {} rows. Showing all cases.".format(str(nrows))
-                                show += "\n"
-                                show += row_format.format("(Row)", *columns)
-                                show += "\n"
-                                for i, row in enumerate(data):
-                                    #print(row_format.format(str(i), *row)) # not posiible to pass None (Null in db)
-                                    show += row_format.format(str(i+1), *[str(r) if len(str(r)) <= 15 else str(r)[:13]+".." for r in row])    # Null to None
-                                    show += "\n"
-                            else:
-                                print("There are {} rows. Showing first / last {} cases.".format(str(nrows), str(10)))
-                                print(row_format.format("(Row)", *columns))
-                                for i, row in enumerate(data[:10]):
-                                    print(row_format.format(str(i+1), *[str(r) for r in row]))    # Null to None
-                                print("\n","...","\n")
-                                for i, row in enumerate(data[-10:]):
-                                    print(row_format.format(str(nrows-10+i+1), *[str(r) for r in row]))
-                        zobraz(show)
-                    elif asked == "q":
-                        OK = 0
 
-        elif sql.startswith("\sqlite3::memory:"):
-            print("\n" + "Using database in memory. Save or loose!")
-            try:
-                conn = sqlite3.connect(":memory:")
-                db_version = "Sqlite3 (memory): "
-            except Exception as e:
-                traceback.print_exc()
+        elif command == "sqlite3":
+            if options["filename"] == ":memory:":
+                print("\n" + "Using database in memory. Save or loose!")
+                try:
+                    conn = sqlite3.connect(":memory:")
+                    db_version = "Sqlite3 (memory): "
+                except Exception as e:
+                    traceback.print_exc()
+            else:
+                db_filename = options["filename"]
+                file_exists, full_filename = check_filename(db_filename)
+                if file_exists:
+                    print("Using database '{}'.".format(full_filename))
+                else:
+                    print("Creating database '{}'.".format(full_filename))
+                try:
+                    conn = sqlite3.connect(full_filename)
+                    db_version = f"Sqlite3 ({full_filename}): "
+                except Exception as e:
+                    traceback.print_exc()
 
         elif command == "mysql":
             db_schema = options["schema"]
@@ -196,54 +209,28 @@ def do_sql(sql):
                 print("No MySQL support. Please run 'pip install mysqlclient'.\n")
                 traceback.print_exc()
 
-        elif sql.startswith("\sqlite3:"):
-            db_filename = sql[len("\sqlite3:"):]
-            file_exists, full_filename = check_filename(db_filename)
-            if file_exists:
-                print("Using database '{}'.".format(full_filename))
-            else:
-                print("Creating database '{}'.".format(full_filename))
-            try:
-                conn = sqlite3.connect(full_filename)
-                db_version = f"Sqlite3 ({full_filename}): "
-            except Exception as e:
-                traceback.print_exc()
         elif command == "folder":
-            folder_old = folder
+            folder_exists_old = folder_exists
             folder_name_old = folder_name
             #folder_name = sql[len("\folder:"):]
             folder_name = options["foldername"]
-            folder = os.path.isdir(folder_name)
-            if folder:
-                print("Using folder '{}'.".format(folder_name))
+            #folder = os.path.isdir(folder_name)
+            folder_exists, full_foldername = check_foldername(folder_name, folder_name_old)
+            if folder_exists:
+                print(f'''Using folder '{full_foldername}'.''')
+                folder_name = full_foldername
             else:
-                if folder_old:
-                    print("Folder '{}' does not exist. Using current folder '{}'.".format(folder_name, folder_name_old))
-                    folder = folder_old
+                if folder_exists_old:
+                    print(f'''Folder '{folder_name}' does not exist. Using current folder '{folder_name_old}'.''')
+                    folder_exists = folder_exists_old
                     folder_name = folder_name_old
                 else:
                     # folder_name_old is None if sql imported file has wrong \folder command
                     print("Folder '{}' does not exist. Using working directory '{}'.".format(folder_name, os.getcwd()))
                     folder_name = os.getcwd()
-        elif sql.startswith("\import:"):
-            sql_filename = sql[len("\import:"):]
-            file_exists, full_filename = check_filename(sql_filename)
-            #print("Check if file exists:", sql_file_exists)
-            if file_exists:
-                with open(full_filename, "r") as f:
-                    sql = f.read()
-                    #print("SQL file query:")
-                    #print(sql.strip(), sql.count(";"))
-                    parseSql(full_filename, sql)
-                for i, sql in enumerate(sqls[full_filename]):
-                    print("SQL file '{}' command no {}:".format(full_filename, str(i+1)))
-                    print(sql)
-                    print()
-                    do_sql(sql)
-            else:
-                print("! SQL file '{}' does not exist !".format(full_filename))
-        elif sql.startswith("\read:"):
-            read_filename = sql[len("\read:"):]
+
+        elif command == "read:":
+            read_filename = options["filename"]
             file_exists, full_filename = check_filename(read_filename)
             print("Read: '{}'".format(read_filename))
             try:
@@ -276,6 +263,60 @@ def do_sql(sql):
                         print("! There are no data returned from this sql query !")
             except Exception as e:
                 traceback.print_exc()
+
+        elif sql.startswith("\pause:"):
+            if "ask" in sql:
+                asked = ""
+                while asked != "c" and asked != "q":
+                    asked = input("Paused. C for continue, D for data view, Q for quit: ").lower()
+                    print(asked)
+                    if asked == "d":
+                        show = "Error"
+                        if data:
+                            #columns = [col[0] for col in c.description]
+                            row_format = "{:>15}" * (len(columns) + 1)
+                            nrows = len(data)
+                            if nrows > 0:   #< 100
+                                show = "There are {} rows. Showing all cases.".format(str(nrows))
+                                show += "\n"
+                                show += row_format.format("(Row)", *columns)
+                                show += "\n"
+                                for i, row in enumerate(data):
+                                    #print(row_format.format(str(i), *row)) # not posiible to pass None (Null in db)
+                                    show += row_format.format(str(i+1), *[str(r) if len(str(r)) <= 15 else str(r)[:13]+".." for r in row])    # Null to None
+                                    show += "\n"
+                            else:
+                                print("There are {} rows. Showing first / last {} cases.".format(str(nrows), str(10)))
+                                print(row_format.format("(Row)", *columns))
+                                for i, row in enumerate(data[:10]):
+                                    print(row_format.format(str(i+1), *[str(r) for r in row]))    # Null to None
+                                print("\n","...","\n")
+                                for i, row in enumerate(data[-10:]):
+                                    print(row_format.format(str(nrows-10+i+1), *[str(r) for r in row]))
+                        zobraz(show)
+                    elif asked == "q":
+                        OK = 0
+
+        elif sql.startswith("\import:"):
+            sql_filename = sql[len("\import:"):]
+            file_exists, full_filename = check_filename(sql_filename)
+            #print("Check if file exists:", sql_file_exists)
+            if file_exists:
+                with open(full_filename, "r") as f:
+                    sql = f.read()
+                    #print("SQL file query:")
+                    #print(sql.strip(), sql.count(";"))
+                    parseSql(full_filename, sql)
+                for i, sql in enumerate(sqls[full_filename]):
+                    print("SQL file '{}' command no {}:".format(full_filename, str(i+1)))
+                    print(sql)
+                    print()
+                    do_sql(sql)
+            else:
+                print("! SQL file '{}' does not exist !".format(full_filename))
+
+
+
         elif sql.startswith("\save:"):
             save_filename = sql[len("\save:"):]
             file_exists, full_filename = check_filename(save_filename)
@@ -291,6 +332,7 @@ def do_sql(sql):
                         f.write("\n")
             except Exception as e:
                 traceback.print_exc()
+
         elif sql.startswith("\insert:"):
             save_tablename = sql.split(":")[1]
             print("\n" + "Insert:", save_tablename)
@@ -318,8 +360,10 @@ def do_sql(sql):
                 conn.commit()
             except Exception as e:
                 traceback.print_exc()
+
         elif sql.startswith("\print:columns"):
             print(", ".join([str(c) for c in columns]))
+
         elif sql.startswith("\print:"):
             fromm_toos = sql[len("\print:"):].split(",")
             #print(fromm_toos)
@@ -373,7 +417,7 @@ def do_sql(sql):
                     print(row_format.format(str(fromm+i*stepp), *[str(r) for r in row]))    # Null to None
                 print("\n")
         else:
-            print("! Command was not recognized !")
+            print("! Command was not recognized or missing arguments !")
     else:
         print(db_version + sql + "\n")
         data_new = None
@@ -410,23 +454,35 @@ def do_sql(sql):
 
 def main(argv):
 
-    global conn, sqls, data, columns, folder, folder_name, db_version, show_cases, command_options
+    global conn, sqls, data, columns, folder_exists, folder_name, db_version, show_cases, command_options
 
     conn = None
     sqls = {}
     data = None
     columns = None
-    folder = None
+    folder_exists = None
     folder_name = None
     db_version = "None: "
     show_cases = 5
 
     command_options = {}
-    command_options["folder"] = []
-    command_options["folder"].append("foldername")
-    command_options["folder"].append("testname")
-    command_options["sqlite3"] = []
-    command_options["sqlite3"].append("filename")
+    command_options['quit'] = {}
+    command_options['quit']["names"] = []
+    command_options['quit']['required'] = []
+    command_options['q'] = {}
+    command_options['q']["names"] = []
+    command_options['q']['required'] = []
+    command_options['folder'] = {}
+    command_options['folder']["names"] = ["foldername", "testname"]
+    command_options['folder']['required'] = [True, False]
+    command_options['folder']['help1'] = "Help for command 'folder'"
+    command_options['folder']['help2'] = ["Blabla1", "Blabla2"]
+    command_options['sqlite3'] = {}
+    command_options['sqlite3']["names"] = ['filename']
+    command_options['sqlite3']['required'] = [True]
+    command_options['read'] = {}
+    command_options['read']["names"] = ['filename']
+    command_options['read']['required'] = [True]
     command_options["mysql"] = []
     command_options["mysql"].append("schema")
 
@@ -462,7 +518,7 @@ def main(argv):
         else:
             print("Database is not specified. Please use '\sqlite3:filename' for example.")
 
-        if folder:
+        if folder_exists:
             print("Using folder '{}'.".format(folder_name))
         else:
             folder_name = os.getcwd()
@@ -471,8 +527,9 @@ def main(argv):
 
         interactive_pass = 0
         sql = input(db_version)
+        OK_returned = 1
 
-        while sql.lower().strip() != "\quit":
+        while OK_returned == 1:
 
             interactive_pass += 1
 
