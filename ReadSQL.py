@@ -229,7 +229,7 @@ def do_sql(sql):
                     print("Folder '{}' does not exist. Using working directory '{}'.".format(folder_name, os.getcwd()))
                     folder_name = os.getcwd()
 
-        elif command == "read:":
+        elif command == "read":
             read_filename = options["filename"]
             file_exists, full_filename = check_filename(read_filename)
             print("Read: '{}'".format(read_filename))
@@ -260,9 +260,73 @@ def do_sql(sql):
                         columns = columns_new
                         show_data()
                     else:
+                        print()
                         print("! There are no data returned from this sql query !")
             except Exception as e:
                 traceback.print_exc()
+
+        elif command == "import":
+            sql_filename = options["filename"]
+            file_exists, full_filename = check_filename(sql_filename)
+            #print("Check if file exists:", sql_file_exists)
+            if file_exists:
+                with open(full_filename, "r") as f:
+                    sql = f.read()
+                    #print("SQL file query:")
+                    #print(sql.strip(), sql.count(";"))
+                    parseSql(full_filename, sql)
+                for i, sql in enumerate(sqls[full_filename]):
+                    print(f'''\n\\\\ SQL file '{full_filename}' command no {str(i+1)} \\\\''')
+                    do_sql(sql)
+            else:
+                print(f'''\n! SQL file '{full_filename}' does not exist !''')
+
+        elif command == "insert":
+            tablename = options["tablename"]
+            #print("\n" + "Insert:", tablename)
+            part1 = ""
+            part2 = ""
+            try:
+                for i, c in enumerate(columns):
+                    if i == 0:
+                        part1 += "{{0[{}]}}".format(str(i))
+                        if db_version[:7] == "Sqlite3":
+                            part2 += "?".format(str(i))
+                        elif db_version[:5] == "MySQL":
+                            part2 += "%s".format(str(i))
+                    else:
+                        part1 += ",{{0[{}]}}".format(str(i))
+                        if db_version[:7] == "Sqlite3":
+                            part2 += ",?".format(str(i))
+                        elif db_version[:5] == "MySQL":
+                            part2 += ",%s".format(str(i))
+                sql = f'''insert into {tablename} ({part1}) values ({part2})'''
+                print()
+                print(db_version + sql)
+                #print(columns, data)
+                c = conn.cursor()
+                c.executemany(sql.format(columns), data)
+                conn.commit()
+                print("! There are no data returned from this sql query !")
+            except Exception as e:
+                traceback.print_exc()
+
+        elif sql.startswith("\save:"):
+            save_filename = sql[len("\save:"):]
+            file_exists, full_filename = check_filename(save_filename)
+            print("Save: '{}'".format(save_filename))
+            try:
+                with open(full_filename, "w") as f:
+                    for c in columns:
+                        f.write(str(c) + "\t")
+                    f.write("\n")
+                    for d in data:
+                        for c in d:
+                            f.write(str(c) + "\t")
+                        f.write("\n")
+            except Exception as e:
+                traceback.print_exc()
+
 
         elif sql.startswith("\pause:"):
             if "ask" in sql:
@@ -296,70 +360,6 @@ def do_sql(sql):
                         zobraz(show)
                     elif asked == "q":
                         OK = 0
-
-        elif sql.startswith("\import:"):
-            sql_filename = sql[len("\import:"):]
-            file_exists, full_filename = check_filename(sql_filename)
-            #print("Check if file exists:", sql_file_exists)
-            if file_exists:
-                with open(full_filename, "r") as f:
-                    sql = f.read()
-                    #print("SQL file query:")
-                    #print(sql.strip(), sql.count(";"))
-                    parseSql(full_filename, sql)
-                for i, sql in enumerate(sqls[full_filename]):
-                    print("SQL file '{}' command no {}:".format(full_filename, str(i+1)))
-                    print(sql)
-                    print()
-                    do_sql(sql)
-            else:
-                print("! SQL file '{}' does not exist !".format(full_filename))
-
-
-
-        elif sql.startswith("\save:"):
-            save_filename = sql[len("\save:"):]
-            file_exists, full_filename = check_filename(save_filename)
-            print("Save: '{}'".format(save_filename))
-            try:
-                with open(full_filename, "w") as f:
-                    for c in columns:
-                        f.write(str(c) + "\t")
-                    f.write("\n")
-                    for d in data:
-                        for c in d:
-                            f.write(str(c) + "\t")
-                        f.write("\n")
-            except Exception as e:
-                traceback.print_exc()
-
-        elif sql.startswith("\insert:"):
-            save_tablename = sql.split(":")[1]
-            print("\n" + "Insert:", save_tablename)
-            part1 = ""
-            part2 = ""
-            try:
-                for i, c in enumerate(columns):
-                    if i == 0:
-                        part1 += "{{0[{}]}}".format(str(i))
-                        if db_version[:7] == "Sqlite3":
-                            part2 += "?".format(str(i))
-                        elif db_version[:5] == "MySQL":
-                            part2 += "%s".format(str(i))
-                    else:
-                        part1 += ",{{0[{}]}}".format(str(i))
-                        if db_version[:7] == "Sqlite3":
-                            part2 += ",?".format(str(i))
-                        elif db_version[:5] == "MySQL":
-                            part2 += ",%s".format(str(i))
-                sql = """insert into {} ({}) values ({})""".format(save_tablename, part1, part2)
-                print(sql)
-                #print(columns, data)
-                c = conn.cursor()
-                c.executemany(sql.format(columns), data)
-                conn.commit()
-            except Exception as e:
-                traceback.print_exc()
 
         elif sql.startswith("\print:columns"):
             print(", ".join([str(c) for c in columns]))
@@ -466,25 +466,32 @@ def main(argv):
     show_cases = 5
 
     command_options = {}
-    command_options['quit'] = {}
-    command_options['quit']["names"] = []
-    command_options['quit']['required'] = []
-    command_options['q'] = {}
-    command_options['q']["names"] = []
-    command_options['q']['required'] = []
-    command_options['folder'] = {}
-    command_options['folder']["names"] = ["foldername", "testname"]
-    command_options['folder']['required'] = [True, False]
-    command_options['folder']['help1'] = "Help for command 'folder'"
-    command_options['folder']['help2'] = ["Blabla1", "Blabla2"]
-    command_options['sqlite3'] = {}
-    command_options['sqlite3']["names"] = ['filename']
-    command_options['sqlite3']['required'] = [True]
-    command_options['read'] = {}
-    command_options['read']["names"] = ['filename']
-    command_options['read']['required'] = [True]
-    command_options["mysql"] = []
-    command_options["mysql"].append("schema")
+    command_options["quit"] = {}
+    command_options["quit"]["names"] = []
+    command_options["quit"]["required"] = []
+    command_options["q"] = {}
+    command_options["q"]["names"] = []
+    command_options["q"]["required"] = []
+    command_options["folder"] = {}
+    command_options["folder"]["names"] = ["foldername", "testname"]
+    command_options["folder"]["required"] = [True, False]
+    command_options["folder"]["help1"] = "Help for command 'folder'"
+    command_options["folder"]["help2"] = ["Blabla1", "Blabla2"]
+    command_options["sqlite3"] = {}
+    command_options["sqlite3"]["names"] = ["filename"]
+    command_options["sqlite3"]["required"] = [True]
+    command_options["read"] = {}
+    command_options["read"]["names"] = ["filename"]
+    command_options["read"]["required"] = [True]
+    command_options["import"] = {}
+    command_options["import"]["names"] = ["filename"]
+    command_options["import"]["required"] = [True]
+    command_options["mysql"] = {}
+    command_options["mysql"]["names"] = ["schema"]
+    command_options["mysql"]["required"] = [True]
+    command_options["insert"] = {}
+    command_options["insert"]["names"] = ["tablename"]
+    command_options["insert"]["required"] = [True]
 
     namespace = parseArgv(argv)
     """
@@ -537,12 +544,14 @@ def main(argv):
             parseSql(sql_file, sql)
             #OK_returned = 1
             for i, sql in enumerate(sqls[sql_file]):
-                print("\n\\\\" + " SQL file '{}' command no {} ".format(sql_file, str(i+1)) + "\\\\")
+                print(f'''\n\\\\ SQL file '{sql_file}' command no {str(i+1)} \\\\''')
                 #print(sql)
                 #print()
                 OK_returned = do_sql(sql)
                 if OK_returned == 0: break
-            if OK_returned == 1: sql = input(db_version)
+            if OK_returned == 1:
+                print()
+                sql = input(db_version)
 
     try:
         conn.close()
