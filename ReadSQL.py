@@ -43,8 +43,8 @@ def parseSql(sql_filename, sql):
 def parseCommand(command_line):
     command = ""
     options = {}
-    command_line = command_line.replace(" ", "")
-    command_line = command_line[1:].lower() #no slash
+    #command_line = command_line.replace(" ", "")
+    command_line = command_line[1:].lower().strip() #no slash
     print (command_line)
     for c in command_options:
         #print(c)
@@ -52,12 +52,13 @@ def parseCommand(command_line):
             command = c
             command_line_list = command_line[len(c):].split(",")
             for i, cl in enumerate(command_line_list):
+                cl = cl.strip()
                 if "=" in cl:
                     cll = cl.split("=")
                     for o in command_options[c]["names"]:
-                        if cll[0] == o:
-                            options[o] = cll[1]
-                    if cll[0] not in options:
+                        if cll[0].strip() == o:
+                            options[o] = cll[1].strip()
+                    if cll[0].strip() not in options:
                         print(f'''Unknown option '{cll[0]}'. I will not use your '{cll[1]}' value in any way.''')
                 elif cl != "":
                     if i < len (command_options[c]["names"]):
@@ -67,10 +68,10 @@ def parseCommand(command_line):
                         print(f'''Too many options given. I will not use your '{cl}' value in any way.''')
             break
 
-    print (f'''Comand '{command}' with options {', '.join([str(op + "='" + options[op] + "'") for op in options])}.''')
-
-    for i, r in enumerate(command_options[command]["required"]):
+    for i, z in enumerate(zip(command_options[command]["required"], command_options[command]["default"])):
+        r, d = z[0], z[1]
         execute = True
+        print(i, z, r, d)
         if r:
             #assert command_options[command]["names"][i] in options
             if command_options[command]["names"][i] not in options:
@@ -79,6 +80,11 @@ def parseCommand(command_line):
                 command = ""
                 options = []
                 break
+        if command_options[command]["names"][i] not in options and d is not None:
+            print(f'''Default argument '{command_options[command]["names"][i]}' set to '{d}'.''')
+            options[command_options[command]["names"][i]] = d
+
+    print (f'''Comand '{command}' with options {', '.join([str(str(op) + "=" + str(options[op])) for op in options])}.''')
 
     return command, options
 
@@ -327,6 +333,26 @@ def do_sql(sql):
             except Exception as e:
                 traceback.print_exc()
 
+        elif command == "print":
+            if options["what"] == "columns":
+                print(", ".join([str(c) for c in columns]))
+
+            elif options["what"] == "data":
+                fromm = options["from"]
+                too = options["to"]
+                stepp = options["step"]
+                print(fromm, too, stepp)
+                row_format = "{:>15}" * (len(columns) + 1)
+                nrows = len(data)
+                if fromm <= 0: fromm = 1
+                if too <= 0: too = 1
+                if stepp <= 0: stepp = 1
+                if too > nrows: too = nrows
+                print("There are {} rows. Showing cases {} to {} step {}.".format(str(nrows), str(fromm), str(too), str(stepp)))
+                print(row_format.format("(Row)", *columns))
+                for i, row in enumerate(data[fromm-1:too:stepp]):
+                    print(row_format.format(str(fromm+i*stepp), *[str(r) for r in row]))    # Null to None
+                print("\n")
 
         elif sql.startswith("\pause:"):
             if "ask" in sql:
@@ -361,61 +387,7 @@ def do_sql(sql):
                     elif asked == "q":
                         OK = 0
 
-        elif sql.startswith("\print:columns"):
-            print(", ".join([str(c) for c in columns]))
 
-        elif sql.startswith("\print:"):
-            fromm_toos = sql[len("\print:"):].split(",")
-            #print(fromm_toos)
-            for ft in range(len(fromm_toos)):
-                fromm_too = fromm_toos[ft].split(":")
-                fromm, too, stepp = 1, len(data), 1
-                if len(fromm_too) == 1:
-                    if fromm_too[0].strip() != "":
-                        try:
-                            fromm = int(fromm_too[0])
-                            too = fromm
-                        except Exception as e:
-                            traceback.print_exc()
-                if len(fromm_too) == 2:
-                    if fromm_too[0].strip() != "":
-                        try:
-                            fromm = int(fromm_too[0])
-                        except Exception as e:
-                            traceback.print_exc()
-                    if fromm_too[1].strip() != "":
-                        try:
-                            too = int(fromm_too[1])
-                        except Exception as e:
-                            traceback.print_exc()
-                if len(fromm_too) > 2:
-                    if fromm_too[0].strip() != "":
-                        try:
-                            fromm = int(fromm_too[0])
-                        except Exception as e:
-                            traceback.print_exc()
-                    if fromm_too[1].strip() != "":
-                        try:
-                            too = int(fromm_too[1])
-                        except Exception as e:
-                            traceback.print_exc()
-                    if fromm_too[2].strip() != "":
-                        try:
-                            stepp = int(fromm_too[2])
-                        except Exception as e:
-                            traceback.print_exc()
-                #print(fromm, too, stepp)
-                row_format = "{:>15}" * (len(columns) + 1)
-                nrows = len(data)
-                if fromm <= 0: fromm = 1
-                if too <= 0: too = 1
-                if stepp <= 0: stepp = 1
-                if too > nrows: too = nrows
-                print("There are {} rows. Showing cases {} to {} step {}.".format(str(nrows), str(fromm), str(too), str(stepp)))
-                print(row_format.format("(Row)", *columns))
-                for i, row in enumerate(data[fromm-1:too:stepp]):
-                    print(row_format.format(str(fromm+i*stepp), *[str(r) for r in row]))    # Null to None
-                print("\n")
         else:
             print("! Command was not recognized or missing arguments !")
     else:
@@ -454,7 +426,8 @@ def do_sql(sql):
 
 def main(argv):
 
-    global conn, sqls, data, columns, folder_exists, folder_name, db_version, show_cases, command_options
+    global conn, sqls, data, columns, folder_exists, folder_name, db_version, show_cases, command_options, \
+    print_max_default
 
     conn = None
     sqls = {}
@@ -464,34 +437,58 @@ def main(argv):
     folder_name = None
     db_version = "None: "
     show_cases = 5
+    print_max_default = 100
 
     command_options = {}
     command_options["quit"] = {}
     command_options["quit"]["names"] = []
     command_options["quit"]["required"] = []
+    command_options["quit"]["data"] = []
+    command_options["quit"]["default"] = []
     command_options["q"] = {}
     command_options["q"]["names"] = []
     command_options["q"]["required"] = []
+    command_options["q"]["data"] = []
+    command_options["q"]["default"] = []
     command_options["folder"] = {}
     command_options["folder"]["names"] = ["foldername", "testname"]
     command_options["folder"]["required"] = [True, False]
+    command_options["folder"]["data"] = ["str", "str"]
+    command_options["folder"]["default"] = [None, None]
     command_options["folder"]["help1"] = "Help for command 'folder'"
     command_options["folder"]["help2"] = ["Blabla1", "Blabla2"]
     command_options["sqlite3"] = {}
     command_options["sqlite3"]["names"] = ["filename"]
     command_options["sqlite3"]["required"] = [True]
+    command_options["sqlite3"]["data"] = ["str"]
+    command_options["sqlite3"]["default"] = [None]
+    command_options["folder"]["data"] = ["str"]
+    command_options["folder"]["default"] = [None]
     command_options["read"] = {}
     command_options["read"]["names"] = ["filename"]
     command_options["read"]["required"] = [True]
+    command_options["read"]["data"] = ["str"]
+    command_options["read"]["default"] = [None]
     command_options["import"] = {}
     command_options["import"]["names"] = ["filename"]
     command_options["import"]["required"] = [True]
+    command_options["import"]["data"] = ["str"]
+    command_options["import"]["default"] = [None]
     command_options["mysql"] = {}
     command_options["mysql"]["names"] = ["schema"]
     command_options["mysql"]["required"] = [True]
+    command_options["mysql"]["data"] = ["str"]
+    command_options["mysql"]["default"] = [None]
     command_options["insert"] = {}
     command_options["insert"]["names"] = ["tablename"]
     command_options["insert"]["required"] = [True]
+    command_options["insert"]["data"] = ["str"]
+    command_options["insert"]["default"] = [None]
+    command_options["print"] = {}
+    command_options["print"]["names"] = ["what", "from", "to", "step", "list", "columns"]
+    command_options["print"]["required"] = [False, False, False, False, False, False]
+    command_options["print"]["data"] = [["data","columns"], "int", "int", "int", "list of strings"]
+    command_options["print"]["default"] = ["data", 0, print_max_default, 1, None]
 
     namespace = parseArgv(argv)
     """
@@ -517,13 +514,13 @@ def main(argv):
 
         if conn:
             if db_version[:7] == "Sqlite3":
-                print("Using Sqlite3 database '{}'. Use \sqlite3:filename' for change.".format(db_filename))
+                print("Using Sqlite3 database '{}'. Use \sqlite3 filename' for change.".format(db_filename))
             elif db_version[:5] == "MySQL":
-                print("Using MySQL schema '{}'. Use '\mysql:schema' for change.".format(db_schema))
+                print("Using MySQL schema '{}'. Use '\mysql schema' for change.".format(db_schema))
             else:
                 print("Sorry, no db_version.")
         else:
-            print("Database is not specified. Please use '\sqlite3:filename' for example.")
+            print("Database is not specified. Please use '\sqlite3 filename' for example.")
 
         if folder_exists:
             print("Using folder '{}'.".format(folder_name))

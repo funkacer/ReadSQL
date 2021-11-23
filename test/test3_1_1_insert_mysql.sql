@@ -11,6 +11,6 @@ create table test3_1 (r INTEGER PRIMARY KEY AUTO_INCREMENT, id INTEGER, id_p INT
 
 \read test3_1.csvx;
 
-\insert:test3_1;
+\insert test3_1;
 
-\print:columns;
+\print columns;
