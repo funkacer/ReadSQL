@@ -55,34 +55,45 @@ def parseCommand(command_line):
                 cl = cl.strip()
                 if "=" in cl:
                     cll = cl.split("=")
-                    for o in command_options[c]["names"]:
+                    for o in command_options[c]["name"]:
                         if cll[0].strip() == o:
                             options[o] = cll[1].strip()
                     if cll[0].strip() not in options:
                         print(f'''Unknown option '{cll[0]}'. I will not use your '{cll[1]}' value in any way.''')
                 elif cl != "":
-                    if i < len (command_options[c]["names"]):
-                        print(f'''I will use '{cl}' for option '{command_options[c]["names"][i]}'.''')
-                        options[command_options[c]["names"][i]] = cl
+                    if i < len (command_options[c]["name"]):
+                        print(f'''I will use '{cl}' for option '{command_options[c]["name"][i]}'.''')
+                        options[command_options[c]["name"][i]] = cl
                     else:
                         print(f'''Too many options given. I will not use your '{cl}' value in any way.''')
             break
 
-    for i, z in enumerate(zip(command_options[command]["required"], command_options[command]["default"])):
-        r, d = z[0], z[1]
+    for i, z in enumerate(zip(command_options[command]["name"], command_options[command]["required"], command_options[command]["default"], command_options[command]["type"])):
+        n, r, d, t = z[0], z[1], z[2], z[3]
         execute = True
-        print(i, z, r, d)
+        print(f'''i:{i}, name:{n}, required:{r}, default:{d}, type:{t}''')
         if r:
-            #assert command_options[command]["names"][i] in options
-            if command_options[command]["names"][i] not in options:
-                print(f'''Missing required argument '{command_options[command]["names"][i]}'. Command won't be executed.''')
+            #assert command_options[command]["name"][i] in options
+            if n not in options:
+                print(f'''Missing required argument '{n}'. Command won't be executed.''')
                 execute = False
                 command = ""
                 options = []
                 break
-        if command_options[command]["names"][i] not in options and d is not None:
-            print(f'''Default argument '{command_options[command]["names"][i]}' set to '{d}'.''')
-            options[command_options[command]["names"][i]] = d
+        if n not in options and d is not None:
+            print(f'''Default argument '{n}' set to '{d}'.''')
+            options[n] = d
+        if n in options:
+            if isinstance(t, list):
+                assert options[n] in t, \
+f'''Value {options[n]} is not valid for option '{n}'. \
+Use one of these options: {t}.'''
+            elif t == "int":
+                try:
+                    options[n] = int(options[n])
+                except Exception as e:
+                    traceback.print_exc()
+                assert isinstance(options[n], int)
 
     print (f'''Comand '{command}' with options {', '.join([str(str(op) + "=" + str(options[op])) for op in options])}.''')
 
@@ -441,76 +452,76 @@ def main(argv):
 
     command_options = {}
     command_options["quit"] = {}
-    command_options["quit"]["names"] = []
+    command_options["quit"]["name"] = []
     command_options["quit"]["required"] = []
-    command_options["quit"]["data"] = []
+    command_options["quit"]["type"] = []
     command_options["quit"]["default"] = []
     command_options["quit"]["help1"] = "Help for command 'folder'"
     command_options["quit"]["help2"] = []
-    command_options["quit"]["alternatives"] = ["q"]
+    command_options["quit"]["alternative"] = ["q"]
 
     command_options["folder"] = {}
-    command_options["folder"]["names"] = ["foldername"]
+    command_options["folder"]["name"] = ["foldername"]
     command_options["folder"]["required"] = [True]
-    command_options["folder"]["data"] = ["str"]
+    command_options["folder"]["type"] = ["str"]
     command_options["folder"]["default"] = [None]
     command_options["folder"]["help1"] = "Help for command 'folder'"
     command_options["folder"]["help2"] = ["Blabla1"]
-    command_options["folder"]["alternatives"] = ["f"]
+    command_options["folder"]["alternative"] = ["f"]
 
     command_options["sqlite3"] = {}
-    command_options["sqlite3"]["names"] = ["filename"]
+    command_options["sqlite3"]["name"] = ["filename"]
     command_options["sqlite3"]["required"] = [True]
-    command_options["sqlite3"]["data"] = ["str"]
+    command_options["sqlite3"]["type"] = ["str"]
     command_options["sqlite3"]["default"] = [None]
     command_options["sqlite3"]["help1"] = "Help for command 'folder'"
     command_options["sqlite3"]["help2"] = ["Blabla1"]
-    command_options["sqlite3"]["alternatives"] = ["f"]
+    command_options["sqlite3"]["alternative"] = ["f"]
 
     command_options["read"] = {}
-    command_options["read"]["names"] = ["filename"]
+    command_options["read"]["name"] = ["filename"]
     command_options["read"]["required"] = [True]
-    command_options["read"]["data"] = ["str"]
+    command_options["read"]["type"] = ["str"]
     command_options["read"]["default"] = [None]
     command_options["read"]["help1"] = "Help for command 'folder'"
     command_options["read"]["help2"] = ["Blabla1"]
-    command_options["read"]["alternatives"] = ["f"]
+    command_options["read"]["alternative"] = ["f"]
 
     command_options["import"] = {}
-    command_options["import"]["names"] = ["filename"]
+    command_options["import"]["name"] = ["filename"]
     command_options["import"]["required"] = [True]
-    command_options["import"]["data"] = ["str"]
+    command_options["import"]["type"] = ["str"]
     command_options["import"]["default"] = [None]
     command_options["import"]["help1"] = "Help for command 'folder'"
     command_options["import"]["help2"] = ["Blabla1"]
-    command_options["import"]["alternatives"] = ["f"]
+    command_options["import"]["alternative"] = ["f"]
 
     command_options["mysql"] = {}
-    command_options["mysql"]["names"] = ["schema"]
+    command_options["mysql"]["name"] = ["schema"]
     command_options["mysql"]["required"] = [True]
-    command_options["mysql"]["data"] = ["str"]
+    command_options["mysql"]["type"] = ["str"]
     command_options["mysql"]["default"] = [None]
     command_options["mysql"]["help1"] = "Help for command 'folder'"
     command_options["mysql"]["help2"] = ["Blabla1"]
-    command_options["mysql"]["alternatives"] = ["f"]
+    command_options["mysql"]["alternative"] = ["f"]
 
     command_options["insert"] = {}
-    command_options["insert"]["names"] = ["tablename"]
+    command_options["insert"]["name"] = ["tablename"]
     command_options["insert"]["required"] = [True]
-    command_options["insert"]["data"] = ["str"]
+    command_options["insert"]["type"] = ["str"]
     command_options["insert"]["default"] = [None]
     command_options["insert"]["help1"] = "Help for command 'folder'"
     command_options["insert"]["help2"] = ["Blabla1"]
-    command_options["insert"]["alternatives"] = ["f"]
+    command_options["insert"]["alternative"] = ["f"]
 
     command_options["print"] = {}
-    command_options["print"]["names"] = ["what", "from", "to", "step", "list", "columns"]
+    command_options["print"]["name"] = ["what", "from", "to", "step", "list", "columns"]
     command_options["print"]["required"] = [False, False, False, False, False, False]
-    command_options["print"]["data"] = [["data","columns"], "int", "int", "int", "int list", "str list"]
+    command_options["print"]["type"] = [["data","columns"], "int", "int", "int", "int list", "str list"]
     command_options["print"]["default"] = ["data", 0, print_max_default, 1, None, None]
     command_options["print"]["help1"] = "Help for command 'folder'"
     command_options["print"]["help2"] = ["Bla1","Bla2","Bla3","Bla4","Bla5","Bla6"]
-    command_options["print"]["alternatives"] = ["f"]
+    command_options["print"]["alternative"] = ["f"]
 
     default_options = 7
     for key1 in command_options.keys():
@@ -518,9 +529,9 @@ def main(argv):
 f'''Command {key1} has {len(command_options[key1].keys())} options \
 instead of default {default_options}.'''
         for key2 in command_options[key1].keys():
-            if key2 != "help1" and key2 != "alternatives":
-                assert len(command_options[key1]["names"]) == len(command_options[key1][key2]), \
-f'''Command option {key1} has {len(command_options[key1]["names"])} names \
+            if key2 != "help1" and key2 != "alternative":
+                assert len(command_options[key1]["name"]) == len(command_options[key1][key2]), \
+f'''Command option {key1} has {len(command_options[key1]["name"])} names \
 but {len(command_options[key1][key2])} '{key2}'.'''
 
     namespace = parseArgv(argv)
