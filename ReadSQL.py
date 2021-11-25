@@ -445,50 +445,83 @@ def main(argv):
     command_options["quit"]["required"] = []
     command_options["quit"]["data"] = []
     command_options["quit"]["default"] = []
-    command_options["q"] = {}
-    command_options["q"]["names"] = []
-    command_options["q"]["required"] = []
-    command_options["q"]["data"] = []
-    command_options["q"]["default"] = []
+    command_options["quit"]["help1"] = "Help for command 'folder'"
+    command_options["quit"]["help2"] = []
+    command_options["quit"]["alternatives"] = ["q"]
+
     command_options["folder"] = {}
-    command_options["folder"]["names"] = ["foldername", "testname"]
-    command_options["folder"]["required"] = [True, False]
-    command_options["folder"]["data"] = ["str", "str"]
-    command_options["folder"]["default"] = [None, None]
+    command_options["folder"]["names"] = ["foldername"]
+    command_options["folder"]["required"] = [True]
+    command_options["folder"]["data"] = ["str"]
+    command_options["folder"]["default"] = [None]
     command_options["folder"]["help1"] = "Help for command 'folder'"
-    command_options["folder"]["help2"] = ["Blabla1", "Blabla2"]
+    command_options["folder"]["help2"] = ["Blabla1"]
+    command_options["folder"]["alternatives"] = ["f"]
+
     command_options["sqlite3"] = {}
     command_options["sqlite3"]["names"] = ["filename"]
     command_options["sqlite3"]["required"] = [True]
     command_options["sqlite3"]["data"] = ["str"]
     command_options["sqlite3"]["default"] = [None]
-    command_options["folder"]["data"] = ["str"]
-    command_options["folder"]["default"] = [None]
+    command_options["sqlite3"]["help1"] = "Help for command 'folder'"
+    command_options["sqlite3"]["help2"] = ["Blabla1"]
+    command_options["sqlite3"]["alternatives"] = ["f"]
+
     command_options["read"] = {}
     command_options["read"]["names"] = ["filename"]
     command_options["read"]["required"] = [True]
     command_options["read"]["data"] = ["str"]
     command_options["read"]["default"] = [None]
+    command_options["read"]["help1"] = "Help for command 'folder'"
+    command_options["read"]["help2"] = ["Blabla1"]
+    command_options["read"]["alternatives"] = ["f"]
+
     command_options["import"] = {}
     command_options["import"]["names"] = ["filename"]
     command_options["import"]["required"] = [True]
     command_options["import"]["data"] = ["str"]
     command_options["import"]["default"] = [None]
+    command_options["import"]["help1"] = "Help for command 'folder'"
+    command_options["import"]["help2"] = ["Blabla1"]
+    command_options["import"]["alternatives"] = ["f"]
+
     command_options["mysql"] = {}
     command_options["mysql"]["names"] = ["schema"]
     command_options["mysql"]["required"] = [True]
     command_options["mysql"]["data"] = ["str"]
     command_options["mysql"]["default"] = [None]
+    command_options["mysql"]["help1"] = "Help for command 'folder'"
+    command_options["mysql"]["help2"] = ["Blabla1"]
+    command_options["mysql"]["alternatives"] = ["f"]
+
     command_options["insert"] = {}
     command_options["insert"]["names"] = ["tablename"]
     command_options["insert"]["required"] = [True]
     command_options["insert"]["data"] = ["str"]
     command_options["insert"]["default"] = [None]
+    command_options["insert"]["help1"] = "Help for command 'folder'"
+    command_options["insert"]["help2"] = ["Blabla1"]
+    command_options["insert"]["alternatives"] = ["f"]
+
     command_options["print"] = {}
     command_options["print"]["names"] = ["what", "from", "to", "step", "list", "columns"]
     command_options["print"]["required"] = [False, False, False, False, False, False]
-    command_options["print"]["data"] = [["data","columns"], "int", "int", "int", "list of strings"]
-    command_options["print"]["default"] = ["data", 0, print_max_default, 1, None]
+    command_options["print"]["data"] = [["data","columns"], "int", "int", "int", "int list", "str list"]
+    command_options["print"]["default"] = ["data", 0, print_max_default, 1, None, None]
+    command_options["print"]["help1"] = "Help for command 'folder'"
+    command_options["print"]["help2"] = ["Bla1","Bla2","Bla3","Bla4","Bla5","Bla6"]
+    command_options["print"]["alternatives"] = ["f"]
+
+    default_options = 7
+    for key1 in command_options.keys():
+        assert len(command_options[key1].keys()) == default_options, \
+f'''Command {key1} has {len(command_options[key1].keys())} options \
+instead of default {default_options}.'''
+        for key2 in command_options[key1].keys():
+            if key2 != "help1" and key2 != "alternatives":
+                assert len(command_options[key1]["names"]) == len(command_options[key1][key2]), \
+f'''Command option {key1} has {len(command_options[key1]["names"])} names \
+but {len(command_options[key1][key2])} '{key2}'.'''
 
     namespace = parseArgv(argv)
     """

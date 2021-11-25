@@ -1,0 +1,3 @@
+id;value;code	
+1;122.5;Ahoj	
+2;222;Ahoj	
