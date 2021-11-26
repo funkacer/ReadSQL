@@ -94,6 +94,27 @@ Use one of these options: {t}.'''
                 except Exception as e:
                     traceback.print_exc()
                 assert isinstance(options[n], int)
+            elif t == "intset":
+                lst_old = options[n].split(" ")
+                lst_new = set()
+                for l_old in lst_old:
+                    l_new = None
+                    try:
+                        l_new = int(l_old)
+                    except Exception as e:
+                        traceback.print_exc()
+                    assert isinstance(l_new, int)
+                    lst_new.add(l_new)
+                options[n] = lst_new
+            elif t == "strset":
+                if '"' in options[n] or "'" in options[n]:
+                    print("Uvozovky")
+                else:
+                    lst_old = options[n].split(" ")
+                    lst_new = set()
+                    for l_old in lst_old:
+                        lst_new.add(l_old)
+                    options[n] = lst_new
 
     print (f'''Comand '{command}' with options {', '.join([str(str(op) + "=" + str(options[op])) for op in options])}.''')
 
@@ -517,7 +538,7 @@ def main(argv):
     command_options["print"] = {}
     command_options["print"]["name"] = ["what", "from", "to", "step", "list", "columns"]
     command_options["print"]["required"] = [False, False, False, False, False, False]
-    command_options["print"]["type"] = [["data","columns"], "int", "int", "int", "int list", "str list"]
+    command_options["print"]["type"] = [["data","columns"], "int", "int", "int", "intset", "strset"]
     command_options["print"]["default"] = ["data", 0, print_max_default, 1, None, None]
     command_options["print"]["help1"] = "Help for command 'folder'"
     command_options["print"]["help2"] = ["Bla1","Bla2","Bla3","Bla4","Bla5","Bla6"]
