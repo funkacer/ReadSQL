@@ -13,7 +13,7 @@ from importlib.metadata import version
 
 import time
 
-from okno import zobraz
+#from okno import zobraz
 
 '''
 HEADER = '\033[95m'
