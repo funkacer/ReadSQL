@@ -151,11 +151,11 @@ def parseCommand(command_line):
     options = {}
     error = 0
     #command_line = command_line.replace(" ", "")
-    command_line = command_line[1:].lower().strip() #no slash
+    command_line = command_line[1:].strip() #no slash
     print (command_line)
     for c in command_options:
         #print(c)
-        if command_line[:len(c)] == c:
+        if command_line[:len(c)].lower() == c:
             command = c
             command_line_list = command_line[len(c):].split(",")
             for i, cl in enumerate(command_line_list):
@@ -197,6 +197,11 @@ def parseCommand(command_line):
                 if not bCond:
                     execute = False
                     break
+            elif t == "str":
+                options[n] = options[n].strip('"')
+                print(options[n])
+                #command = "quit"
+
             elif t == "int":
                 try:
                     options[n] = int(options[n])
@@ -457,11 +462,15 @@ def do_sql(sql):
                             part2 += ",?".format(str(i))
                         elif db_version[:5] == "MySQL":
                             part2 += ",%s".format(str(i))
-                sql = f'''insert into {tablename} ({part1}) values ({part2})'''
+                sql = f'''insert into "{tablename}" ({part1}) values ({part2})'''
                 print()
                 print(db_version + sql)
                 #print(columns, data)
                 c = conn.cursor()
+                columns_print = []
+                for col in columns:
+                    columns_print.append('"' + col + '"')
+                print(columns_print)
                 c.executemany(sql.format(columns), data)
                 conn.commit()
                 print("! There are no data returned from this sql query !")
