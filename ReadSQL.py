@@ -201,7 +201,6 @@ def parseCommand(command_line):
                 options[n] = options[n].strip('"')
                 print(options[n])
                 #command = "quit"
-
             elif t == "int":
                 try:
                     options[n] = int(options[n])
@@ -223,8 +222,25 @@ def parseCommand(command_line):
             elif t == "strlist":
                 if '"' in options[n] or "'" in options[n]:
                     print("Uvozovky", options[n].count('"'), options[n].count("'"))
-                    assert not options[n].count('"') % 2 or not options[n].count("'") % 2
-                    
+                    lst_new = []
+                    apos = -1
+                    maxx = len(options[n])
+                    for i, chr in enumerate(options[n]):
+                        if apos == -1 and (chr == '"' or chr == "'"):
+                            apos = i
+                            ''' Are there any items before the first apostrophe? '''
+                            if i > 0 and len(lst_new) == 0: lst_new = [o for o in options[n][:i].split(" ") if o is not ""]
+                            #print(lst_new)
+                            #print(chr, i)
+                        elif apos > -1 and chr == options[n][apos]:
+                            lst_new.append(options[n][apos+1:i])
+                            #print(chr, i)
+                            maxx = i
+                            apos = -1
+                    ''' Are there any items after the last apostrophe? '''
+                    if maxx < len(options[n]): lst_new += [o for o in options[n][maxx+1:].split(" ") if o is not ""]
+                    #print(lst_new)
+                    options[n] = lst_new
                 else:
                     lst_old = options[n].split(" ")
                     lst_new = []
