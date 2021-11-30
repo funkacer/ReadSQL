@@ -222,7 +222,9 @@ def parseCommand(command_line):
                 options[n] = lst_new
             elif t == "strlist":
                 if '"' in options[n] or "'" in options[n]:
-                    print("Uvozovky")
+                    print("Uvozovky", options[n].count('"'), options[n].count("'"))
+                    assert not options[n].count('"') % 2 or not options[n].count("'") % 2
+                    
                 else:
                     lst_old = options[n].split(" ")
                     lst_new = []
