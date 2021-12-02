@@ -121,6 +121,15 @@ command_options["print"]["help1"] = "Help for command 'folder'"
 command_options["print"]["help2"] = ["Bla1","Bla2","Bla3","Bla4","Bla5","Bla6"]
 command_options["print"]["alternative"] = ["f"]
 
+command_options["save"] = {}
+command_options["save"]["name"] = ["filename"]
+command_options["save"]["required"] = [True]
+command_options["save"]["type"] = ["str"]
+command_options["save"]["default"] = [None]
+command_options["save"]["help1"] = "Help for command 'folder'"
+command_options["save"]["help2"] = ["Blabla1"]
+command_options["save"]["alternative"] = ["f"]
+
 def parseArgv(argument_list):
 
     parser = argparse.ArgumentParser()
@@ -182,7 +191,7 @@ def parseCommand(command_line):
         if r:
             #assert command_options[command]["name"][i] in options
             if n not in options:
-                printRed(f'''Missing required argument '{n}'. Command won't be executed.''')
+                printRed(f'''Missing required argument '{n}'. Command not executed.''')
                 execute = False
                 break
         if n not in options and d is not None:
@@ -495,8 +504,8 @@ def do_sql(sql):
             except Exception as e:
                 traceback.print_exc()
 
-        elif sql.startswith("\save:"):
-            save_filename = sql[len("\save:"):]
+        elif command == "save":
+            save_filename = options["filename"]
             file_exists, full_filename = check_filename(save_filename)
             print("Save: '{}'".format(save_filename))
             try:
@@ -585,8 +594,8 @@ def do_sql(sql):
             #conn.close()
         except Exception as e:
             traceback.print_exc()
-            data = None
-            columns = None
+            #data = None
+            #columns = None
     #print()
     # this checks dtb
     if db_version[:5] == "MySQL":
