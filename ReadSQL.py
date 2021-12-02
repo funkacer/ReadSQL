@@ -428,10 +428,11 @@ def do_sql(sql):
                     columns_new = []
                     i = 0
                     data_line = f.readline()
-                    if data_line[-1:] == "\n": data_line = data_line[:-1]
                     while data_line:
+                        if data_line[-1] == "\n": data_line = data_line[:-1]
+                        if data_line[-1] == "\t": data_line = data_line[:-1]
                         row_new = []
-                        for c in data_line.split(";"):
+                        for c in data_line.split("\t"):
                             if i == 0:
                                 columns_new.append(c)
                             else:
@@ -442,7 +443,6 @@ def do_sql(sql):
                         if i > 0: data_new.append(row_new)
                         i += 1
                         data_line = f.readline()
-                        if data_line[-1:] == "\n": data_line = data_line[:-1]
                     #print(data_new)
                     if len(data_new) > 0:
                         data = data_new
@@ -472,6 +472,7 @@ def do_sql(sql):
 
         elif command == "insert":
             tablename = options["tablename"]
+            print(columns)
             #print("\n" + "Insert:", tablename)
             part1 = ""
             part2 = ""
@@ -489,6 +490,7 @@ def do_sql(sql):
                             part2 += ",?".format(str(i))
                         elif db_version[:5] == "MySQL":
                             part2 += ",%s".format(str(i))
+                    print(i)
                 sql = f'''insert into "{tablename}" ({part1}) values ({part2})'''
                 print()
                 print(db_version + sql)
