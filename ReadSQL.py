@@ -77,12 +77,12 @@ command_options["sqlite3"]["help2"] = ["Blabla1"]
 command_options["sqlite3"]["alternative"] = ["f"]
 
 command_options["read"] = {}
-command_options["read"]["name"] = ["filename"]
-command_options["read"]["required"] = [True]
-command_options["read"]["type"] = ["str"]
-command_options["read"]["default"] = [None]
+command_options["read"]["name"] = ["filename", "delimiter"]
+command_options["read"]["required"] = [True, False]
+command_options["read"]["type"] = ["str", "str"]
+command_options["read"]["default"] = [None, "\t"]
 command_options["read"]["help1"] = "Help for command 'folder'"
-command_options["read"]["help2"] = ["Blabla1"]
+command_options["read"]["help2"] = ["Blabla1", "Blablabla2"]
 command_options["read"]["alternative"] = ["f"]
 
 command_options["import"] = {}
@@ -148,11 +148,38 @@ def parseArgv(argument_list):
 def parseSql(sql_filename, sql):
     global sqls
     sqls[sql_filename] = []
+    '''
+    I need to enable delimiters in ""
+
     if sql.count(";") > 0:
         for s in sql.split(";"):
             if s.strip() != "": sqls[sql_filename].append(s.strip())
     else:
         sqls[sql_filename].append(sql.strip())
+    '''
+
+    if '"' in myText or "'" in myText:
+        print("Uvozovky", myText.count('"'), myText.count("'"))
+        lst_new = []
+        apos = -1
+        maxx = len(myText)
+        for i, chr in enumerate(myText):
+            if apos == -1 and (chr == '"' or chr == "'"):
+                apos = i
+                ''' Are there any items before the first apostrophe? '''
+                if i > 0 and len(lst_new) == 0: lst_new = [o for o in myText[:i].split(" ") if o is not ""]
+                #print(lst_new)
+                #print(chr, i)
+            elif apos > -1 and chr == myText[apos]:
+                lst_new.append(myText[apos+1:i])
+                #print(chr, i)
+                maxx = i
+                apos = -1
+        ''' Are there any items after the last apostrophe? '''
+        if maxx < len(myText): lst_new += [o for o in myText[maxx+1:].split(" ") if o is not ""]
+        #print(lst_new)
+        myText = lst_new
+
     return None
 
 def parseCommand(command_line):
@@ -208,7 +235,7 @@ def parseCommand(command_line):
                     break
             elif t == "str":
                 options[n] = options[n].strip('"')
-                print(options[n])
+                print(n, "string", options[n])
                 #command = "quit"
             elif t == "int":
                 try:
@@ -420,6 +447,7 @@ def do_sql(sql):
 
         elif command == "read":
             read_filename = options["filename"]
+            read_delimiter = options["delimiter"]
             file_exists, full_filename = check_filename(read_filename)
             print("Read: '{}'".format(read_filename))
             try:
@@ -430,9 +458,9 @@ def do_sql(sql):
                     data_line = f.readline()
                     while data_line:
                         if data_line[-1] == "\n": data_line = data_line[:-1]
-                        if data_line[-1] == "\t": data_line = data_line[:-1]
+                        if data_line[-1] == read_delimiter: data_line = data_line[:-1]
                         row_new = []
-                        for c in data_line.split("\t"):
+                        for c in data_line.split(read_delimiter):
                             if i == 0:
                                 columns_new.append(c)
                             else:
