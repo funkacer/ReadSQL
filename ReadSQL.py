@@ -146,39 +146,43 @@ def parseArgv(argument_list):
     return parser.parse_args(argument_list)
 
 def parseText(myText, delimiter):
-    if '"' in myText or "'" in myText:
-        print("Uvozovky", myText.count('"'), myText.count("'"))
-        lst_new = []
-        apos = None
-        maxs = -1
-        spl = delimiter
-        for i, chr in enumerate(myText):
-            if not apos and (chr == spl):
-                lst_new.append(myText[maxs+1:i].strip())
-                maxs = i
-            elif not apos and (chr == '"' or chr == "'"):
-                # Are there any items before the first apostrophe?
-                #lst_new += [o.strip() for o in myText[maxx+1:i].split(spl) if o.strip() is not ""]
-                apos = chr
-                if apos == "[": apos = "]"
-                #print(lst_new)
-                #print(chr, i)
-            elif chr == apos:
-                # first line for strlistsplit, senond for sql parse
-                #lst_new.append(myText[apos+1:i])
-                #lst_new.append(myText[maxs+1:i].strip())
-                #print(chr, i)
-                apos = None
+
+    #print("Uvozovky", myText.count('"'), myText.count("'"))
+
+    lst_new = []
+    apos = None
+    maxs = -1
+    spl = delimiter
+    for i, chr in enumerate(myText):
+        if not apos and (chr == spl):
+            lst_new.append(myText[maxs+1:i].strip())
+            maxs = i
+        elif not apos and (chr == '"' or chr == "'" or chr == "["):
+            # Are there any items before the first apostrophe?
+            #lst_new += [o.strip() for o in myText[maxx+1:i].split(spl) if o.strip() is not ""]
+            apos = chr
+            if apos == "[": apos = "]"
+            #print(lst_new)
+            #print(chr, i)
+        elif chr == apos:
+            # first line for strlistsplit, senond for sql parse
+            #lst_new.append(myText[apos+1:i])
+            #lst_new.append(myText[maxs+1:i].strip())
+            #print(chr, i)
+            apos = None
         # Are there any items after the last apostrophe?
         #if maxa < len(myText): lst_new += [o.strip() for o in myText[maxa+1:].split(spl) if o.strip() is not ""]
-        lst_new.append(myText[maxs+1:].strip())
-        print(lst_new)
 
-        return lst_new
+    lst_new.append(myText[maxs+1:].strip())
+
+    #print(lst_new)
+
+    return lst_new
 
 def parseSql(sql_filename, sql):
     global sqls
     sqls[sql_filename] = parseText(sql, ";")
+    print("Parse sql with ';':", sqls[sql_filename])
 
     return None
 
@@ -193,7 +197,8 @@ def parseCommand(command_line):
         #print(c)
         if command_line[:len(c)].lower() == c:
             command = c
-            command_line_list = command_line[len(c):].split(",")
+            command_line_list = parseText(command_line[len(c):], ",")
+            print(f"Parse command {command} with ',':", command_line_list)
             for i, cl in enumerate(command_line_list):
                 cl = cl.strip()
                 if "=" in cl:
