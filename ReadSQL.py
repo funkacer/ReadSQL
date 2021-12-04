@@ -145,48 +145,40 @@ def parseArgv(argument_list):
 
     return parser.parse_args(argument_list)
 
-def parseSql(sql_filename, sql):
-    global sqls
-    sqls[sql_filename] = []
-
-    #I need to enable delimiters in ""
-
-    if sql.count(";") > 0:
-        for s in sql.split(";"):
-            if s.strip() != "": sqls[sql_filename].append(s.strip())
-    else:
-        sqls[sql_filename].append(sql.strip())
-
-
-    myText = sql
+def parseText(myText, delimiter):
     if '"' in myText or "'" in myText:
         print("Uvozovky", myText.count('"'), myText.count("'"))
         lst_new = []
-        apos = -1
-        maxa = -1
+        apos = None
         maxs = -1
-        spl = ";"
+        spl = delimiter
         for i, chr in enumerate(myText):
-            if apos == -1 and (chr == spl):
-                lst_new.append(myText[maxs+1:i])
+            if not apos and (chr == spl):
+                lst_new.append(myText[maxs+1:i].strip())
                 maxs = i
-            elif apos == -1 and (chr == '"' or chr == "'"):
+            elif not apos and (chr == '"' or chr == "'"):
                 # Are there any items before the first apostrophe?
                 #lst_new += [o.strip() for o in myText[maxx+1:i].split(spl) if o.strip() is not ""]
-                apos = i
+                apos = chr
+                if apos == "[": apos = "]"
                 #print(lst_new)
                 #print(chr, i)
-            elif apos > -1 and chr == myText[apos]:
+            elif chr == apos:
                 # first line for strlistsplit, senond for sql parse
                 #lst_new.append(myText[apos+1:i])
-                lst_new.append(myText[maxs+1:i].strip())
+                #lst_new.append(myText[maxs+1:i].strip())
                 #print(chr, i)
-                maxa = i
-                apos = -1
+                apos = None
         # Are there any items after the last apostrophe?
-        if maxa < len(myText): lst_new += [o.strip() for o in myText[maxa+1:].split(spl) if o.strip() is not ""]
+        #if maxa < len(myText): lst_new += [o.strip() for o in myText[maxa+1:].split(spl) if o.strip() is not ""]
+        lst_new.append(myText[maxs+1:].strip())
         print(lst_new)
-        myText = lst_new
+
+        return lst_new
+
+def parseSql(sql_filename, sql):
+    global sqls
+    sqls[sql_filename] = parseText(sql, ";")
 
     return None
 
