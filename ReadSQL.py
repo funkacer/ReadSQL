@@ -148,36 +148,44 @@ def parseArgv(argument_list):
 def parseSql(sql_filename, sql):
     global sqls
     sqls[sql_filename] = []
-    '''
-    I need to enable delimiters in ""
+
+    #I need to enable delimiters in ""
 
     if sql.count(";") > 0:
         for s in sql.split(";"):
             if s.strip() != "": sqls[sql_filename].append(s.strip())
     else:
         sqls[sql_filename].append(sql.strip())
-    '''
 
+
+    myText = sql
     if '"' in myText or "'" in myText:
         print("Uvozovky", myText.count('"'), myText.count("'"))
         lst_new = []
         apos = -1
-        maxx = len(myText)
+        maxa = -1
+        maxs = -1
+        spl = ";"
         for i, chr in enumerate(myText):
-            if apos == -1 and (chr == '"' or chr == "'"):
+            if apos == -1 and (chr == spl):
+                lst_new.append(myText[maxs+1:i])
+                maxs = i
+            elif apos == -1 and (chr == '"' or chr == "'"):
+                # Are there any items before the first apostrophe?
+                #lst_new += [o.strip() for o in myText[maxx+1:i].split(spl) if o.strip() is not ""]
                 apos = i
-                ''' Are there any items before the first apostrophe? '''
-                if i > 0 and len(lst_new) == 0: lst_new = [o for o in myText[:i].split(" ") if o is not ""]
                 #print(lst_new)
                 #print(chr, i)
             elif apos > -1 and chr == myText[apos]:
-                lst_new.append(myText[apos+1:i])
+                # first line for strlistsplit, senond for sql parse
+                #lst_new.append(myText[apos+1:i])
+                lst_new.append(myText[maxs+1:i].strip())
                 #print(chr, i)
-                maxx = i
+                maxa = i
                 apos = -1
-        ''' Are there any items after the last apostrophe? '''
-        if maxx < len(myText): lst_new += [o for o in myText[maxx+1:].split(" ") if o is not ""]
-        #print(lst_new)
+        # Are there any items after the last apostrophe?
+        if maxa < len(myText): lst_new += [o.strip() for o in myText[maxa+1:].split(spl) if o.strip() is not ""]
+        print(lst_new)
         myText = lst_new
 
     return None
