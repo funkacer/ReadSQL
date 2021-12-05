@@ -249,7 +249,12 @@ def parseCommand(command_line):
                     traceback.print_exc()
                 assert isinstance(options[n], int)
             elif t == "intlist":
-                lst_old = options[n].split(" ")
+                if options[n][0] == "[" and options[n][-1] == "]":
+                    lst_old = parseText(options[n][1:-1], ",")
+                else:
+                    lst_old = parseText(options[n], " ")
+                print(lst_old)
+                #lst_old = options[n].split(" ")
                 lst_new = []
                 for l_old in lst_old:
                     l_new = None
@@ -261,33 +266,20 @@ def parseCommand(command_line):
                     if l_new not in lst_new: lst_new.append(l_new)
                 options[n] = lst_new
             elif t == "strlist":
-                if '"' in options[n] or "'" in options[n]:
-                    print("Uvozovky", options[n].count('"'), options[n].count("'"))
-                    lst_new = []
-                    apos = -1
-                    maxx = len(options[n])
-                    for i, chr in enumerate(options[n]):
-                        if apos == -1 and (chr == '"' or chr == "'"):
-                            apos = i
-                            ''' Are there any items before the first apostrophe? '''
-                            if i > 0 and len(lst_new) == 0: lst_new = [o for o in options[n][:i].split(" ") if o is not ""]
-                            #print(lst_new)
-                            #print(chr, i)
-                        elif apos > -1 and chr == options[n][apos]:
-                            lst_new.append(options[n][apos+1:i])
-                            #print(chr, i)
-                            maxx = i
-                            apos = -1
-                    ''' Are there any items after the last apostrophe? '''
-                    if maxx < len(options[n]): lst_new += [o for o in options[n][maxx+1:].split(" ") if o is not ""]
-                    #print(lst_new)
-                    options[n] = lst_new
+                if options[n][0] == "[" and options[n][-1] == "]":
+                    lst_old = parseText(options[n][1:-1], ",")
                 else:
-                    lst_old = options[n].split(" ")
-                    lst_new = []
-                    for l_old in lst_old:
-                        if l_old not in lst_new: lst_new.append(l_old)
-                    options[n] = lst_new
+                    lst_old = parseText(options[n], " ")
+                print(lst_old)
+                lst_new = []
+                for l_old in lst_old:
+                    if l_old[0] == '"' and l_old[-1] == '"':
+                        lst_new.append(l_old.strip('"'))
+                    elif l_old[0] == "'" and l_old[-1] == "'":
+                        lst_new.append(l_old.strip("'"))
+                    else:
+                        lst_new.append(l_old)
+                options[n] = lst_new
 
     if not execute:
         command = ""
