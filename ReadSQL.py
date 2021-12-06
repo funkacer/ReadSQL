@@ -80,10 +80,19 @@ command_options["read"] = {}
 command_options["read"]["name"] = ["filename", "delimiter"]
 command_options["read"]["required"] = [True, False]
 command_options["read"]["type"] = ["str", "str"]
-command_options["read"]["default"] = [None, "\t"]
+command_options["read"]["default"] = [None, ";"]
 command_options["read"]["help1"] = "Help for command 'folder'"
 command_options["read"]["help2"] = ["Blabla1", "Blablabla2"]
 command_options["read"]["alternative"] = ["f"]
+
+command_options["save"] = {}
+command_options["save"]["name"] = ["filename", "delimiter"]
+command_options["save"]["required"] = [True, False]
+command_options["save"]["type"] = ["str", "str"]
+command_options["save"]["default"] = [None, ";"]
+command_options["save"]["help1"] = "Help for command 'folder'"
+command_options["save"]["help2"] = ["Blabla1", "Blablabla2"]
+command_options["save"]["alternative"] = ["f"]
 
 command_options["import"] = {}
 command_options["import"]["name"] = ["filename"]
@@ -120,15 +129,6 @@ command_options["print"]["default"] = ["data", 0, print_max_default, 1, None, No
 command_options["print"]["help1"] = "Help for command 'folder'"
 command_options["print"]["help2"] = ["Bla1","Bla2","Bla3","Bla4","Bla5","Bla6"]
 command_options["print"]["alternative"] = ["f"]
-
-command_options["save"] = {}
-command_options["save"]["name"] = ["filename"]
-command_options["save"]["required"] = [True]
-command_options["save"]["type"] = ["str"]
-command_options["save"]["default"] = [None]
-command_options["save"]["help1"] = "Help for command 'folder'"
-command_options["save"]["help2"] = ["Blabla1"]
-command_options["save"]["alternative"] = ["f"]
 
 def parseArgv(argument_list):
 
@@ -239,8 +239,12 @@ def parseCommand(command_line):
                     execute = False
                     break
             elif t == "str":
-                options[n] = options[n].strip('"')
-                print(n, "string", options[n])
+                #options[n] = options[n].strip('"')
+                if options[n][0] == '"' and options[n][-1] == '"':
+                    options[n] = options[n].strip('"')
+                elif options[n][0] == "'" and options[n][-1] == "'":
+                    options[n] = options[n].strip("'")
+                print(f"Parse option '{n}' as string:", options[n])
                 #command = "quit"
             elif t == "int":
                 try:
@@ -248,12 +252,15 @@ def parseCommand(command_line):
                 except Exception as e:
                     traceback.print_exc()
                 assert isinstance(options[n], int)
+                print(f"Parse option '{n}' as integer:", options[n])
             elif t == "intlist":
                 if options[n][0] == "[" and options[n][-1] == "]":
                     lst_old = parseText(options[n][1:-1], ",")
+                    print(f"Parse intlist {options[n]} with ',':", lst_old)
                 else:
                     lst_old = parseText(options[n], " ")
-                print(lst_old)
+                    print(f"Parse intlist {options[n]} with ' ':", lst_old)
+                #print(lst_old)
                 #lst_old = options[n].split(" ")
                 lst_new = []
                 for l_old in lst_old:
@@ -268,9 +275,11 @@ def parseCommand(command_line):
             elif t == "strlist":
                 if options[n][0] == "[" and options[n][-1] == "]":
                     lst_old = parseText(options[n][1:-1], ",")
+                    print(f"Parse strlist {options[n]} with ',':", lst_old)
                 else:
                     lst_old = parseText(options[n], " ")
-                print(lst_old)
+                    print(f"Parse strlist {options[n]} with ' ':", lst_old)
+                #print(lst_old)
                 lst_new = []
                 for l_old in lst_old:
                     if l_old[0] == '"' and l_old[-1] == '"':
@@ -455,7 +464,6 @@ def do_sql(sql):
                     data_line = f.readline()
                     while data_line:
                         if data_line[-1] == "\n": data_line = data_line[:-1]
-                        if data_line[-1] == read_delimiter: data_line = data_line[:-1]
                         row_new = []
                         for c in data_line.split(read_delimiter):
                             if i == 0:
@@ -476,6 +484,30 @@ def do_sql(sql):
                     else:
                         print()
                         print("! There are no data returned from this sql query !")
+            except Exception as e:
+                traceback.print_exc()
+
+        elif command == "save":
+            save_filename = options["filename"]
+            save_delimiter = options["delimiter"]
+            file_exists, full_filename = check_filename(save_filename)
+            print("Save: '{}'".format(save_filename))
+            col_len = len(columns)-1
+            try:
+                with open(full_filename, "w") as f:
+                    for i, c in enumerate(columns):
+                        if i < col_len:
+                            f.write(str(c) + save_delimiter)
+                        else:
+                            f.write(str(c))
+                    f.write("\n")
+                    for d in data:
+                        for i, c in enumerate(d):
+                            if i < col_len:
+                                f.write(str(c) + save_delimiter)
+                            else:
+                                f.write(str(c))
+                        f.write("\n")
             except Exception as e:
                 traceback.print_exc()
 
@@ -528,22 +560,6 @@ def do_sql(sql):
                 c.executemany(sql.format(columns), data)
                 conn.commit()
                 print("! There are no data returned from this sql query !")
-            except Exception as e:
-                traceback.print_exc()
-
-        elif command == "save":
-            save_filename = options["filename"]
-            file_exists, full_filename = check_filename(save_filename)
-            print("Save: '{}'".format(save_filename))
-            try:
-                with open(full_filename, "w") as f:
-                    for c in columns:
-                        f.write(str(c) + "\t")
-                    f.write("\n")
-                    for d in data:
-                        for c in d:
-                            f.write(str(c) + "\t")
-                        f.write("\n")
             except Exception as e:
                 traceback.print_exc()
 
