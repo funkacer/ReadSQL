@@ -182,7 +182,7 @@ def parseText(myText, delimiter):
 def parseSql(sql_filename, sql):
     global sqls
     sqls[sql_filename] = parseText(sql, ";")
-    print("Parse sql with ';':", sqls[sql_filename])
+    #print("Parse sql with ';':", sqls[sql_filename])
 
     return None
 
@@ -192,13 +192,13 @@ def parseCommand(command_line):
     error = 0
     #command_line = command_line.replace(" ", "")
     command_line = command_line[1:].strip() #no slash
-    print (command_line)
+    #print (command_line)
     for c in command_options:
         #print(c)
         if command_line[:len(c)].lower() == c:
             command = c
             command_line_list = parseText(command_line[len(c):], ",")
-            print(f"Parse command {command} with ',':", command_line_list)
+            #print(f"Parse command {command} with ',':", command_line_list)
             for i, cl in enumerate(command_line_list):
                 cl = cl.strip()
                 if "=" in cl:
@@ -210,7 +210,7 @@ def parseCommand(command_line):
                         printRed(f'''Unknown option '{cll[0]}'. I will not use your '{cll[1]}' value in any way.''')
                 elif cl != "":
                     if i < len (command_options[c]["name"]):
-                        print(f'''I will use '{cl}' for option '{command_options[c]["name"][i]}'.''')
+                        #print(f'''I will use '{cl}' for option '{command_options[c]["name"][i]}'.''')
                         options[command_options[c]["name"][i]] = cl
                     else:
                         printRed(f'''Too many options given. I will not use your '{cl}' value in any way.''')
@@ -219,7 +219,7 @@ def parseCommand(command_line):
     for i, z in enumerate(zip(command_options[command]["name"], command_options[command]["required"], command_options[command]["default"], command_options[command]["type"])):
         n, r, d, t = z[0], z[1], z[2], z[3]
         execute = True
-        print(f'''i:{i}, name:{n}, required:{r}, default:{d}, type:{t}''')
+        #print(f'''i:{i}, name:{n}, required:{r}, default:{d}, type:{t}''')
         if r:
             #assert command_options[command]["name"][i] in options
             if n not in options:
@@ -227,7 +227,7 @@ def parseCommand(command_line):
                 execute = False
                 break
         if n not in options and d is not None:
-            print(f'''Default argument '{n}' set to '{d}'.''')
+            #print(f'''Default argument '{n}' set to '{d}'.''')
             options[n] = d
         if n in options:
             if isinstance(t, list):
@@ -244,7 +244,7 @@ def parseCommand(command_line):
                     options[n] = options[n].strip('"')
                 elif options[n][0] == "'" and options[n][-1] == "'":
                     options[n] = options[n].strip("'")
-                print(f"Parse option '{n}' as string:", options[n])
+                #print(f"Parse option '{n}' as string:", options[n])
                 #command = "quit"
             elif t == "int":
                 try:
@@ -252,14 +252,14 @@ def parseCommand(command_line):
                 except Exception as e:
                     traceback.print_exc()
                 assert isinstance(options[n], int)
-                print(f"Parse option '{n}' as integer:", options[n])
+                #print(f"Parse option '{n}' as integer:", options[n])
             elif t == "intlist":
                 if options[n][0] == "[" and options[n][-1] == "]":
                     lst_old = parseText(options[n][1:-1], ",")
-                    print(f"Parse intlist {options[n]} with ',':", lst_old)
+                    #print(f"Parse intlist {options[n]} with ',':", lst_old)
                 else:
                     lst_old = parseText(options[n], " ")
-                    print(f"Parse intlist {options[n]} with ' ':", lst_old)
+                    #print(f"Parse intlist {options[n]} with ' ':", lst_old)
                 #print(lst_old)
                 #lst_old = options[n].split(" ")
                 lst_new = []
@@ -275,10 +275,10 @@ def parseCommand(command_line):
             elif t == "strlist":
                 if options[n][0] == "[" and options[n][-1] == "]":
                     lst_old = parseText(options[n][1:-1], ",")
-                    print(f"Parse strlist {options[n]} with ',':", lst_old)
+                    #print(f"Parse strlist {options[n]} with ',':", lst_old)
                 else:
                     lst_old = parseText(options[n], " ")
-                    print(f"Parse strlist {options[n]} with ' ':", lst_old)
+                    #print(f"Parse strlist {options[n]} with ' ':", lst_old)
                 #print(lst_old)
                 lst_new = []
                 for l_old in lst_old:
@@ -293,6 +293,7 @@ def parseCommand(command_line):
     if not execute:
         command = ""
         options = []
+        print()
     else:
         printoptions = {}
         for op in options:
@@ -301,6 +302,7 @@ def parseCommand(command_line):
             else:
                 printoptions[op] = options[op]
         printYellow(f'''Comand '{command}' with options {', '.join([str(str(op) + "=" + str(printoptions[op])) for op in printoptions])}.''')
+        print()
 
     return command, options
 
@@ -316,7 +318,7 @@ def get_sql_queries_dict(lst):
                 #print(sql.strip(), sql.count(";"))
                 parseSql(full_filename, sql)
         else:
-            print("! SQL file:", sql_filename, "does not exist !")
+            printRed("! SQL file:", sql_filename, "does not exist !")
     return None
 
 def check_foldername(foldername, foldername_old):
@@ -443,19 +445,19 @@ def do_sql(sql):
                 folder_name = full_foldername
             else:
                 if folder_exists_old:
-                    print(f'''Folder '{folder_name}' does not exist. Using current folder '{folder_name_old}'.''')
+                    printRed(f'''Folder '{folder_name}' does not exist. Using current folder '{folder_name_old}'.''')
                     folder_exists = folder_exists_old
                     folder_name = folder_name_old
                 else:
                     # folder_name_old is None if sql imported file has wrong \folder command
-                    print("Folder '{}' does not exist. Using working directory '{}'.".format(folder_name, os.getcwd()))
+                    printRed("Folder '{}' does not exist. Using working directory '{}'.".format(folder_name, os.getcwd()))
                     folder_name = os.getcwd()
 
         elif command == "read":
             read_filename = options["filename"]
             read_delimiter = options["delimiter"]
             file_exists, full_filename = check_filename(read_filename)
-            print("Read: '{}'".format(read_filename))
+            #print("Read: '{}'".format(read_filename))
             try:
                 with open(full_filename, "r", encoding = "utf-8") as f:
                     data_new = []
@@ -491,7 +493,7 @@ def do_sql(sql):
             save_filename = options["filename"]
             save_delimiter = options["delimiter"]
             file_exists, full_filename = check_filename(save_filename)
-            print("Save: '{}'".format(save_filename))
+            #print("Save: '{}'".format(save_filename))
             col_len = len(columns)-1
             try:
                 with open(full_filename, "w") as f:
@@ -522,14 +524,14 @@ def do_sql(sql):
                     #print(sql.strip(), sql.count(";"))
                     parseSql(full_filename, sql)
                 for i, sql in enumerate(sqls[full_filename]):
-                    print(f'''\n\\\\ SQL file '{full_filename}' command no {str(i+1)} \\\\''')
+                    printCom(f'''\n\\\\ SQL file '{full_filename}' command no {str(i+1)} \\\\''')
                     do_sql(sql)
             else:
-                print(f'''\n! SQL file '{full_filename}' does not exist !''')
+                printRed(f'''\n! SQL file '{full_filename}' does not exist !''')
 
         elif command == "insert":
             tablename = options["tablename"]
-            print(columns)
+            #print(columns)
             #print("\n" + "Insert:", tablename)
             part1 = ""
             part2 = ""
@@ -547,7 +549,7 @@ def do_sql(sql):
                             part2 += ",?".format(str(i))
                         elif db_version[:5] == "MySQL":
                             part2 += ",%s".format(str(i))
-                    print(i)
+                    #print(i)
                 sql = f'''insert into "{tablename}" ({part1}) values ({part2})'''
                 print()
                 print(db_version + sql)
@@ -556,7 +558,7 @@ def do_sql(sql):
                 columns_print = []
                 for col in columns:
                     columns_print.append('"' + col + '"')
-                print(columns_print)
+                #print(columns_print)
                 c.executemany(sql.format(columns), data)
                 conn.commit()
                 print("! There are no data returned from this sql query !")
@@ -566,19 +568,18 @@ def do_sql(sql):
         elif command == "print":
             if options["what"] == "columns":
                 print(", ".join([str(c) for c in columns]))
-
             elif options["what"] == "data":
                 fromm = options["from"]
                 too = options["to"]
                 stepp = options["step"]
-                print(fromm, too, stepp)
+                #print(fromm, too, stepp)
                 row_format = "{:>15}" * (len(columns) + 1)
                 nrows = len(data)
                 if fromm <= 0: fromm = 1
                 if too <= 0: too = 1
                 if stepp <= 0: stepp = 1
                 if too > nrows: too = nrows
-                print("There are {} rows. Showing cases {} to {} step {}.".format(str(nrows), str(fromm), str(too), str(stepp)))
+                printInvGreen("There are {} rows. Showing cases {} to {} step {}.".format(str(nrows), str(fromm), str(too), str(stepp)))
                 print(row_format.format("(Row)", *columns))
                 for i, row in enumerate(data[fromm-1:too:stepp]):
                     print(row_format.format(str(fromm+i*stepp), *[str(r) for r in row]))    # Null to None
@@ -697,7 +698,7 @@ but {len(command_options[key1][key2])} '{key2}'.'''
             elif db_version[:5] == "MySQL":
                 print("Using MySQL schema '{}'. Use '\mysql schema' for change.".format(db_schema))
             else:
-                print("Sorry, no db_version.")
+                printRed("Sorry, no db_version.")
         else:
             print("Database is not specified. Please use '\sqlite3 filename' for example.")
 
