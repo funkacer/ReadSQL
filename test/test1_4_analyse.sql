@@ -1,5 +1,5 @@
----folder:test;
----mysql:moje;
+\folder test;
+\mysql test;
 
 show tables;
 

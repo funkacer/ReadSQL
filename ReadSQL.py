@@ -535,25 +535,32 @@ def do_sql(sql):
             #print("\n" + "Insert:", tablename)
             part1 = ""
             part2 = ""
-            try:
+            if db_version[:7] == "Sqlite3":
                 for i, c in enumerate(columns):
                     if i == 0:
                         part1 += "{{0[{}]}}".format(str(i))
-                        if db_version[:7] == "Sqlite3":
-                            part2 += "?".format(str(i))
-                        elif db_version[:5] == "MySQL":
-                            part2 += "%s".format(str(i))
+                        part2 += "?".format(str(i))
                     else:
                         part1 += ",{{0[{}]}}".format(str(i))
-                        if db_version[:7] == "Sqlite3":
-                            part2 += ",?".format(str(i))
-                        elif db_version[:5] == "MySQL":
-                            part2 += ",%s".format(str(i))
+                        part2 += ",?".format(str(i))
                     #print(i)
                 sql = f'''insert into "{tablename}" ({part1}) values ({part2})'''
-                print()
-                print(db_version + sql)
-                #print(columns, data)
+
+            elif db_version[:5] == "MySQL":
+                for i, c in enumerate(columns):
+                    if i == 0:
+                        part1 += "{{0[{}]}}".format(str(i))
+                        part2 += "%s".format(str(i))
+                    else:
+                        part1 += ",{{0[{}]}}".format(str(i))
+                        part2 += ",%s".format(str(i))
+                    #print(i)
+                sql = f'''insert into {tablename} ({part1}) values ({part2})'''
+
+            print()
+            print(db_version + sql)
+            #print(columns, data)
+            try:
                 c = conn.cursor()
                 columns_print = []
                 for col in columns:
