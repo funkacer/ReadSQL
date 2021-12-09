@@ -660,7 +660,7 @@ def do_sql(sql):
 
 def main(argv):
 
-    global folder_name
+    global folder_name, sqls
 
     default_options = 7
     for key1 in command_options.keys():
