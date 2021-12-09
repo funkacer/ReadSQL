@@ -155,7 +155,8 @@ def parseText(myText, delimiter):
     spl = delimiter
     for i, chr in enumerate(myText):
         if not apos and (chr == spl):
-            lst_new.append(myText[maxs+1:i].strip())
+            app_text = myText[maxs+1:i].strip()
+            if app_text != "": lst_new.append(app_text)
             maxs = i
         elif not apos and (chr == '"' or chr == "'" or chr == "["):
             # Are there any items before the first apostrophe?
@@ -173,18 +174,13 @@ def parseText(myText, delimiter):
         # Are there any items after the last apostrophe?
         #if maxa < len(myText): lst_new += [o.strip() for o in myText[maxa+1:].split(spl) if o.strip() is not ""]
 
-    lst_new.append(myText[maxs+1:].strip())
+    app_text = myText[maxs+1:].strip()
+    if app_text != "": lst_new.append(app_text)
 
     #print(lst_new)
 
     return lst_new
 
-def parseSql(sql_filename, sql):
-    global sqls
-    sqls[sql_filename] = parseText(sql, ";")
-    #print("Parse sql with ';':", sqls[sql_filename])
-
-    return None
 
 def parseCommand(command_line):
     command = ""
@@ -316,10 +312,10 @@ def get_sql_queries_dict(lst):
                 sql = f.read()
                 #print("SQL file query:")
                 #print(sql.strip(), sql.count(";"))
-                parseSql(full_filename, sql)
+                sqls[sql_filename] = parseText(sql, ";")
         else:
-            printRed("! SQL file:", sql_filename, "does not exist !")
-    return None
+            printRed(f"! SQL file {sql_filename} does not exist !")
+    return sqls
 
 def check_foldername(foldername, foldername_old):
     folder_exists = False
@@ -522,9 +518,9 @@ def do_sql(sql):
                     sql = f.read()
                     #print("SQL file query:")
                     #print(sql.strip(), sql.count(";"))
-                    parseSql(full_filename, sql)
-                for i, sql in enumerate(sqls[full_filename]):
-                    printCom(f'''\n\\\\ SQL file '{full_filename}' command no {str(i+1)} \\\\''')
+                    sqls_import = parseText(sql, ";")
+                for i, sql in enumerate(sqls_import):
+                    printCom(f'''\n\\\\ SQL file '{full_filename}' imported command no {str(i+1)} \\\\''')
                     do_sql(sql)
             else:
                 printRed(f'''\n! SQL file '{full_filename}' does not exist !''')
@@ -684,7 +680,7 @@ but {len(command_options[key1][key2])} '{key2}'.'''
     """
 
     if len(vars(namespace)["sql_files"]) > 0:
-        get_sql_queries_dict(vars(namespace)["sql_files"])
+        sqls = get_sql_queries_dict(vars(namespace)["sql_files"])
         #print(sqls)
 
         for sql_filename in sqls.keys():
@@ -724,11 +720,11 @@ but {len(command_options[key1][key2])} '{key2}'.'''
 
             interactive_pass += 1
 
-            sql_file = "interactive pass " + str(interactive_pass)
-            parseSql(sql_file, sql)
+            sql_filename = "interactive pass " + str(interactive_pass)
+            sqls[sql_filename] = parseText(sql, ";")
             #OK_returned = 1
-            for i, sql in enumerate(sqls[sql_file]):
-                printCom(f'''\n\\\\ SQL file '{sql_file}' command no {str(i+1)} \\\\''')
+            for i, sql in enumerate(sqls[sql_filename]):
+                printCom(f'''\n\\\\ SQL file '{sql_filename}' command no {str(i+1)} \\\\''')
                 #print(sql)
                 #print()
                 OK_returned = do_sql(sql)
