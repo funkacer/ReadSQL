@@ -13,5 +13,4 @@ create table test1 (id INTEGER PRIMARY KEY AUTO_INCREMENT, V integer, B integer,
 
 \import test1_4_analyse.sql;
 
-
-\read test1.csvx;
+\print columns;

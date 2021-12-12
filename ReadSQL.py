@@ -414,9 +414,9 @@ def do_sql(sql):
                     #conn = mysql.connector.connect(host = "localhost", user = "root", password="admin", use_unicode=True,charset="utf8")
                     try:
                         c = conn.cursor()
-                        c.execute("""use {}""".format(db_schema))
+                        c.execute(f'''use `{db_schema}`''')
                         conn.commit()
-                        db_version = f"MySQL ({db_schema}): "
+                        db_version = f"MySQL (`{db_schema}`): "
                     except Exception as e:
                         traceback.print_exc()
                         db_version = f"MySQL (No schema!): "
@@ -534,35 +534,41 @@ def do_sql(sql):
             if db_version[:7] == "Sqlite3":
                 for i, c in enumerate(columns):
                     if i == 0:
-                        part1 += "{{0[{}]}}".format(str(i))
-                        part2 += "?".format(str(i))
+                        #part1 += '''{{0[{}]}}'''.format(str(i))
+                        part1 += f"{{0[{str(i)}]}}"
+                        #part2 += '''?'''.format(str(i))
+                        part2 += "?"
                     else:
-                        part1 += ",{{0[{}]}}".format(str(i))
-                        part2 += ",?".format(str(i))
+                        part1 += f",{{0[{str(i)}]}}"
+                        part2 += ",?"
                     #print(i)
                 sql = f'''insert into "{tablename}" ({part1}) values ({part2})'''
+                columns_print = []
+                for col in columns:
+                    columns_print.append(f'''"{col}"''')
 
             elif db_version[:5] == "MySQL":
                 for i, c in enumerate(columns):
                     if i == 0:
-                        part1 += "{{0[{}]}}".format(str(i))
-                        part2 += "%s".format(str(i))
+                        part1 += f"{{0[{str(i)}]}}"
+                        part2 += "%s"
                     else:
-                        part1 += ",{{0[{}]}}".format(str(i))
-                        part2 += ",%s".format(str(i))
+                        part1 += f",{{0[{str(i)}]}}"
+                        part2 += ",%s"
                     #print(i)
-                sql = f'''insert into {tablename} ({part1}) values ({part2})'''
+                sql = f'''insert into `{tablename}` ({part1}) values ({part2})'''
+                columns_print = []
+                for col in columns:
+                    columns_print.append(f'''`{col}`''')
 
             print()
             print(db_version + sql)
             #print(columns, data)
             try:
                 c = conn.cursor()
-                columns_print = []
-                for col in columns:
-                    columns_print.append('"' + col + '"')
                 #print(columns_print)
-                c.executemany(sql.format(columns), data)
+                print(sql.format(columns_print))
+                c.executemany(sql.format(columns_print), data)
                 conn.commit()
                 print("! There are no data returned from this sql query !")
             except Exception as e:
@@ -627,13 +633,16 @@ def do_sql(sql):
     else:
         printBlue(db_version + sql + "\n")
         data_new = None
+        columns_new = None
         try:
             c = conn.cursor()
-            c.execute(""'{}'"".format(sql))
+            #c.execute(""'{}'"".format(sql))
+            c.execute(f"{sql}")
             data_new = c.fetchall()
-            if data_new:
+            if c.description: columns_new = [col[0] for col in c.description]
+            if data_new or columns_new:
                 data = data_new
-                columns = [col[0] for col in c.description]
+                columns = columns_new
                 show_data()
             else:
                 print("! There are no data returned from this sql query !")
@@ -649,10 +658,10 @@ def do_sql(sql):
         #print(conn.get_proto_info())
         try:
             c = conn.cursor()
-            c.execute(""'{}'"".format("SELECT database();"))
+            c.execute("SELECT database();")
             data_new = c.fetchall()
             db_schema = data_new[0][0]
-            db_version = f"MySQL ({db_schema}): "
+            db_version = f"MySQL (`{db_schema}`): "
         except Exception as e:
             traceback.print_exc()
     sql = ""
