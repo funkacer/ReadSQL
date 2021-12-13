@@ -76,6 +76,24 @@ command_options["sqlite3"]["help1"] = "Help for command 'folder'"
 command_options["sqlite3"]["help2"] = ["Blabla1"]
 command_options["sqlite3"]["alternative"] = ["f"]
 
+command_options["mysql"] = {}
+command_options["mysql"]["name"] = ["database", "user", "password", "host", "port"]
+command_options["mysql"]["required"] = [False, False, False, False, False]
+command_options["mysql"]["type"] = ["str", "str", "str", "str", "int"]
+command_options["mysql"]["default"] = ["", "root", "admin", "localhost", 3306]
+command_options["mysql"]["help1"] = "Help for command 'folder'"
+command_options["mysql"]["help2"] = ["Bla1", "Bla2", "Bla3", "Bla4", "Bla5"]
+command_options["mysql"]["alternative"] = ["f"]
+
+command_options["postgre"] = {}
+command_options["postgre"]["name"] = ["database", "user", "password", "host", "port"]
+command_options["postgre"]["required"] = [False, False, False, False, False]
+command_options["postgre"]["type"] = ["str", "str", "str", "str", "int"]
+command_options["postgre"]["default"] = ["", "postgres", "postgres1", "localhost", 5432]
+command_options["postgre"]["help1"] = "Help for command 'folder'"
+command_options["postgre"]["help2"] = ["Bla1", "Bla2", "Bla3", "Bla4", "Bla5"]
+command_options["postgre"]["alternative"] = ["f"]
+
 command_options["read"] = {}
 command_options["read"]["name"] = ["filename", "delimiter"]
 command_options["read"]["required"] = [True, False]
@@ -102,15 +120,6 @@ command_options["import"]["default"] = [None]
 command_options["import"]["help1"] = "Help for command 'folder'"
 command_options["import"]["help2"] = ["Blabla1"]
 command_options["import"]["alternative"] = ["f"]
-
-command_options["mysql"] = {}
-command_options["mysql"]["name"] = ["schema"]
-command_options["mysql"]["required"] = [True]
-command_options["mysql"]["type"] = ["str"]
-command_options["mysql"]["default"] = [None]
-command_options["mysql"]["help1"] = "Help for command 'folder'"
-command_options["mysql"]["help2"] = ["Blabla1"]
-command_options["mysql"]["alternative"] = ["f"]
 
 command_options["insert"] = {}
 command_options["insert"]["name"] = ["tablename"]
@@ -236,10 +245,11 @@ def parseCommand(command_line):
                     break
             elif t == "str":
                 #options[n] = options[n].strip('"')
-                if options[n][0] == '"' and options[n][-1] == '"':
-                    options[n] = options[n].strip('"')
-                elif options[n][0] == "'" and options[n][-1] == "'":
-                    options[n] = options[n].strip("'")
+                if len(options[n]) > 0:
+                    if options[n][0] == '"' and options[n][-1] == '"':
+                        options[n] = options[n].strip('"')
+                    elif options[n][0] == "'" and options[n][-1] == "'":
+                        options[n] = options[n].strip("'")
                 #print(f"Parse option '{n}' as string:", options[n])
                 #command = "quit"
             elif t == "int":
@@ -395,7 +405,12 @@ def do_sql(sql):
                     traceback.print_exc()
 
         elif command == "mysql":
-            db_schema = options["schema"]
+            #"database", "user", "password", "host", "port"
+            database = options["database"]
+            user = options["user"]
+            password = options["password"]
+            host = options["host"]
+            port = options["port"]
             try:
                 print("Using mysqlclient version:", version("mysqlclient"))
                 import MySQLdb
@@ -410,24 +425,41 @@ def do_sql(sql):
                 #print(connpars["user"])
                 #print(connpars["password"])
                 try:
-                    conn = MySQLdb.connect("localhost", "root", "admin", use_unicode=True,charset="utf8")
+                    conn = MySQLdb.connect(database = database, \
+                    user = user, password = password, host = host, \
+                    port = port, use_unicode=True,charset="utf8")
                     #conn = mysql.connector.connect(host = "localhost", user = "root", password="admin", use_unicode=True,charset="utf8")
-                    try:
-                        c = conn.cursor()
-                        c.execute(f'''use `{db_schema}`''')
-                        conn.commit()
-                        db_version = f"MySQL (`{db_schema}`): "
-                    except Exception as e:
-                        traceback.print_exc()
-                        db_version = f"MySQL (No schema!): "
-                        print(e.__class__)
-
+                    db_version = f"MySQL (Add schema!): "
                 except Exception as e:
                     traceback.print_exc()
 
             except Exception as e:
                 print("No MySQL support. Please run 'pip install mysqlclient'.\n")
                 traceback.print_exc()
+
+        elif command == "postgre":
+            #"database", "user", "password", "host", "port"
+            database = options["database"]
+            user = options["user"]
+            password = options["password"]
+            host = options["host"]
+            port = options["port"]
+            try:
+                print("Using psycopg2 version:", version("psycopg2"))
+                import psycopg2
+                try:
+                    conn = psycopg2.connect(database = database, \
+                    user = user, password = password, host = host, \
+                    port = port)
+                    #conn = mysql.connector.connect(host = "localhost", user = "root", password="admin", use_unicode=True,charset="utf8")
+                    db_version = f"PostgreSQL (Add schema!): "
+                except Exception as e:
+                    traceback.print_exc()
+
+            except Exception as e:
+                print("No MySQL support. Please run 'pip install mysqlclient'.\n")
+                traceback.print_exc()
+
 
         elif command == "folder":
             folder_exists_old = folder_exists
@@ -664,6 +696,17 @@ def do_sql(sql):
             db_version = f"MySQL (`{db_schema}`): "
         except Exception as e:
             traceback.print_exc()
+    if db_version[:10] == "PostgreSQL":
+        #print(conn.get_proto_info())
+        try:
+            c = conn.cursor()
+            c.execute("SELECT current_database();")
+            data_new = c.fetchall()
+            db_schema = data_new[0][0]
+            db_version = f'''PostgreSQL ("{db_schema}"): '''
+        except Exception as e:
+            traceback.print_exc()
+    # SELECT current_database();
     sql = ""
     return OK
 
