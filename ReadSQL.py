@@ -593,6 +593,20 @@ def do_sql(sql):
                 for col in columns:
                     columns_print.append(f'''`{col}`''')
 
+            elif db_version[:10] == "PostgreSQL":
+                for i, c in enumerate(columns):
+                    if i == 0:
+                        part1 += f"{{0[{str(i)}]}}"
+                        part2 += "%s"
+                    else:
+                        part1 += f",{{0[{str(i)}]}}"
+                        part2 += ",%s"
+                    #print(i)
+                sql = f'''insert into "{tablename}" ({part1}) values ({part2})'''
+                columns_print = []
+                for col in columns:
+                    columns_print.append(f'''"{col}"''')
+
             print()
             print(db_version + sql)
             #print(columns, data)
@@ -659,9 +673,9 @@ def do_sql(sql):
                     elif asked == "q":
                         OK = 0
 
-
         else:
             print("! Command was not recognized or missing arguments !")
+
     else:
         printBlue(db_version + sql + "\n")
         data_new = None
@@ -670,6 +684,8 @@ def do_sql(sql):
             c = conn.cursor()
             #c.execute(""'{}'"".format(sql))
             c.execute(f"{sql}")
+            conn.commit()
+            #print(c.statusmessage)
             data_new = c.fetchall()
             if c.description: columns_new = [col[0] for col in c.description]
             if data_new or columns_new:
@@ -678,7 +694,6 @@ def do_sql(sql):
                 show_data()
             else:
                 print("! There are no data returned from this sql query !")
-            conn.commit()
             #conn.close()
         except Exception as e:
             traceback.print_exc()
@@ -705,6 +720,9 @@ def do_sql(sql):
             db_schema = data_new[0][0]
             db_version = f'''PostgreSQL ("{db_schema}"): '''
         except Exception as e:
+            db_version = "None: "
+            db_schema = None
+            conn = None
             traceback.print_exc()
     # SELECT current_database();
     sql = ""
@@ -749,9 +767,11 @@ but {len(command_options[key1][key2])} '{key2}'.'''
 
         if conn:
             if db_version[:7] == "Sqlite3":
-                print("Using Sqlite3 database '{}'. Use \sqlite3 filename' for change.".format(db_filename))
+                print(f'''Using Sqlite3 filename "{db_filename}". Use \sqlite3 filename' for change.''')
             elif db_version[:5] == "MySQL":
-                print("Using MySQL schema '{}'. Use '\mysql schema' for change.".format(db_schema))
+                print(f'''Using MySQL database `{db_schema}`. Use '\mysql database' for change.''')
+            elif db_version[:10] == "PostgreSQL":
+                print(f'''Using PostgreSQL database "{db_schema}". Use '\mysql database' for change.''')
             else:
                 printRed("Sorry, no db_version.")
         else:
