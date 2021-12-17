@@ -74,7 +74,7 @@ command_options["sqlite3"]["type"] = ["str"]
 command_options["sqlite3"]["default"] = [None]
 command_options["sqlite3"]["help1"] = "Help for command 'folder'"
 command_options["sqlite3"]["help2"] = ["Blabla1"]
-command_options["sqlite3"]["alternative"] = ["f"]
+command_options["sqlite3"]["alternative"] = ["sqlite", "sql"]
 
 command_options["mysql"] = {}
 command_options["mysql"]["name"] = ["database", "user", "password", "host", "port"]
@@ -83,7 +83,7 @@ command_options["mysql"]["type"] = ["str", "str", "str", "str", "int"]
 command_options["mysql"]["default"] = ["", "root", "admin", "localhost", 3306]
 command_options["mysql"]["help1"] = "Help for command 'folder'"
 command_options["mysql"]["help2"] = ["Bla1", "Bla2", "Bla3", "Bla4", "Bla5"]
-command_options["mysql"]["alternative"] = ["f"]
+command_options["mysql"]["alternative"] = ["ms"]
 
 command_options["postgre"] = {}
 command_options["postgre"]["name"] = ["database", "user", "password", "host", "port"]
@@ -92,7 +92,7 @@ command_options["postgre"]["type"] = ["str", "str", "str", "str", "int"]
 command_options["postgre"]["default"] = ["", "postgres", "postgres1", "localhost", 5432]
 command_options["postgre"]["help1"] = "Help for command 'folder'"
 command_options["postgre"]["help2"] = ["Bla1", "Bla2", "Bla3", "Bla4", "Bla5"]
-command_options["postgre"]["alternative"] = ["f"]
+command_options["postgre"]["alternative"] = ["pg"]
 
 command_options["read"] = {}
 command_options["read"]["name"] = ["filename", "delimiter"]
@@ -101,7 +101,7 @@ command_options["read"]["type"] = ["str", "str"]
 command_options["read"]["default"] = [None, ";"]
 command_options["read"]["help1"] = "Help for command 'folder'"
 command_options["read"]["help2"] = ["Blabla1", "Blablabla2"]
-command_options["read"]["alternative"] = ["f"]
+command_options["read"]["alternative"] = ["r"]
 
 command_options["save"] = {}
 command_options["save"]["name"] = ["filename", "delimiter"]
@@ -110,16 +110,16 @@ command_options["save"]["type"] = ["str", "str"]
 command_options["save"]["default"] = [None, ";"]
 command_options["save"]["help1"] = "Help for command 'folder'"
 command_options["save"]["help2"] = ["Blabla1", "Blablabla2"]
-command_options["save"]["alternative"] = ["f"]
+command_options["save"]["alternative"] = ["s"]
 
-command_options["import"] = {}
-command_options["import"]["name"] = ["filename"]
-command_options["import"]["required"] = [True]
-command_options["import"]["type"] = ["str"]
-command_options["import"]["default"] = [None]
-command_options["import"]["help1"] = "Help for command 'folder'"
-command_options["import"]["help2"] = ["Blabla1"]
-command_options["import"]["alternative"] = ["f"]
+command_options["load"] = {}
+command_options["load"]["name"] = ["filename"]
+command_options["load"]["required"] = [True]
+command_options["load"]["type"] = ["str"]
+command_options["load"]["default"] = [None]
+command_options["load"]["help1"] = "Help for command 'folder'"
+command_options["load"]["help2"] = ["Blabla1"]
+command_options["load"]["alternative"] = ["l"]
 
 command_options["insert"] = {}
 command_options["insert"]["name"] = ["tablename"]
@@ -128,7 +128,7 @@ command_options["insert"]["type"] = ["str"]
 command_options["insert"]["default"] = [None]
 command_options["insert"]["help1"] = "Help for command 'folder'"
 command_options["insert"]["help2"] = ["Blabla1"]
-command_options["insert"]["alternative"] = ["f"]
+command_options["insert"]["alternative"] = ["i"]
 
 command_options["print"] = {}
 command_options["print"]["name"] = ["what", "from", "to", "step", "list", "columns"]
@@ -137,7 +137,7 @@ command_options["print"]["type"] = [["data","columns"], "int", "int", "int", "in
 command_options["print"]["default"] = ["data", 0, print_max_default, 1, None, None]
 command_options["print"]["help1"] = "Help for command 'folder'"
 command_options["print"]["help2"] = ["Bla1","Bla2","Bla3","Bla4","Bla5","Bla6"]
-command_options["print"]["alternative"] = ["f"]
+command_options["print"]["alternative"] = ["p"]
 
 def parseArgv(argument_list):
 
@@ -195,6 +195,7 @@ def parseCommand(command_line):
     command = ""
     options = {}
     error = 0
+    execute = True
     #command_line = command_line.replace(" ", "")
     command_line = command_line[1:].strip() #no slash
     #print (command_line)
@@ -204,26 +205,35 @@ def parseCommand(command_line):
             command = c
             command_line_list = parseText(command_line[len(c):], ",")
             #print(f"Parse command {command} with ',':", command_line_list)
-            for i, cl in enumerate(command_line_list):
-                cl = cl.strip()
-                if "=" in cl:
-                    cll = cl.split("=")
-                    for o in command_options[c]["name"]:
-                        if cll[0].strip() == o:
-                            options[o] = cll[1].strip()
-                    if cll[0].strip() not in options:
-                        printRed(f'''Unknown option '{cll[0]}'. I will not use your '{cll[1]}' value in any way.''')
-                elif cl != "":
-                    if i < len (command_options[c]["name"]):
-                        #print(f'''I will use '{cl}' for option '{command_options[c]["name"][i]}'.''')
-                        options[command_options[c]["name"][i]] = cl
-                    else:
-                        printRed(f'''Too many options given. I will not use your '{cl}' value in any way.''')
-            break
+        else:
+            for a in command_options[c]["alternative"]:
+                if command_line[:len(a)].lower() == a:
+                    command = c
+                    command_line_list = parseText(command_line[len(a):], ",")
+                if command != "": break
+                print(a)
+        if command != "": break
+        print(c)
+
+    print(command)
+    for i, cl in enumerate(command_line_list):
+        cl = cl.strip()
+        if "=" in cl:
+            cll = cl.split("=")
+            for o in command_options[command]["name"]:
+                if cll[0].strip() == o:
+                    options[o] = cll[1].strip()
+            if cll[0].strip() not in options:
+                printRed(f'''Unknown option '{cll[0]}'. I will not use your '{cll[1]}' value in any way.''')
+        elif cl != "":
+            if i < len (command_options[command]["name"]):
+                #print(f'''I will use '{cl}' for option '{command_options[c]["name"][i]}'.''')
+                options[command_options[command]["name"][i]] = cl
+            else:
+                printRed(f'''Too many options given. I will not use your '{cl}' value in any way.''')
 
     for i, z in enumerate(zip(command_options[command]["name"], command_options[command]["required"], command_options[command]["default"], command_options[command]["type"])):
         n, r, d, t = z[0], z[1], z[2], z[3]
-        execute = True
         #print(f'''i:{i}, name:{n}, required:{r}, default:{d}, type:{t}''')
         if r:
             #assert command_options[command]["name"][i] in options
@@ -541,7 +551,7 @@ def do_sql(sql):
             except Exception as e:
                 traceback.print_exc()
 
-        elif command == "import":
+        elif command == "load":
             sql_filename = options["filename"]
             file_exists, full_filename = check_filename(sql_filename)
             #print("Check if file exists:", sql_file_exists)
@@ -550,9 +560,9 @@ def do_sql(sql):
                     sql = f.read()
                     #print("SQL file query:")
                     #print(sql.strip(), sql.count(";"))
-                    sqls_import = parseText(sql, ";")
-                for i, sql in enumerate(sqls_import):
-                    printCom(f'''\n\\\\ SQL file '{full_filename}' imported command no {str(i+1)} \\\\''')
+                    sqls_load = parseText(sql, ";")
+                for i, sql in enumerate(sqls_load):
+                    printCom(f'''\n\\\\ SQL file '{full_filename}' loaded command no {str(i+1)} \\\\''')
                     do_sql(sql)
             else:
                 printRed(f'''\n! SQL file '{full_filename}' does not exist !''')
@@ -742,6 +752,11 @@ instead of default {default_options}.'''
                 assert len(command_options[key1]["name"]) == len(command_options[key1][key2]), \
 f'''Command option {key1} has {len(command_options[key1]["name"])} names \
 but {len(command_options[key1][key2])} '{key2}'.'''
+        for key2 in command_options.keys():
+            if key1 != key2:
+                for a1 in command_options[key1]["alternative"]:
+                    for a2 in command_options[key2]["alternative"]:
+                        assert a1 != a2, f"Command '{key1}' has the same alternative as command '{key2}': '{a1}'."
 
     namespace = parseArgv(argv)
     """
