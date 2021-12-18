@@ -1,3 +1,6 @@
+#import socket
+#print(socket.gethostname())
+
 # SELECT database();
 # TODO: command {command} was not recognized
 # TODO: no data returned must not delete global data
@@ -9,9 +12,10 @@ import os
 import argparse
 import sqlite3
 import traceback
-from importlib.metadata import version
-
+import socket
 import time
+
+from importlib.metadata import version
 
 #from okno import zobraz
 
@@ -74,7 +78,7 @@ command_options["sqlite3"]["type"] = ["str"]
 command_options["sqlite3"]["default"] = [None]
 command_options["sqlite3"]["help1"] = "Help for command 'folder'"
 command_options["sqlite3"]["help2"] = ["Blabla1"]
-command_options["sqlite3"]["alternative"] = ["sqlite", "sql"]
+command_options["sqlite3"]["alternative"] = ["sqlite", "sql3", "sql", "sq", "s"]
 
 command_options["mysql"] = {}
 command_options["mysql"]["name"] = ["database", "user", "password", "host", "port"]
@@ -83,7 +87,7 @@ command_options["mysql"]["type"] = ["str", "str", "str", "str", "int"]
 command_options["mysql"]["default"] = ["", "root", "admin", "localhost", 3306]
 command_options["mysql"]["help1"] = "Help for command 'folder'"
 command_options["mysql"]["help2"] = ["Bla1", "Bla2", "Bla3", "Bla4", "Bla5"]
-command_options["mysql"]["alternative"] = ["ms"]
+command_options["mysql"]["alternative"] = ["my"]
 
 command_options["postgre"] = {}
 command_options["postgre"]["name"] = ["database", "user", "password", "host", "port"]
@@ -94,6 +98,15 @@ command_options["postgre"]["help1"] = "Help for command 'folder'"
 command_options["postgre"]["help2"] = ["Bla1", "Bla2", "Bla3", "Bla4", "Bla5"]
 command_options["postgre"]["alternative"] = ["pg"]
 
+command_options["mssql"] = {}
+command_options["mssql"]["name"] = ["database", "user", "password", "host", "port"]
+command_options["mssql"]["required"] = [False, False, False, False, False]
+command_options["mssql"]["type"] = ["str", "str", "str", "str", "int"]
+command_options["mssql"]["default"] = ["", "root", "admin", "localhost", 3306]
+command_options["mssql"]["help1"] = "Help for command 'folder'"
+command_options["mssql"]["help2"] = ["Bla1", "Bla2", "Bla3", "Bla4", "Bla5"]
+command_options["mssql"]["alternative"] = ["ms"]
+
 command_options["read"] = {}
 command_options["read"]["name"] = ["filename", "delimiter"]
 command_options["read"]["required"] = [True, False]
@@ -103,14 +116,14 @@ command_options["read"]["help1"] = "Help for command 'folder'"
 command_options["read"]["help2"] = ["Blabla1", "Blablabla2"]
 command_options["read"]["alternative"] = ["r"]
 
-command_options["save"] = {}
-command_options["save"]["name"] = ["filename", "delimiter"]
-command_options["save"]["required"] = [True, False]
-command_options["save"]["type"] = ["str", "str"]
-command_options["save"]["default"] = [None, ";"]
-command_options["save"]["help1"] = "Help for command 'folder'"
-command_options["save"]["help2"] = ["Blabla1", "Blablabla2"]
-command_options["save"]["alternative"] = ["s"]
+command_options["export"] = {}
+command_options["export"]["name"] = ["filename", "delimiter"]
+command_options["export"]["required"] = [True, False]
+command_options["export"]["type"] = ["str", "str"]
+command_options["export"]["default"] = [None, ";"]
+command_options["export"]["help1"] = "Help for command 'folder'"
+command_options["export"]["help2"] = ["Blabla1", "Blablabla2"]
+command_options["export"]["alternative"] = ["e"]
 
 command_options["load"] = {}
 command_options["load"]["name"] = ["filename"]
@@ -130,6 +143,24 @@ command_options["insert"]["help1"] = "Help for command 'folder'"
 command_options["insert"]["help2"] = ["Blabla1"]
 command_options["insert"]["alternative"] = ["i"]
 
+command_options["print data"] = {}
+command_options["print data"]["name"] = ["what", "from", "to", "step", "list", "columns"]
+command_options["print data"]["required"] = [False, False, False, False, False, False]
+command_options["print data"]["type"] = [["data"], "int", "int", "int", "intlist", "strlist"]
+command_options["print data"]["default"] = ["data", 0, print_max_default, 1, None, None]
+command_options["print data"]["help1"] = "Help for command 'folder'"
+command_options["print data"]["help2"] = ["Bla1","Bla2","Bla3","Bla4","Bla5","Bla6"]
+command_options["print data"]["alternative"] = ["pd"]
+
+command_options["print columns"] = {}
+command_options["print columns"]["name"] = ["what", "from", "to", "step", "list", "columns"]
+command_options["print columns"]["required"] = [False, False, False, False, False, False]
+command_options["print columns"]["type"] = [["columns"], "int", "int", "int", "intlist", "strlist"]
+command_options["print columns"]["default"] = ["columns", 0, print_max_default, 1, None, None]
+command_options["print columns"]["help1"] = "Help for command 'folder'"
+command_options["print columns"]["help2"] = ["Bla1","Bla2","Bla3","Bla4","Bla5","Bla6"]
+command_options["print columns"]["alternative"] = ["pc"]
+
 command_options["print"] = {}
 command_options["print"]["name"] = ["what", "from", "to", "step", "list", "columns"]
 command_options["print"]["required"] = [False, False, False, False, False, False]
@@ -138,6 +169,15 @@ command_options["print"]["default"] = ["data", 0, print_max_default, 1, None, No
 command_options["print"]["help1"] = "Help for command 'folder'"
 command_options["print"]["help2"] = ["Bla1","Bla2","Bla3","Bla4","Bla5","Bla6"]
 command_options["print"]["alternative"] = ["p"]
+
+command_options["break"] = {}
+command_options["break"]["name"] = ["what", "from", "to", "step", "list", "columns"]
+command_options["break"]["required"] = [False, False, False, False, False, False]
+command_options["break"]["type"] = [["data","columns"], "int", "int", "int", "intlist", "strlist"]
+command_options["break"]["default"] = ["data", 0, print_max_default, 1, None, None]
+command_options["break"]["help1"] = "Help for command 'folder'"
+command_options["break"]["help2"] = ["Bla1","Bla2","Bla3","Bla4","Bla5","Bla6"]
+command_options["break"]["alternative"] = ["b"]
 
 def parseArgv(argument_list):
 
@@ -438,6 +478,7 @@ def do_sql(sql):
                     conn = MySQLdb.connect(database = database, \
                     user = user, password = password, host = host, \
                     port = port, use_unicode=True,charset="utf8")
+                    conn.autocommit(True)
                     #conn = mysql.connector.connect(host = "localhost", user = "root", password="admin", use_unicode=True,charset="utf8")
                     db_version = f"MySQL (Add schema!): "
                 except Exception as e:
@@ -461,15 +502,39 @@ def do_sql(sql):
                     conn = psycopg2.connect(database = database, \
                     user = user, password = password, host = host, \
                     port = port)
+                    conn.set_session(autocommit=True)
                     #conn = mysql.connector.connect(host = "localhost", user = "root", password="admin", use_unicode=True,charset="utf8")
                     db_version = f"PostgreSQL (Add schema!): "
                 except Exception as e:
                     traceback.print_exc()
-
             except Exception as e:
                 print("No MySQL support. Please run 'pip install mysqlclient'.\n")
                 traceback.print_exc()
 
+        elif command == "mssql":
+            #"database", "user", "password", "host", "port"
+            database = options["database"]
+            user = options["user"]
+            password = options["password"]
+            host = options["host"]
+            port = options["port"]
+            server = socket.gethostname()
+            try:
+                print("Using pyodbc version:", version("pyodbc"))
+                import pyodbc
+                try:
+                    conn = pyodbc.connect('Driver={SQL Server};'
+                      f'Server={server}\SQLEXPRESS;'
+                      f'Database={database};'
+                      'Trusted_Connection=yes;')
+                    conn.autocommit = True
+                    #conn = mysql.connector.connect(host = "localhost", user = "root", password="admin", use_unicode=True,charset="utf8")
+                    db_version = f"MsSQL (Add schema!): "
+                except Exception as e:
+                    traceback.print_exc()
+            except Exception as e:
+                print("No MsSQL support. Please run 'pip install pyodbc'.\n")
+                traceback.print_exc()
 
         elif command == "folder":
             folder_exists_old = folder_exists
@@ -527,24 +592,24 @@ def do_sql(sql):
             except Exception as e:
                 traceback.print_exc()
 
-        elif command == "save":
-            save_filename = options["filename"]
-            save_delimiter = options["delimiter"]
-            file_exists, full_filename = check_filename(save_filename)
-            #print("Save: '{}'".format(save_filename))
+        elif command == "export":
+            export_filename = options["filename"]
+            export_delimiter = options["delimiter"]
+            file_exists, full_filename = check_filename(export_filename)
+            #print("Export: '{}'".format(export_filename))
             col_len = len(columns)-1
             try:
                 with open(full_filename, "w") as f:
                     for i, c in enumerate(columns):
                         if i < col_len:
-                            f.write(str(c) + save_delimiter)
+                            f.write(str(c) + export_delimiter)
                         else:
                             f.write(str(c))
                     f.write("\n")
                     for d in data:
                         for i, c in enumerate(d):
                             if i < col_len:
-                                f.write(str(c) + save_delimiter)
+                                f.write(str(c) + export_delimiter)
                             else:
                                 f.write(str(c))
                         f.write("\n")
@@ -617,6 +682,20 @@ def do_sql(sql):
                 for col in columns:
                     columns_print.append(f'''"{col}"''')
 
+            elif db_version[:5] == "MsSQL":
+                for i, c in enumerate(columns):
+                    if i == 0:
+                        part1 += f"{{0[{str(i)}]}}"
+                        part2 += "?"
+                    else:
+                        part1 += f",{{0[{str(i)}]}}"
+                        part2 += ",?"
+                    #print(i)
+                sql = f'''insert into "{tablename}" ({part1}) values ({part2})'''
+                columns_print = []
+                for col in columns:
+                    columns_print.append(f'''"{col}"''')
+
             print()
             print(db_version + sql)
             #print(columns, data)
@@ -630,7 +709,7 @@ def do_sql(sql):
             except Exception as e:
                 traceback.print_exc()
 
-        elif command == "print":
+        elif command == "print" or command == "print data" or command == "print columns":
             if options["what"] == "columns":
                 print(", ".join([str(c) for c in columns]))
             elif options["what"] == "data":
@@ -694,7 +773,11 @@ def do_sql(sql):
             c = conn.cursor()
             #c.execute(""'{}'"".format(sql))
             c.execute(f"{sql}")
-            conn.commit()
+        except Exception as e:
+            traceback.print_exc()
+            print()
+        try:
+            #conn.commit()
             #print(c.statusmessage)
             data_new = c.fetchall()
             if c.description: columns_new = [col[0] for col in c.description]
@@ -706,7 +789,15 @@ def do_sql(sql):
                 print("! There are no data returned from this sql query !")
             #conn.close()
         except Exception as e:
+            #traceback.print_exc()
+            print("! There are no data returned from this sql query !")
+        '''
+        try:
+            conn.commit()
+        except Exception as e:
             traceback.print_exc()
+        '''
+
             #data = None
             #columns = None
     #print()
@@ -718,7 +809,17 @@ def do_sql(sql):
             c.execute("SELECT database();")
             data_new = c.fetchall()
             db_schema = data_new[0][0]
-            db_version = f"MySQL (`{db_schema}`): "
+            db_version = f'''MySQL (`{db_schema}`): '''
+        except Exception as e:
+            traceback.print_exc()
+    if db_version[:5] == "MsSQL":
+        #print(conn.get_proto_info())
+        try:
+            c = conn.cursor()
+            c.execute("SELECT DB_NAME();")
+            data_new = c.fetchall()
+            db_schema = data_new[0][0]
+            db_version = f'''MsSQL ("{db_schema}"): '''
         except Exception as e:
             traceback.print_exc()
     if db_version[:10] == "PostgreSQL":
@@ -785,6 +886,8 @@ but {len(command_options[key1][key2])} '{key2}'.'''
                 print(f'''Using Sqlite3 filename "{db_filename}". Use \sqlite3 filename' for change.''')
             elif db_version[:5] == "MySQL":
                 print(f'''Using MySQL database `{db_schema}`. Use '\mysql database' for change.''')
+            elif db_version[:5] == "MsSQL":
+                print(f'''Using MsSQL database "{db_schema}". Use '\mssql database' for change.''')
             elif db_version[:10] == "PostgreSQL":
                 print(f'''Using PostgreSQL database "{db_schema}". Use '\mysql database' for change.''')
             else:
