@@ -357,12 +357,13 @@ def parseCommand(command_line):
                 printoptions[op] = "'" + options[op] + "'"
             else:
                 printoptions[op] = options[op]
-        printYellow(f'''Comand '{command}' with options {', '.join([str(str(op) + "=" + str(printoptions[op])) for op in printoptions])}.''')
+        printYellow(f'''Command '{command}' with options {', '.join([str(str(op) + "=" + str(printoptions[op])) for op in printoptions])}.''')
         print()
 
     return command, options
 
 def get_sql_queries_dict(lst):
+    sqls_local = {}
     for sql_filename in lst:
         #print("SQL file:", sql_file)
         file_exists, full_filename = check_filename(sql_filename)
@@ -372,10 +373,10 @@ def get_sql_queries_dict(lst):
                 sql = f.read()
                 #print("SQL file query:")
                 #print(sql.strip(), sql.count(";"))
-                sqls[sql_filename] = parseText(sql, ";")
+                sqls_local[full_filename] = parseText(sql, ";")
         else:
-            printRed(f"! SQL file {sql_filename} does not exist !")
-    return sqls
+            printRed(f'''! SQL file '{full_filename}' does not exist !''')
+    return sqls_local
 
 def check_foldername(foldername, foldername_old):
     folder_exists = False
@@ -617,20 +618,32 @@ def do_sql(sql):
                 traceback.print_exc()
 
         elif command == "load":
+            #Vratit zpatky db_version a folder pred load
             sql_filename = options["filename"]
+            '''
             file_exists, full_filename = check_filename(sql_filename)
             #print("Check if file exists:", sql_file_exists)
             if file_exists:
-                with open(full_filename, "r") as f:
+                with open(full_filename, mode="r", encoding="utf-8") as f:
                     sql = f.read()
                     #print("SQL file query:")
                     #print(sql.strip(), sql.count(";"))
                     sqls_load = parseText(sql, ";")
                 for i, sql in enumerate(sqls_load):
-                    printCom(f'''\n\\\\ SQL file '{full_filename}' loaded command no {str(i+1)} \\\\''')
+                    printCom(f"\n\\\\ SQL file '{full_filename}' loaded command no {str(i+1)} \\\\")
                     do_sql(sql)
             else:
-                printRed(f'''\n! SQL file '{full_filename}' does not exist !''')
+                printRed(f"! SQL file '{full_filename}' does not exist !")
+            '''
+            sqls_load = get_sql_queries_dict([sql_filename])
+            for full_filename in sqls_load.keys():
+                #OK_returned = 1
+                for i, sql_load in enumerate(sqls_load[full_filename]):
+                    printCom(f"\n\\\\ SQL file '{full_filename}' command no {str(i+1)} \\\\")
+                    #print(sql)
+                    #print()
+                    OK_returned = do_sql(sql_load)
+                    if OK_returned == 0: break
 
         elif command == "insert":
             tablename = options["tablename"]
@@ -868,15 +881,15 @@ but {len(command_options[key1][key2])} '{key2}'.'''
     if len(vars(namespace)["sql_files"]) > 0:
         sqls = get_sql_queries_dict(vars(namespace)["sql_files"])
         #print(sqls)
-
-        for sql_filename in sqls.keys():
+        for full_filename in sqls.keys():
             #OK_returned = 1
-            for i, sql in enumerate(sqls[sql_filename]):
-                printCom("\n\\\\" + " SQL file '{}' command no {} ".format(sql_filename, str(i+1)) + "\\\\")
+            for i, sql in enumerate(sqls[full_filename]):
+                printCom(f"\n\\\\ SQL file '{full_filename}' command no {str(i+1)} \\\\")
                 #print(sql)
                 #print()
                 OK_returned = do_sql(sql)
                 if OK_returned == 0: break
+
 
     if len(vars(namespace)["sql_files"]) == 0 and isinstance(vars(namespace)["interactive"], str) or vars(namespace)["interactive"]:
         print("\nEntering interactive mode. Type '\quit' to quit.")
