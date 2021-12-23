@@ -73,9 +73,9 @@ command_options["folder"]["alternative"] = ["f"]
 
 command_options["sqlite3"] = {}
 command_options["sqlite3"]["name"] = ["filename"]
-command_options["sqlite3"]["required"] = [True]
+command_options["sqlite3"]["required"] = [False]
 command_options["sqlite3"]["type"] = ["str"]
-command_options["sqlite3"]["default"] = [None]
+command_options["sqlite3"]["default"] = [":memory:"]
 command_options["sqlite3"]["help1"] = "Help for command 'folder'"
 command_options["sqlite3"]["help2"] = ["Blabla1"]
 command_options["sqlite3"]["alternative"] = ["sqlite", "sql3", "sql", "sq", "s"]
@@ -144,10 +144,10 @@ command_options["insert"]["help2"] = ["Blabla1"]
 command_options["insert"]["alternative"] = ["i"]
 
 command_options["print data"] = {}
-command_options["print data"]["name"] = ["what", "from", "to", "step", "list", "columns"]
+command_options["print data"]["name"] = ["from", "to", "step", "list", "columns", "what"]
 command_options["print data"]["required"] = [False, False, False, False, False, False]
-command_options["print data"]["type"] = [["data"], "int", "int", "int", "intlist", "strlist"]
-command_options["print data"]["default"] = ["data", 0, print_max_default, 1, None, None]
+command_options["print data"]["type"] = ["int", "int", "int", "intlist", "strlist",["data"]]
+command_options["print data"]["default"] = [0, 0, 1, None, None, "data"]
 command_options["print data"]["help1"] = "Help for command 'folder'"
 command_options["print data"]["help2"] = ["Bla1","Bla2","Bla3","Bla4","Bla5","Bla6"]
 command_options["print data"]["alternative"] = ["pd"]
@@ -600,7 +600,7 @@ def do_sql(sql):
             #print("Export: '{}'".format(export_filename))
             col_len = len(columns)-1
             try:
-                with open(full_filename, "w") as f:
+                with open(full_filename, mode="w", encoding="utf-8") as f:
                     for i, c in enumerate(columns):
                         if i < col_len:
                             f.write(str(c) + export_delimiter)
@@ -732,10 +732,19 @@ def do_sql(sql):
                 #print(fromm, too, stepp)
                 row_format = "{:>15}" * (len(columns) + 1)
                 nrows = len(data)
-                if fromm <= 0: fromm = 1
-                if too <= 0: too = 1
+                if fromm < 0:
+                    fromm += nrows + 1
+                    if too == 0: too = nrows
+                if too < 0:
+                    too += nrows + 1
+                    if fromm == 0: fromm = nrows
+                if too < fromm:
+                    pom = fromm
+                    fromm = too
+                    too = pom
                 if stepp <= 0: stepp = 1
                 if too > nrows: too = nrows
+                if fromm < 1: fromm = 1
                 printInvGreen("There are {} rows. Showing cases {} to {} step {}.".format(str(nrows), str(fromm), str(too), str(stepp)))
                 print(row_format.format("(Row)", *columns))
                 for i, row in enumerate(data[fromm-1:too:stepp]):
