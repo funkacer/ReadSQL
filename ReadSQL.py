@@ -14,6 +14,7 @@ import sqlite3
 import traceback
 import socket
 import time
+import random
 
 from importlib.metadata import version
 
@@ -61,6 +62,7 @@ command_options["quit"]["default"] = []
 command_options["quit"]["help1"] = "Help for command 'folder'"
 command_options["quit"]["help2"] = []
 command_options["quit"]["alternative"] = ["q"]
+command_options["quit"]["altoption"] = []
 
 command_options["folder"] = {}
 command_options["folder"]["name"] = ["foldername"]
@@ -70,6 +72,7 @@ command_options["folder"]["default"] = [None]
 command_options["folder"]["help1"] = "Help for command 'folder'"
 command_options["folder"]["help2"] = ["Blabla1"]
 command_options["folder"]["alternative"] = ["f"]
+command_options["folder"]["altoption"] = [["f","fn"]]
 
 command_options["sqlite3"] = {}
 command_options["sqlite3"]["name"] = ["filename"]
@@ -79,6 +82,7 @@ command_options["sqlite3"]["default"] = [":memory:"]
 command_options["sqlite3"]["help1"] = "Help for command 'folder'"
 command_options["sqlite3"]["help2"] = ["Blabla1"]
 command_options["sqlite3"]["alternative"] = ["sqlite", "sql3", "sql", "sq", "s"]
+command_options["sqlite3"]["altoption"] = [["f"]]
 
 command_options["mysql"] = {}
 command_options["mysql"]["name"] = ["database", "user", "password", "host", "port"]
@@ -88,6 +92,7 @@ command_options["mysql"]["default"] = ["", "root", "admin", "localhost", 3306]
 command_options["mysql"]["help1"] = "Help for command 'folder'"
 command_options["mysql"]["help2"] = ["Bla1", "Bla2", "Bla3", "Bla4", "Bla5"]
 command_options["mysql"]["alternative"] = ["my"]
+command_options["mysql"]["altoption"] = [["d"],["u"],["p"],["h"],["po"]]
 
 command_options["postgre"] = {}
 command_options["postgre"]["name"] = ["database", "user", "password", "host", "port"]
@@ -97,6 +102,7 @@ command_options["postgre"]["default"] = ["", "postgres", "postgres1", "localhost
 command_options["postgre"]["help1"] = "Help for command 'folder'"
 command_options["postgre"]["help2"] = ["Bla1", "Bla2", "Bla3", "Bla4", "Bla5"]
 command_options["postgre"]["alternative"] = ["pg"]
+command_options["postgre"]["altoption"] = [["d"],["u"],["p"],["h"],["po"]]
 
 command_options["mssql"] = {}
 command_options["mssql"]["name"] = ["database", "user", "password", "host", "port"]
@@ -106,6 +112,7 @@ command_options["mssql"]["default"] = ["", "root", "admin", "localhost", 3306]
 command_options["mssql"]["help1"] = "Help for command 'folder'"
 command_options["mssql"]["help2"] = ["Bla1", "Bla2", "Bla3", "Bla4", "Bla5"]
 command_options["mssql"]["alternative"] = ["ms"]
+command_options["mssql"]["altoption"] = [["d"],["u"],["p"],["h"],["po"]]
 
 command_options["read"] = {}
 command_options["read"]["name"] = ["filename", "delimiter"]
@@ -115,6 +122,7 @@ command_options["read"]["default"] = [None, ";"]
 command_options["read"]["help1"] = "Help for command 'folder'"
 command_options["read"]["help2"] = ["Blabla1", "Blablabla2"]
 command_options["read"]["alternative"] = ["r"]
+command_options["read"]["altoption"] = [["f"],["d"]]
 
 command_options["export"] = {}
 command_options["export"]["name"] = ["filename", "delimiter"]
@@ -124,6 +132,7 @@ command_options["export"]["default"] = [None, ";"]
 command_options["export"]["help1"] = "Help for command 'folder'"
 command_options["export"]["help2"] = ["Blabla1", "Blablabla2"]
 command_options["export"]["alternative"] = ["e"]
+command_options["export"]["altoption"] = [["f"],["d"]]
 
 command_options["load"] = {}
 command_options["load"]["name"] = ["filename"]
@@ -133,6 +142,7 @@ command_options["load"]["default"] = [None]
 command_options["load"]["help1"] = "Help for command 'folder'"
 command_options["load"]["help2"] = ["Blabla1"]
 command_options["load"]["alternative"] = ["l"]
+command_options["load"]["altoption"] = [["f"]]
 
 command_options["insert"] = {}
 command_options["insert"]["name"] = ["tablename"]
@@ -142,15 +152,17 @@ command_options["insert"]["default"] = [None]
 command_options["insert"]["help1"] = "Help for command 'folder'"
 command_options["insert"]["help2"] = ["Blabla1"]
 command_options["insert"]["alternative"] = ["i"]
+command_options["insert"]["altoption"] = [["t"]]
 
 command_options["print data"] = {}
-command_options["print data"]["name"] = ["from", "to", "step", "list", "columns", "what"]
-command_options["print data"]["required"] = [False, False, False, False, False, False]
-command_options["print data"]["type"] = ["int", "int", "int", "intlist", "strlist",["data"]]
-command_options["print data"]["default"] = [0, 0, 1, None, None, "data"]
+command_options["print data"]["name"] = ["from", "to", "step", "random", "list", "columns", "what"]
+command_options["print data"]["required"] = [False, False, False, False, False, False, False]
+command_options["print data"]["type"] = ["int", "int", "int", "int", "intlist", "strlist",["data"]]
+command_options["print data"]["default"] = [0, 0, 1, 0, "[]", "[]", "data"]
 command_options["print data"]["help1"] = "Help for command 'folder'"
-command_options["print data"]["help2"] = ["Bla1","Bla2","Bla3","Bla4","Bla5","Bla6"]
+command_options["print data"]["help2"] = ["Bla1","Bla2","Bla3","Bla4","Bla5","Bla6", "Bla7"]
 command_options["print data"]["alternative"] = ["pd"]
+command_options["print data"]["altoption"] = [["f"], ["t"], ["s"], ["r"], ["l"], ["c"], ["w"]]
 
 command_options["print columns"] = {}
 command_options["print columns"]["name"] = ["what", "from", "to", "step", "list", "columns"]
@@ -160,6 +172,7 @@ command_options["print columns"]["default"] = ["columns", 0, print_max_default, 
 command_options["print columns"]["help1"] = "Help for command 'folder'"
 command_options["print columns"]["help2"] = ["Bla1","Bla2","Bla3","Bla4","Bla5","Bla6"]
 command_options["print columns"]["alternative"] = ["pc"]
+command_options["print columns"]["altoption"] = [["f"], ["t"], ["s"], ["l"], ["c"], ["w"]]
 
 command_options["print"] = {}
 command_options["print"]["name"] = ["what", "from", "to", "step", "list", "columns"]
@@ -169,6 +182,7 @@ command_options["print"]["default"] = ["data", 0, print_max_default, 1, None, No
 command_options["print"]["help1"] = "Help for command 'folder'"
 command_options["print"]["help2"] = ["Bla1","Bla2","Bla3","Bla4","Bla5","Bla6"]
 command_options["print"]["alternative"] = ["p"]
+command_options["print"]["altoption"] = [["w"],["f"], ["t"], ["s"], ["l"], ["c"]]
 
 command_options["break"] = {}
 command_options["break"]["name"] = ["what", "from", "to", "step", "list", "columns"]
@@ -178,6 +192,7 @@ command_options["break"]["default"] = ["data", 0, print_max_default, 1, None, No
 command_options["break"]["help1"] = "Help for command 'folder'"
 command_options["break"]["help2"] = ["Bla1","Bla2","Bla3","Bla4","Bla5","Bla6"]
 command_options["break"]["alternative"] = ["b"]
+command_options["break"]["altoption"] = [["w"],["f"], ["t"], ["s"], ["l"], ["c"]]
 
 def parseArgv(argument_list):
 
@@ -260,10 +275,19 @@ def parseCommand(command_line):
         cl = cl.strip()
         if "=" in cl:
             cll = cl.split("=")
-            for o in command_options[command]["name"]:
+            does_exist = 0
+            for j, o in enumerate(command_options[command]["name"]):
                 if cll[0].strip() == o:
                     options[o] = cll[1].strip()
-            if cll[0].strip() not in options:
+                    does_exist = 1
+                else:
+                    for a in command_options[command]["altoption"][j]:
+                        if cll[0].strip().lower() == a:
+                            options[o] = cll[1].strip()
+                            does_exist = 1
+                        if does_exist: break
+                        print(a)
+            if not does_exist:
                 printRed(f'''Unknown option '{cll[0]}'. I will not use your '{cll[1]}' value in any way.''')
         elif cl != "":
             if i < len (command_options[command]["name"]):
@@ -729,26 +753,103 @@ def do_sql(sql):
                 fromm = options["from"]
                 too = options["to"]
                 stepp = options["step"]
+                listt = options["list"]
+                randd = options["random"]
+                colss = options["columns"]
                 #print(fromm, too, stepp)
-                row_format = "{:>15}" * (len(columns) + 1)
                 nrows = len(data)
-                if fromm < 0:
-                    fromm += nrows + 1
-                    if too == 0: too = nrows
-                if too < 0:
-                    too += nrows + 1
-                    if fromm == 0: fromm = nrows
-                if too < fromm:
-                    pom = fromm
-                    fromm = too
-                    too = pom
-                if stepp <= 0: stepp = 1
-                if too > nrows: too = nrows
-                if fromm < 1: fromm = 1
-                printInvGreen("There are {} rows. Showing cases {} to {} step {}.".format(str(nrows), str(fromm), str(too), str(stepp)))
-                print(row_format.format("(Row)", *columns))
-                for i, row in enumerate(data[fromm-1:too:stepp]):
-                    print(row_format.format(str(fromm+i*stepp), *[str(r) for r in row]))    # Null to None
+                ncols = len(columns)
+                columns_show = columns
+                if len(colss) > 0:
+                    colsi = []
+                    for cols in colss:
+                        if cols in columns:
+                            colsi.append(columns.index(cols))
+                        else:
+                            printRed(f"Columns {cols} is not in columns!")
+                    columns_show = [columns[i] for i in colsi]
+                    print(columns_show)
+                row_format = "{:>15}" * (len(columns_show) + 1)
+                if len(listt) > 0:
+                    #assert list in range of cases
+                    for i, l in enumerate(listt):
+                        if l < 0: l += nrows + 1
+                        if l == 0: l = 1
+                        if l > nrows: l = nrows
+                        listt[i] = l
+                if len(listt) > 0 and randd == 0:
+                    if len(colss) > 0:
+                        printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing {len(listt)} listed cases with selected columns {columns_show}.")
+                        print(row_format.format("(Row)", *columns_show))
+                        for l in listt:
+                            print(row_format.format(str(l), *[str(r) for r in [data[l-1][i] for i in colsi]]))    # Null to None
+                    else:
+                        printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing {len(listt)} listed cases with all columns.")
+                        print(row_format.format("(Row)", *columns_show))
+                        for l in listt:
+                            print(row_format.format(str(l), *[str(r) for r in data[l-1]]))    # Null to None
+                else:
+                    if fromm < 0:
+                        fromm += nrows + 1
+                        if too == 0: too = nrows
+                    if too < 0:
+                        too += nrows + 1
+                        if fromm == 0: fromm = nrows
+                    if too < fromm:
+                        pom = fromm
+                        fromm = too
+                        too = pom
+                    if stepp <= 0: stepp = 1
+                    if too > nrows: too = nrows
+                    if fromm < 1: fromm = 1
+                    if randd > 0:
+                        if too == 0: too = nrows
+                        randlistt = []
+                        if len(listt) > 0:
+                            # select from listt
+                            # cannot select 2 same cases in list when 0,1 or >nrows => make set
+                            listt = list(set(listt))
+                            if randd > len(listt): randd = len(listt)
+                            for i in range(randd):
+                                r = random.choice(listt)
+                                while r in randlistt:
+                                    r = random.choice(listt)
+                                randlistt.append(r)
+                        else:
+                            # select fromm-too-stepp
+                            randmax = int((too-fromm+1)/stepp)
+                            #print(fromm, too, stepp, randd, randmax)
+                            if randd > randmax: randd = randmax
+                            if randd == 0: randd = 1
+                            for i in range(randd):
+                                r = random.randrange(fromm, too+1, stepp)
+                                while r in randlistt:
+                                    r = random.randrange(fromm, too+1, stepp)
+                                randlistt.append(r)
+                        #print(randlistt)
+                        if len(colss) > 0:
+                            printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing {len(randlistt)} random cases with selected columns {columns_show}.")
+                            print(row_format.format("(Row)", *columns_show))
+                            for l in randlistt:
+                                if l < 0: l += nrows + 1
+                                print(row_format.format(str(l), *[str(r) for r in [data[l-1][i] for i in colsi]]))    # Null to None
+                        else:
+                            printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing {len(randlistt)} random cases with all columns.")
+                            print(row_format.format("(Row)", *columns_show))
+                            for l in randlistt:
+                                if l < 0: l += nrows + 1
+                                print(row_format.format(str(l), *[str(r) for r in data[l-1]]))    # Null to None
+                    else:
+                        if len(colss) > 0:
+                            printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing cases {fromm} to {too} step {stepp} with selected columns {columns_show}.")
+                            print(row_format.format("(Row)", *columns_show))
+                            for i, row in enumerate(data[fromm-1:too:stepp]):
+                                print(row_format.format(str(fromm+i*stepp), *[str(r) for r in [row[i] for i in colsi]]))    # Null to None
+                        else:
+                            printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing cases {fromm} to {too} step {stepp} with all columns.")
+                            print(row_format.format("(Row)", *columns_show))
+                            for i, row in enumerate(data[fromm-1:too:stepp]):
+                                print(row_format.format(str(fromm+i*stepp), *[str(r) for r in row]))    # Null to None
                 print("\n")
 
         elif sql.startswith("\pause:"):
@@ -865,7 +966,7 @@ def main(argv):
 
     global folder_name, sqls
 
-    default_options = 7
+    default_options = 8
     for key1 in command_options.keys():
         assert len(command_options[key1].keys()) == default_options, \
 f'''Command {key1} has {len(command_options[key1].keys())} options \
