@@ -817,10 +817,10 @@ def do_sql(sql):
                                 randlistt.append(r)
                         else:
                             # select fromm-too-stepp
-                            randmax = int((too-fromm+1)/stepp)
-                            #print(fromm, too, stepp, randd, randmax)
+                            randmax = int((too-fromm)/stepp) + 1
+                            print(fromm, too, stepp, randd, randmax)
                             if randd > randmax: randd = randmax
-                            if randd == 0: randd = 1
+                            #if randd == 0: randd = 1
                             for i in range(randd):
                                 r = random.randrange(fromm, too+1, stepp)
                                 while r in randlistt:
