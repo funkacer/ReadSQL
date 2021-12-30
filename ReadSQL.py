@@ -43,6 +43,8 @@ printCom = lambda sTxt: print(COM + sTxt + END)
 printInvGreen = lambda sTxt: print(INVGREEN + sTxt + END)
 Assert = lambda bCond=False, sTxt='': printRed(sTxt) if not bCond else None
 
+row_format_l = lambda columns: "".join([f"{{:>{columns[c]}}}" for c in columns]) if isinstance(columns, dict) else "{:>15}" * (len(columns) + 1)
+
 conn = None
 sqls = {}
 data = None
@@ -193,6 +195,87 @@ command_options["break"]["help1"] = "Help for command 'folder'"
 command_options["break"]["help2"] = ["Bla1","Bla2","Bla3","Bla4","Bla5","Bla6"]
 command_options["break"]["alternative"] = ["b"]
 command_options["break"]["altoption"] = [["w"],["f"], ["t"], ["s"], ["l"], ["c"]]
+
+def data_select():
+    global fromm, too, stepp, randd, listt, colss, listi
+    nrows = len(data)
+    ncols = len(columns)
+    colsi = range(1, ncols + 1)
+    if len(colss) > 0:
+        colsi = []
+        for cols in colss:
+            if cols in columns:
+                colsi.append(columns.index(cols) + 1)
+            else:
+                printRed(f"Column '{cols}' not in columns!")
+    #columns_show = [columns[i] for i in colsi] # only existing
+    rowsi = []
+    listi = []
+    if len(listt) > 0:
+        #assert list in range of cases
+        for l in listt:
+            if l < 0: l += nrows + 1
+            if l <= 0: l = 1    # if l was lower than -nrows
+            if l > nrows: l = nrows
+            if l not in listi: listi.append(l)
+    if fromm < 0:
+        fromm += nrows + 1
+        if too == 0: too = nrows
+    if too < 0:
+        too += nrows + 1
+        if fromm == 0: fromm = nrows
+    if too < fromm:
+        pom = fromm
+        fromm = too
+        too = pom
+    if stepp <= 0: stepp = 1
+    if too > nrows: too = nrows
+    if fromm < 1: fromm = 1
+    if randd > 0:
+        if too == 0: too = nrows
+        if len(listi) > 0:
+            # select from listt
+            # cannot select 2 same cases in list when 0,1 or >nrows => make set
+            #listi = list(set(listi))
+            if randd > len(listi): randd = len(listi)
+            for i in range(randd):
+                r = random.choice(listi)
+                while r in rowsi:
+                    r = random.choice(listi)
+                rowsi.append(r)
+        else:
+            # select fromm-too-stepp
+            randmax = int((too-fromm)/stepp) + 1
+            #print(fromm, too, stepp, randd, randmax)
+            if randd > randmax: randd = randmax
+            #if randd == 0: randd = 1
+            for i in range(randd):
+                r = random.randrange(fromm, too+1, stepp)
+                while r in rowsi:
+                    r = random.randrange(fromm, too+1, stepp)
+                rowsi.append(r)
+        #print(listt_show)
+    else:
+        if len(listi) > 0:
+            rowsi = listi
+        else:
+            rowsi = range(fromm, too+1, stepp)
+    return rowsi, colsi
+
+
+def data_profile(rowsi, colsi):
+    nrows = len(data)
+    ncols = len(columns)
+    colsw = {}
+    colsw['(Row)'] = 5  # Columns 0 is Row number with header '(Row)' = 5 chars
+    for ci in colsi:
+        colsw[columns[ci-1]] = len(columns[ci-1]) + 1
+    for ri in rowsi:
+        if len(str(ri)) > colsw['(Row)']: colsw['(Row)'] = len(str(ri))
+        for ci in colsi:
+            w = len(str(data[ri-1][ci-1])) + 1
+            if w > colsw[columns[ci-1]]: colsw[columns[ci-1]] = w
+    return colsw
 
 def parseArgv(argument_list):
 
@@ -448,7 +531,8 @@ def show_data():
 
 def do_sql(sql):
 
-    global conn, data, columns, db_filename, folder_exists, folder_name, db_version, db_schema
+    global conn, data, columns, db_filename, folder_exists, folder_name, db_version, db_schema, \
+            fromm, too, stepp, randd, listt, colss
 
     time.sleep(1)
 
@@ -757,99 +841,44 @@ def do_sql(sql):
                 randd = options["random"]
                 colss = options["columns"]
                 #print(fromm, too, stepp)
+
                 nrows = len(data)
                 ncols = len(columns)
-                columns_show = columns
-                if len(colss) > 0:
-                    colsi = []
-                    for cols in colss:
-                        if cols in columns:
-                            colsi.append(columns.index(cols))
-                        else:
-                            printRed(f"Columns {cols} is not in columns!")
-                    columns_show = [columns[i] for i in colsi]
-                    print(columns_show)
-                row_format = "{:>15}" * (len(columns_show) + 1)
-                if len(listt) > 0:
-                    #assert list in range of cases
-                    for i, l in enumerate(listt):
-                        if l < 0: l += nrows + 1
-                        if l == 0: l = 1
-                        if l > nrows: l = nrows
-                        listt[i] = l
+
+                rowsi, colsi = data_select()
+                #print(rows_show)
+
+                columns_show = [columns[ci-1] for ci in colsi]
+
                 if len(listt) > 0 and randd == 0:
                     if len(colss) > 0:
-                        printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing {len(listt)} listed cases with selected columns {columns_show}.")
-                        print(row_format.format("(Row)", *columns_show))
-                        for l in listt:
-                            print(row_format.format(str(l), *[str(r) for r in [data[l-1][i] for i in colsi]]))    # Null to None
+                        printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} listed cases {listi} with selected columns {columns_show}.")
                     else:
-                        printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing {len(listt)} listed cases with all columns.")
-                        print(row_format.format("(Row)", *columns_show))
-                        for l in listt:
-                            print(row_format.format(str(l), *[str(r) for r in data[l-1]]))    # Null to None
+                        printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} listed cases {listi} with all columns.")
+                elif len(listt) > 0 and randd > 0:
+                    if len(colss) > 0:
+                        printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} random cases from {listi} with selected columns {columns_show}.")
+                    else:
+                        printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} random cases from {listi} with all columns.")
+                elif randd > 0:
+                    if len(colss) > 0:
+                        printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} random cases from {fromm} to {too} step {stepp} with selected columns {columns_show}.")
+                    else:
+                        printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} random cases from {fromm} to {too} step {stepp} with all columns.")
                 else:
-                    if fromm < 0:
-                        fromm += nrows + 1
-                        if too == 0: too = nrows
-                    if too < 0:
-                        too += nrows + 1
-                        if fromm == 0: fromm = nrows
-                    if too < fromm:
-                        pom = fromm
-                        fromm = too
-                        too = pom
-                    if stepp <= 0: stepp = 1
-                    if too > nrows: too = nrows
-                    if fromm < 1: fromm = 1
-                    if randd > 0:
-                        if too == 0: too = nrows
-                        randlistt = []
-                        if len(listt) > 0:
-                            # select from listt
-                            # cannot select 2 same cases in list when 0,1 or >nrows => make set
-                            listt = list(set(listt))
-                            if randd > len(listt): randd = len(listt)
-                            for i in range(randd):
-                                r = random.choice(listt)
-                                while r in randlistt:
-                                    r = random.choice(listt)
-                                randlistt.append(r)
-                        else:
-                            # select fromm-too-stepp
-                            randmax = int((too-fromm)/stepp) + 1
-                            print(fromm, too, stepp, randd, randmax)
-                            if randd > randmax: randd = randmax
-                            #if randd == 0: randd = 1
-                            for i in range(randd):
-                                r = random.randrange(fromm, too+1, stepp)
-                                while r in randlistt:
-                                    r = random.randrange(fromm, too+1, stepp)
-                                randlistt.append(r)
-                        #print(randlistt)
-                        if len(colss) > 0:
-                            printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing {len(randlistt)} random cases with selected columns {columns_show}.")
-                            print(row_format.format("(Row)", *columns_show))
-                            for l in randlistt:
-                                if l < 0: l += nrows + 1
-                                print(row_format.format(str(l), *[str(r) for r in [data[l-1][i] for i in colsi]]))    # Null to None
-                        else:
-                            printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing {len(randlistt)} random cases with all columns.")
-                            print(row_format.format("(Row)", *columns_show))
-                            for l in randlistt:
-                                if l < 0: l += nrows + 1
-                                print(row_format.format(str(l), *[str(r) for r in data[l-1]]))    # Null to None
+                    if len(colss) > 0:
+                        printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} cases from {fromm} to {too} step {stepp} with selected columns {columns_show}.")
                     else:
-                        if len(colss) > 0:
-                            printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing cases {fromm} to {too} step {stepp} with selected columns {columns_show}.")
-                            print(row_format.format("(Row)", *columns_show))
-                            for i, row in enumerate(data[fromm-1:too:stepp]):
-                                print(row_format.format(str(fromm+i*stepp), *[str(r) for r in [row[i] for i in colsi]]))    # Null to None
-                        else:
-                            printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing cases {fromm} to {too} step {stepp} with all columns.")
-                            print(row_format.format("(Row)", *columns_show))
-                            for i, row in enumerate(data[fromm-1:too:stepp]):
-                                print(row_format.format(str(fromm+i*stepp), *[str(r) for r in row]))    # Null to None
+                        printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} cases from {fromm} to {too} step {stepp} with all columns.")
+
+                colsw = data_profile(rowsi, colsi)
+                row_format = row_format_l(colsw)
+                #print(row_format)
+
+                print(row_format.format(*colsw))
+                for ri in rowsi:
+                    print(row_format.format(str(ri), *[str(col) for col in [data[ri-1][ci-1] for ci in colsi]]))    # Null to None
+
                 print("\n")
 
         elif sql.startswith("\pause:"):
