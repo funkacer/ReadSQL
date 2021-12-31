@@ -511,18 +511,38 @@ def check_filename(filename):
     #print(full_filename)
     return file_exists, full_filename
 
-def show_data():
-    row_format = "{:>15}" * (len(columns) + 1)
+def print_data():
+    global fromm, too, stepp, randd, listt, colss
     nrows = len(data)
+    ncols = len(columns)
+    fromm = 1
+    too = nrows
+    stepp = 1
+    colss = []
+    listt = []
+    randd = 0
+
     if nrows <= show_cases*2:
-        printInvGreen("There are {} rows. Showing all cases.".format(str(nrows)))
-        print(row_format.format("(Row)", *columns))
-        for i, row in enumerate(data):
-            #print(row_format.format(str(i), *row)) # not posiible to pass None (Null in db)
-            print(row_format.format(str(i+1), *[str(r) for r in row]))    # Null to None
+        rowsi, colsi = data_select()
+        #print(rows_show)
+        colsw = data_profile(rowsi, colsi)
+        row_format = row_format_l(colsw)
+        #print(row_format)
+        printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing all cases with all columns.")
+        print(row_format.format(*colsw))
+        for ri in rowsi:
+            print(row_format.format(str(ri), *[str(col) for col in [data[ri-1][ci-1] for ci in colsi]]))    # Null to None
     else:
-        printInvGreen("There are {} rows. Showing first / last {} cases.".format(str(nrows), str(show_cases)))
-        print(row_format.format("(Row)", *columns))
+        listt = range(1,show_cases+1)
+        listt += range(nrows-show_cases+1, nrows +1)
+        print(listt)
+        rowsi, colsi = data_select()
+        #print(rows_show)
+        colsw = data_profile(rowsi, colsi)
+        row_format = row_format_l(colsw)
+        #print(row_format)
+        printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing  first / last {show_cases} cases with all columns.")
+        print(row_format.format("(Row)", *colsw))
         for i, row in enumerate(data[:show_cases]):
             print(row_format.format(str(i+1), *[str(r) for r in row]))    # Null to None
         print("\n","...","\n")
@@ -694,7 +714,7 @@ def do_sql(sql):
                     if len(data_new) > 0:
                         data = data_new
                         columns = columns_new
-                        show_data()
+                        print_data()
                     else:
                         print()
                         print("! There are no data returned from this sql query !")
@@ -879,8 +899,6 @@ def do_sql(sql):
                 for ri in rowsi:
                     print(row_format.format(str(ri), *[str(col) for col in [data[ri-1][ci-1] for ci in colsi]]))    # Null to None
 
-                print("\n")
-
         elif sql.startswith("\pause:"):
             if "ask" in sql:
                 asked = ""
@@ -936,7 +954,7 @@ def do_sql(sql):
             if data_new or columns_new:
                 data = data_new
                 columns = columns_new
-                show_data()
+                print_data()
             else:
                 print("! There are no data returned from this sql query !")
             #conn.close()
