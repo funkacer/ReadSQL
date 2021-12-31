@@ -35,13 +35,17 @@ print('\x1b[6;30;42m' + 'Success!' + '\x1b[0m')
 
 '''
 
-RED, YELLOW, GREEN, BLUE, COM, INVGREEN, END = '\033[91m', '\033[33m', '\033[4m', '\033[34m', '\033[4m', '\033[35m\033[42m', '\033[0m'
+RED, YELLOW, GREEN, BLUE, COM, INVGREEN, INVRED, END = '\033[91m', '\033[33m', '\033[4m', '\033[34m', '\033[4m', '\033[97m\033[42m', '\033[97m\033[101m', '\033[0m'
 printRed = lambda sTxt: print(RED + sTxt + END)
 printYellow = lambda sTxt: print(YELLOW + sTxt + END)
 printBlue = lambda sTxt: print(BLUE + sTxt + END)
 printCom = lambda sTxt: print(COM + sTxt + END)
 printInvGreen = lambda sTxt: print(INVGREEN + sTxt + END)
+printInvRed = lambda sTxt: print(INVRED + sTxt + END)
 Assert = lambda bCond=False, sTxt='': printRed(sTxt) if not bCond else None
+
+printInvRed("KO")
+printInvGreen("OK")
 
 row_format_l = lambda columns: "".join([f"{{:>{columns[c]}}}" for c in columns]) if isinstance(columns, dict) else "{:>15}" * (len(columns) + 1)
 
@@ -332,7 +336,7 @@ def parseText(myText, delimiter):
 def parseCommand(command_line):
     command = ""
     options = {}
-    error = 0
+    #error = 0
     execute = True
     #command_line = command_line.replace(" ", "")
     command_line = command_line[1:].strip() #no slash
@@ -533,21 +537,21 @@ def print_data():
         for ri in rowsi:
             print(row_format.format(str(ri), *[str(col) for col in [data[ri-1][ci-1] for ci in colsi]]))    # Null to None
     else:
-        listt = range(1,show_cases+1)
-        listt += range(nrows-show_cases+1, nrows +1)
-        print(listt)
+        listt = list(range(1,show_cases+1))
+        listt += list(range(nrows-show_cases+1, nrows +1))
+        #print(listt)
         rowsi, colsi = data_select()
         #print(rows_show)
         colsw = data_profile(rowsi, colsi)
         row_format = row_format_l(colsw)
         #print(row_format)
-        printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing  first / last {show_cases} cases with all columns.")
-        print(row_format.format("(Row)", *colsw))
-        for i, row in enumerate(data[:show_cases]):
-            print(row_format.format(str(i+1), *[str(r) for r in row]))    # Null to None
-        print("\n","...","\n")
-        for i, row in enumerate(data[-show_cases:]):
-            print(row_format.format(str(nrows-show_cases+i+1), *[str(r) for r in row]))    # Null to None
+        printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing first / last {show_cases} cases with all columns.")
+        print(row_format.format(*colsw))
+        for ri in range(1,show_cases+1):
+            print(row_format.format(str(ri), *[str(col) for col in [data[ri-1][ci-1] for ci in colsi]]))    # Null to None
+        print(row_format.format("...", *["" for c in columns]))
+        for ri in range(nrows-show_cases+1, nrows +1):
+            print(row_format.format(str(ri), *[str(col) for col in [data[ri-1][ci-1] for ci in colsi]]))    # Null to None
 
 def do_sql(sql):
 
@@ -939,6 +943,7 @@ def do_sql(sql):
         printBlue(db_version + sql + "\n")
         data_new = None
         columns_new = None
+        error = 0
         try:
             c = conn.cursor()
             #c.execute(""'{}'"".format(sql))
@@ -950,27 +955,20 @@ def do_sql(sql):
             #conn.commit()
             #print(c.statusmessage)
             data_new = c.fetchall()
-            if c.description: columns_new = [col[0] for col in c.description]
-            if data_new or columns_new:
-                data = data_new
-                columns = columns_new
-                print_data()
-            else:
-                print("! There are no data returned from this sql query !")
+            if c.description:
+                columns_new = [col[0] for col in c.description]
             #conn.close()
         except Exception as e:
             #traceback.print_exc()
-            print("! There are no data returned from this sql query !")
-        '''
-        try:
-            conn.commit()
-        except Exception as e:
-            traceback.print_exc()
-        '''
+            printInvRed("! Error exexuting this sql query !")
+            error = 1
+        if data_new or columns_new:
+            data = data_new
+            columns = columns_new
+            print_data()
+        elif not error:
+            printInvGreen("! There are no data returned from this sql query !")
 
-            #data = None
-            #columns = None
-    #print()
     # this checks dtb
     if db_version[:5] == "MySQL":
         #print(conn.get_proto_info())
