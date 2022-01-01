@@ -353,11 +353,11 @@ def parseCommand(command_line):
                     command = c
                     command_line_list = parseText(command_line[len(a):], ",")
                 if command != "": break
-                print(a)
+                #print(a)
         if command != "": break
-        print(c)
+        #print(c)
 
-    print(command)
+    #print(command)
     for i, cl in enumerate(command_line_list):
         cl = cl.strip()
         if "=" in cl:
@@ -373,7 +373,7 @@ def parseCommand(command_line):
                             options[o] = cll[1].strip()
                             does_exist = 1
                         if does_exist: break
-                        print(a)
+                        #print(a)
             if not does_exist:
                 printRed(f'''Unknown option '{cll[0]}'. I will not use your '{cll[1]}' value in any way.''')
         elif cl != "":
