@@ -567,10 +567,11 @@ def do_sql(sql):
             OK = 0
 
         elif command == "sqlite3":
+            # , isolation_level=None == autocommit
             if options["filename"] == ":memory:":
                 print("\n" + "Using database in memory. Save or loose!")
                 try:
-                    conn = sqlite3.connect(":memory:")
+                    conn = sqlite3.connect(":memory:", isolation_level=None)
                     db_version = "Sqlite3 (memory): "
                 except Exception as e:
                     traceback.print_exc()
@@ -582,7 +583,7 @@ def do_sql(sql):
                 else:
                     print("Creating database '{}'.".format(full_filename))
                 try:
-                    conn = sqlite3.connect(full_filename)
+                    conn = sqlite3.connect(full_filename, isolation_level=None)
                     db_version = f"Sqlite3 ({full_filename}): "
                 except Exception as e:
                     traceback.print_exc()
@@ -951,6 +952,7 @@ def do_sql(sql):
         except Exception as e:
             traceback.print_exc()
             print()
+            error = 1
         try:
             #conn.commit()
             #print(c.statusmessage)
@@ -960,7 +962,6 @@ def do_sql(sql):
             #conn.close()
         except Exception as e:
             #traceback.print_exc()
-            printInvRed("! Error exexuting this sql query !")
             error = 1
         if data_new or columns_new:
             data = data_new
@@ -968,6 +969,8 @@ def do_sql(sql):
             print_data()
         elif not error:
             printInvGreen("! There are no data returned from this sql query !")
+        else:
+            printInvRed("! Error exexuting this sql query !")
 
     # this checks dtb
     if db_version[:5] == "MySQL":
