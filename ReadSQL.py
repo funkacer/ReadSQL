@@ -161,34 +161,34 @@ command_options["insert"]["alternative"] = ["i"]
 command_options["insert"]["altoption"] = [["t"]]
 
 command_options["print data"] = {}
-command_options["print data"]["name"] = ["from", "to", "step", "random", "list", "columns", "what"]
-command_options["print data"]["required"] = [False, False, False, False, False, False, False]
-command_options["print data"]["type"] = ["int", "int", "int", "int", "intlist", "strlist",["data"]]
-command_options["print data"]["default"] = [0, 0, 1, 0, "[]", "[]", "data"]
+command_options["print data"]["name"] = ["from", "to", "step", "random", "list", "columns"]
+command_options["print data"]["required"] = [False, False, False, False, False, False]
+command_options["print data"]["type"] = ["int", "int", "int", "int", "intlist", "strlist"]
+command_options["print data"]["default"] = [0, 0, 1, 0, "[]", "[]"]
 command_options["print data"]["help1"] = "Help for command 'folder'"
-command_options["print data"]["help2"] = ["Bla1","Bla2","Bla3","Bla4","Bla5","Bla6", "Bla7"]
+command_options["print data"]["help2"] = ["Bla1","Bla2","Bla3","Bla4","Bla5","Bla6"]
 command_options["print data"]["alternative"] = ["pd"]
-command_options["print data"]["altoption"] = [["f"], ["t"], ["s"], ["r"], ["l"], ["c"], ["w"]]
+command_options["print data"]["altoption"] = [["f"], ["t"], ["s"], ["r"], ["l"], ["c"]]
 
 command_options["print columns"] = {}
-command_options["print columns"]["name"] = ["what", "from", "to", "step", "list", "columns"]
-command_options["print columns"]["required"] = [False, False, False, False, False, False]
-command_options["print columns"]["type"] = [["columns"], "int", "int", "int", "intlist", "strlist"]
-command_options["print columns"]["default"] = ["columns", 0, print_max_default, 1, None, None]
+command_options["print columns"]["name"] = []
+command_options["print columns"]["required"] = []
+command_options["print columns"]["type"] = []
+command_options["print columns"]["default"] = []
 command_options["print columns"]["help1"] = "Help for command 'folder'"
-command_options["print columns"]["help2"] = ["Bla1","Bla2","Bla3","Bla4","Bla5","Bla6"]
+command_options["print columns"]["help2"] = []
 command_options["print columns"]["alternative"] = ["pc"]
-command_options["print columns"]["altoption"] = [["f"], ["t"], ["s"], ["l"], ["c"], ["w"]]
+command_options["print columns"]["altoption"] = []
 
 command_options["print"] = {}
-command_options["print"]["name"] = ["what", "from", "to", "step", "list", "columns"]
-command_options["print"]["required"] = [False, False, False, False, False, False]
-command_options["print"]["type"] = [["data","columns"], "int", "int", "int", "intlist", "strlist"]
-command_options["print"]["default"] = ["data", 0, print_max_default, 1, None, None]
+command_options["print"]["name"] = ["what", "from", "to", "step", "random", "list", "columns"]
+command_options["print"]["required"] = [False, False, False, False, False, False, False]
+command_options["print"]["type"] = [["data","columns","d","c"], "int", "int", "int", "int", "intlist", "strlist"]
+command_options["print"]["default"] = ["data", 0, 0, 1, 0, "[]", "[]"]
 command_options["print"]["help1"] = "Help for command 'folder'"
-command_options["print"]["help2"] = ["Bla1","Bla2","Bla3","Bla4","Bla5","Bla6"]
+command_options["print"]["help2"] = ["Bla1","Bla2","Bla3","Bla4","Bla5","Bla6","Bla7"]
 command_options["print"]["alternative"] = ["p"]
-command_options["print"]["altoption"] = [["w"],["f"], ["t"], ["s"], ["l"], ["c"]]
+command_options["print"]["altoption"] = [["w"], ["f"], ["t"], ["s"], ["r"], ["l"], ["c"]]
 
 command_options["break"] = {}
 command_options["break"]["name"] = ["what", "from", "to", "step", "list", "columns"]
@@ -345,20 +345,45 @@ def parseCommand(command_line):
         #print(c)
         if command_line[:len(c)].lower() == c:
             command = c
-            command_line_list = parseText(command_line[len(c):], ",")
+            command_line = command_line[len(c):]
+            command_line = "=".join(parseText(command_line, "="))
+            command_line = ",".join(parseText(command_line, " "))
+            print(command_line)
+            command_line_list = parseText(command_line, ",")
             #print(f"Parse command {command} with ',':", command_line_list)
         else:
             for a in command_options[c]["alternative"]:
                 if command_line[:len(a)].lower() == a:
                     command = c
-                    command_line_list = parseText(command_line[len(a):], ",")
+                    command_line = command_line[len(a):]
+                    command_line = "=".join(parseText(command_line, "="))
+                    command_line = ",".join(parseText(command_line, " "))
+                    print(command_line)
+                    command_line_list = parseText(command_line, ",")
                 if command != "": break
                 #print(a)
         if command != "": break
         #print(c)
 
+    # this should give key=option together
+    print(f"Parse command {command} with ',':", command_line_list)
+    cll_final = []
+    i = 0
+    while i < len(command_line_list):
+        if i < len(command_line_list)-2:
+            if command_line_list[i+1] == "=":
+                cll_final.append("".join([command_line_list[i],"=",command_line_list[i+2]]))
+                i += 3
+            else:
+                cll_final.append(command_line_list[i])
+                i += 1
+        else:
+            cll_final.append(command_line_list[i])
+            i += 1
+    print(cll_final)
+
     #print(command)
-    for i, cl in enumerate(command_line_list):
+    for i, cl in enumerate(cll_final):
         cl = cl.strip()
         if "=" in cl:
             cll = cl.split("=")
@@ -856,6 +881,10 @@ def do_sql(sql):
                 traceback.print_exc()
 
         elif command == "print" or command == "print data" or command == "print columns":
+            if command == "print columns": options["what"] = "columns"
+            if command == "print data": options["what"] = "data"
+            if options["what"] == "c": options["what"] = "columns"
+            if options["what"] == "d": options["what"] = "data"
             if options["what"] == "columns":
                 print(", ".join([str(c) for c in columns]))
             elif options["what"] == "data":
