@@ -424,7 +424,7 @@ def parseCommand(command_line):
             if isinstance(t, list):
                 bCond = options[n] in t
                 #print(options[n], t, bCond)
-                sTxt = f'''Value '{options[n]}' is not valid for option '{n}'. Use one of these options: {t}.'''
+                sTxt = f"Value '{options[n]}' is not valid for option '{n}'. Use one of these options: {t}."
                 Assert(bCond, sTxt)
                 if not bCond:
                     execute = False
@@ -443,17 +443,15 @@ def parseCommand(command_line):
                     options[n] = int(options[n])
                 except Exception as e:
                     traceback.print_exc()
-                assert isinstance(options[n], int)
+                Assert(isinstance(options[n], int), f"Option '{n}' should be integer but is '{options[n]}'. Probably not doing what expected!")
+                if not isinstance(options[n], int):
+                    options[n] = d
                 #print(f"Parse option '{n}' as integer:", options[n])
             elif t == "intlist":
-                if options[n][0] == "[" and options[n][-1] == "]":
-                    lst_old = parseText(options[n][1:-1], ",")
-                    #print(f"Parse intlist {options[n]} with ',':", lst_old)
-                else:
-                    lst_old = parseText(options[n], " ")
-                    #print(f"Parse intlist {options[n]} with ' ':", lst_old)
-                #print(lst_old)
-                #lst_old = options[n].split(" ")
+                Assert(options[n][0] == "[" and options[n][-1] == "]", "Lists must be enclosed with []. Probably not doing what expected!")
+                options_list_line = options[n][1:-1]
+                options_list_line = ",".join(parseText(options_list_line, " "))
+                lst_old = parseText(options_list_line, ",")
                 lst_new = []
                 for l_old in lst_old:
                     l_new = None
@@ -465,13 +463,10 @@ def parseCommand(command_line):
                     if l_new not in lst_new: lst_new.append(l_new)
                 options[n] = lst_new
             elif t == "strlist":
-                if options[n][0] == "[" and options[n][-1] == "]":
-                    lst_old = parseText(options[n][1:-1], ",")
-                    #print(f"Parse strlist {options[n]} with ',':", lst_old)
-                else:
-                    lst_old = parseText(options[n], " ")
-                    #print(f"Parse strlist {options[n]} with ' ':", lst_old)
-                #print(lst_old)
+                Assert(options[n][0] == "[" and options[n][-1] == "]", "Lists must be enclosed with []. Probably not doing what expected!")
+                options_list_line = options[n][1:-1]
+                options_list_line = ",".join(parseText(options_list_line, " "))
+                lst_old = parseText(options_list_line, ",")
                 lst_new = []
                 for l_old in lst_old:
                     if l_old[0] == '"' and l_old[-1] == '"':
@@ -967,7 +962,7 @@ def do_sql(sql):
                         OK = 0
 
         else:
-            print("! Command was not recognized or missing arguments !")
+            printInvRed("! Command was not recognized or missing arguments !")
 
     else:
         printBlue(db_version + sql + "\n")
