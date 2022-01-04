@@ -47,7 +47,7 @@ Assert = lambda bCond=False, sTxt='': printRed(sTxt) if not bCond else None
 printInvRed("KO")
 printInvGreen("OK")
 
-row_format_l = lambda columns: "".join([f"{{:>{columns[c]}}}" for c in columns]) if isinstance(columns, dict) else "{:>15}" * (len(columns) + 1)
+row_format_l = lambda columns: "".join([f"{{:>{columns[c]['w']}}}" for c in columns]) if isinstance(columns, dict) else "{:>15}" * (len(columns) + 1)
 
 conn = None
 sqls = {}
@@ -58,6 +58,7 @@ folder_name = None
 db_version = "None: "
 show_cases = 5
 print_max_default = 100
+profile_max_categorical = 10
 
 command_options = {}
 command_options["quit"] = {}
@@ -200,6 +201,88 @@ command_options["break"]["help2"] = ["Bla1","Bla2","Bla3","Bla4","Bla5","Bla6"]
 command_options["break"]["alternative"] = ["b"]
 command_options["break"]["altoption"] = [["w"],["f"], ["t"], ["s"], ["l"], ["c"]]
 
+command_options["data profile"] = {}
+command_options["data profile"]["name"] = []
+command_options["data profile"]["required"] = []
+command_options["data profile"]["type"] = []
+command_options["data profile"]["default"] = []
+command_options["data profile"]["help1"] = "Help for command 'folder'"
+command_options["data profile"]["help2"] = []
+command_options["data profile"]["alternative"] = ["dp"]
+command_options["data profile"]["altoption"] = []
+
+def data_profile(rowsi, colsi):
+    nrows = len(data)
+    ncols = len(columns)
+    colsp = {}
+    colsp['(Row)'] = {}
+    colsp['(Row)']['w'] = 5  # Columns 0 is Row number with header '(Row)' = 5 chars
+    colsp['(Row)']['t'] = "Quantitative"
+    colsp['(Row)']['fnq'] = None
+    colsp['(Row)']['n'] = 0
+    colsp['(Row)']['v'] = len(rowsi)
+    colsp['(Row)']['c'] = {}
+    colsp['(Row)']['sum'] = sum(rowsi)
+    colsp['(Row)']['min'] = min(rowsi)
+    colsp['(Row)']['max'] = max(rowsi)
+    colsp['(Row)']['mean'] = sum(rowsi) / len(rowsi)
+    for ci in colsi:
+        colsp[columns[ci-1]] = {}
+        colsp[columns[ci-1]]['w'] = len(columns[ci-1]) + 1
+        #colsp[columns[ci-1]]['t'] = "Categorical"
+        colsp[columns[ci-1]]['t'] = "Quantitative"
+        colsp[columns[ci-1]]['fnq'] = None
+        colsp[columns[ci-1]]['n'] = 0
+        colsp[columns[ci-1]]['v'] = 0
+        colsp[columns[ci-1]]['c'] = {}
+        #colsp[columns[ci-1]]['min'] = data[min(rowsi)][ci-1]
+        #colsp[columns[ci-1]]['max'] = data[min(rowsi)][ci-1]
+        colsp[columns[ci-1]]['sum'] = 0
+        #colsp[columns[ci-1]]['mean'] = colsp[columns[ci-1]]['sum'] / colsp[columns[ci-1]]['v']
+    for ri in rowsi:
+        if len(str(ri)) > colsp['(Row)']['w']: colsp['(Row)']['w'] = len(str(ri))
+        if ri not in colsp['(Row)']['c']:
+            colsp['(Row)']['c'][ri] = 1
+        else:
+            colsp['(Row)']['c'][ri] += 1
+        for ci in colsi:
+            w = len(str(data[ri-1][ci-1])) + 1
+            if w > colsp[columns[ci-1]]['w']: colsp[columns[ci-1]]['w'] = w
+            if data[ri-1][ci-1] is not None:
+                colsp[columns[ci-1]]['v'] += 1
+                if colsp[columns[ci-1]]['t'] == "Quantitative":
+                    try:
+                        a = float(data[ri-1][ci-1])
+                        if colsp[columns[ci-1]]['v'] == 1:
+                            colsp[columns[ci-1]]['min'] = data[ri-1][ci-1]
+                            colsp[columns[ci-1]]['max'] = data[ri-1][ci-1]
+                        elif data[ri-1][ci-1] < colsp[columns[ci-1]]['min']:
+                            colsp[columns[ci-1]]['min'] = data[ri-1][ci-1]
+                        elif data[ri-1][ci-1] > colsp[columns[ci-1]]['max']:
+                            colsp[columns[ci-1]]['max'] = data[ri-1][ci-1]
+                        colsp[columns[ci-1]]['sum'] += data[ri-1][ci-1]
+                    except:
+                        colsp[columns[ci-1]]['t'] = "Categorical"
+                        if colsp[columns[ci-1]]['fnq'] is None:
+                            colsp[columns[ci-1]]['fnq'] = data[ri-1][ci-1]
+                if data[ri-1][ci-1] not in colsp[columns[ci-1]]['c']:
+                    colsp[columns[ci-1]]['c'][data[ri-1][ci-1]] = 1
+                else:
+                    colsp[columns[ci-1]]['c'][data[ri-1][ci-1]] += 1
+            else:
+                #count None
+                colsp[columns[ci-1]]['n'] += 1
+    for ci in colsi:
+        if colsp[columns[ci-1]]['v'] > 0 and colsp[columns[ci-1]]['t'] == "Quantitative":
+            colsp[columns[ci-1]]['mean'] = colsp[columns[ci-1]]['sum'] / colsp[columns[ci-1]]['v']
+        else:
+            colsp[columns[ci-1]]['min'] = None
+            colsp[columns[ci-1]]['max'] = None
+            colsp[columns[ci-1]]['sum'] = None
+            colsp[columns[ci-1]]['mean'] = None
+    #print(colsp)
+    return colsp
+
 def data_select():
     global fromm, too, stepp, randd, listt, colss, listi
     nrows = len(data)
@@ -266,20 +349,35 @@ def data_select():
             rowsi = range(fromm, too+1, stepp)
     return rowsi, colsi
 
-
-def data_profile(rowsi, colsi):
+def print_data():
     nrows = len(data)
     ncols = len(columns)
-    colsw = {}
-    colsw['(Row)'] = 5  # Columns 0 is Row number with header '(Row)' = 5 chars
-    for ci in colsi:
-        colsw[columns[ci-1]] = len(columns[ci-1]) + 1
-    for ri in rowsi:
-        if len(str(ri)) > colsw['(Row)']: colsw['(Row)'] = len(str(ri))
-        for ci in colsi:
-            w = len(str(data[ri-1][ci-1])) + 1
-            if w > colsw[columns[ci-1]]: colsw[columns[ci-1]] = w
-    return colsw
+    colsi = range(1, ncols + 1)
+    if nrows <= show_cases*2:
+        #print(rows_show)
+        rowsi = range(1, nrows + 1)
+        colsp = data_profile(rowsi, colsi)
+        row_format = row_format_l(colsp)
+        #print(row_format)
+        printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing all cases with all columns.")
+        print(row_format.format(*colsp))
+        for ri in rowsi:
+            print(row_format.format(str(ri), *[str(col) for col in [data[ri-1][ci-1] for ci in colsi]]))    # Null to None
+    else:
+        rowsi = list(range(1,show_cases+1))
+        rowsi += list(range(nrows-show_cases+1, nrows +1))
+        #print(listt)
+        colsp = data_profile(rowsi, colsi)
+        row_format = row_format_l(colsp)
+        #print(row_format)
+        printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing first / last {show_cases} cases with all columns.")
+        print(row_format.format(*colsp))
+        for ri in range(1,show_cases+1):
+            print(row_format.format(str(ri), *[str(col) for col in [data[ri-1][ci-1] for ci in colsi]]))    # Null to None
+        print(row_format.format("...", *["" for c in columns]))
+        for ri in range(nrows-show_cases+1, nrows +1):
+            print(row_format.format(str(ri), *[str(col) for col in [data[ri-1][ci-1] for ci in colsi]]))    # Null to None
+
 
 def parseArgv(argument_list):
 
@@ -348,7 +446,7 @@ def parseCommand(command_line):
             command_line = command_line[len(c):]
             command_line = "=".join(parseText(command_line, "="))
             command_line = ",".join(parseText(command_line, " "))
-            print(command_line)
+            #print(command_line)
             command_line_list = parseText(command_line, ",")
             #print(f"Parse command {command} with ',':", command_line_list)
         else:
@@ -358,7 +456,7 @@ def parseCommand(command_line):
                     command_line = command_line[len(a):]
                     command_line = "=".join(parseText(command_line, "="))
                     command_line = ",".join(parseText(command_line, " "))
-                    print(command_line)
+                    #print(command_line)
                     command_line_list = parseText(command_line, ",")
                 if command != "": break
                 #print(a)
@@ -366,7 +464,7 @@ def parseCommand(command_line):
         #print(c)
 
     # this should give key=option together
-    print(f"Parse command {command} with ',':", command_line_list)
+    #print(f"Parse command {command} with ',':", command_line_list)
     cll_final = []
     i = 0
     while i < len(command_line_list):
@@ -380,7 +478,7 @@ def parseCommand(command_line):
         else:
             cll_final.append(command_line_list[i])
             i += 1
-    print(cll_final)
+    #print(cll_final)
 
     #print(command)
     for i, cl in enumerate(cll_final):
@@ -534,44 +632,6 @@ def check_filename(filename):
     file_exists = os.path.isfile(full_filename)
     #print(full_filename)
     return file_exists, full_filename
-
-def print_data():
-    global fromm, too, stepp, randd, listt, colss
-    nrows = len(data)
-    ncols = len(columns)
-    fromm = 1
-    too = nrows
-    stepp = 1
-    colss = []
-    listt = []
-    randd = 0
-
-    if nrows <= show_cases*2:
-        rowsi, colsi = data_select()
-        #print(rows_show)
-        colsw = data_profile(rowsi, colsi)
-        row_format = row_format_l(colsw)
-        #print(row_format)
-        printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing all cases with all columns.")
-        print(row_format.format(*colsw))
-        for ri in rowsi:
-            print(row_format.format(str(ri), *[str(col) for col in [data[ri-1][ci-1] for ci in colsi]]))    # Null to None
-    else:
-        listt = list(range(1,show_cases+1))
-        listt += list(range(nrows-show_cases+1, nrows +1))
-        #print(listt)
-        rowsi, colsi = data_select()
-        #print(rows_show)
-        colsw = data_profile(rowsi, colsi)
-        row_format = row_format_l(colsw)
-        #print(row_format)
-        printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing first / last {show_cases} cases with all columns.")
-        print(row_format.format(*colsw))
-        for ri in range(1,show_cases+1):
-            print(row_format.format(str(ri), *[str(col) for col in [data[ri-1][ci-1] for ci in colsi]]))    # Null to None
-        print(row_format.format("...", *["" for c in columns]))
-        for ri in range(nrows-show_cases+1, nrows +1):
-            print(row_format.format(str(ri), *[str(col) for col in [data[ri-1][ci-1] for ci in colsi]]))    # Null to None
 
 def do_sql(sql):
 
@@ -920,14 +980,36 @@ def do_sql(sql):
                     else:
                         printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} cases from {fromm} to {too} step {stepp} with all columns.")
 
-                colsw = data_profile(rowsi, colsi)
-                row_format = row_format_l(colsw)
+                colsp = data_profile(rowsi, colsi)
+                row_format = row_format_l(colsp)
                 #print(row_format)
 
-                print(row_format.format(*colsw))
+                print(row_format.format(*colsp))
                 for ri in rowsi:
                     print(row_format.format(str(ri), *[str(col) for col in [data[ri-1][ci-1] for ci in colsi]]))    # Null to None
 
+
+        elif command == "data" or command == "data profile":
+            if command == "data profile": options["what"] = "profile"
+            if options["what"] == "p": options["what"] = "profile"
+            if options["what"] == "profile":
+                nrows = len(data)
+                ncols = len(columns)
+                colsi = range(1, ncols + 1)
+                rowsi = range(1, nrows + 1)
+                colsp = data_profile(rowsi, colsi)
+                for col in colsp:
+                    print(col + ":")
+                    for c in colsp[col]:
+                        if isinstance(colsp[col][c], int) or isinstance(colsp[col][c], float):
+                            print('\t' + c + ": " + str(colsp[col][c]))
+                        elif isinstance(colsp[col][c], str):
+                            print('\t' + c + ": '" + colsp[col][c] + "'")
+                        elif isinstance(colsp[col][c], dict):
+                            # print n most common
+                            print('\t' + c + ": " + ", ".join([str(k) + ": " + str(v) for k, v in sorted(colsp[col][c].items(), reverse = True, key = lambda x: x[1])[:profile_max_categorical]]))
+                        else:
+                            print('\t' + c + ": " + str(colsp[col][c].__class__))
         elif sql.startswith("\pause:"):
             if "ask" in sql:
                 asked = ""
