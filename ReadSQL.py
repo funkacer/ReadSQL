@@ -59,6 +59,7 @@ db_version = "None: "
 show_cases = 5
 print_max_default = 100
 profile_max_categorical = 10
+rows_label = "(Row)"
 
 command_options = {}
 command_options["quit"] = {}
@@ -211,7 +212,74 @@ command_options["data profile"]["help2"] = []
 command_options["data profile"]["alternative"] = ["dp"]
 command_options["data profile"]["altoption"] = []
 
-def data_profile(rowsi, colsi):
+def data_profile(rowsi, colsi, data, columns, rows, rows_label):
+    nrows = len(data)
+    ncols = len(columns)
+    colsp = {}
+    colsp[rows_label] = {}
+    colsp[rows_label]['w'] = len(str(rows_label))  # Columns 0 is Row number with header '(Row)' = 5 chars
+    colsp[rows_label]['t'] = "Quantitative"
+    colsp[rows_label]['fnq'] = None
+    colsp[rows_label]['n'] = 0
+    colsp[rows_label]['v'] = 0
+    colsp[rows_label]['c'] = {}
+    colsp[rows_label]['sum'] = 0
+    colsp[rows_label]['min'] = 0
+    colsp[rows_label]['max'] = 0
+    colsp[rows_label]['mean'] = 0
+    for ci in colsi:
+        colsp[columns[ci-1]] = {}
+        colsp[columns[ci-1]]['w'] = len(columns[ci-1]) + 1
+        #colsp[columns[ci-1]]['t'] = "Categorical"
+        colsp[columns[ci-1]]['t'] = "Quantitative"
+        colsp[columns[ci-1]]['fnq'] = None
+        colsp[columns[ci-1]]['n'] = 0
+        colsp[columns[ci-1]]['v'] = 0
+        colsp[columns[ci-1]]['c'] = {}
+        colsp[columns[ci-1]]['sum'] = 0
+    for ri in rowsi:
+        if len(str(ri)) > colsp[rows_label]['w']: colsp[rows_label]['w'] = len(str(ri))
+        for ci in colsi:
+            w = len(str(data[ri-1][ci-1])) + 1
+            if w > colsp[columns[ci-1]]['w']: colsp[columns[ci-1]]['w'] = w
+            if data[ri-1][ci-1] is not None:
+                colsp[columns[ci-1]]['v'] += 1
+                if colsp[columns[ci-1]]['t'] == "Quantitative":
+                    try:
+                        a = float(data[ri-1][ci-1])
+                        if colsp[columns[ci-1]]['v'] == 1:
+                            colsp[columns[ci-1]]['min'] = data[ri-1][ci-1]
+                            colsp[columns[ci-1]]['max'] = data[ri-1][ci-1]
+                        elif data[ri-1][ci-1] < colsp[columns[ci-1]]['min']:
+                            colsp[columns[ci-1]]['min'] = data[ri-1][ci-1]
+                        elif data[ri-1][ci-1] > colsp[columns[ci-1]]['max']:
+                            colsp[columns[ci-1]]['max'] = data[ri-1][ci-1]
+                        colsp[columns[ci-1]]['sum'] += data[ri-1][ci-1]
+                    except:
+                        colsp[columns[ci-1]]['t'] = "Categorical"
+                        if colsp[columns[ci-1]]['fnq'] is None:
+                            colsp[columns[ci-1]]['fnq'] = data[ri-1][ci-1]
+                if data[ri-1][ci-1] not in colsp[columns[ci-1]]['c']:
+                    colsp[columns[ci-1]]['c'][data[ri-1][ci-1]] = 1
+                else:
+                    colsp[columns[ci-1]]['c'][data[ri-1][ci-1]] += 1
+            else:
+                #count None
+                colsp[columns[ci-1]]['n'] += 1
+    for ci in colsi:
+        if colsp[columns[ci-1]]['v'] > 0 and colsp[columns[ci-1]]['t'] == "Quantitative":
+            colsp[columns[ci-1]]['mean'] = colsp[columns[ci-1]]['sum'] / colsp[columns[ci-1]]['v']
+        else:
+            colsp[columns[ci-1]]['min'] = None
+            colsp[columns[ci-1]]['max'] = None
+            colsp[columns[ci-1]]['sum'] = None
+            colsp[columns[ci-1]]['mean'] = None
+    #print(colsp)
+    return colsp
+
+
+
+def data_profile_old(rowsi, colsi, data, columns, rows, rows_label):
     nrows = len(data)
     ncols = len(columns)
     colsp = {}
@@ -351,12 +419,13 @@ def data_select():
 
 def print_data():
     nrows = len(data)
+    rows = range(1, nrows + 1)
     ncols = len(columns)
     colsi = range(1, ncols + 1)
     if nrows <= show_cases*2:
         #print(rows_show)
         rowsi = range(1, nrows + 1)
-        colsp = data_profile(rowsi, colsi)
+        colsp = data_profile(rowsi, colsi, data, columns, rows, rows_label)
         row_format = row_format_l(colsp)
         #print(row_format)
         printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing all cases with all columns.")
@@ -367,7 +436,7 @@ def print_data():
         rowsi = list(range(1,show_cases+1))
         rowsi += list(range(nrows-show_cases+1, nrows +1))
         #print(listt)
-        colsp = data_profile(rowsi, colsi)
+        colsp = data_profile(rowsi, colsi, data, columns, rows, rows_label)
         row_format = row_format_l(colsp)
         #print(row_format)
         printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing first / last {show_cases} cases with all columns.")
@@ -980,7 +1049,8 @@ def do_sql(sql):
                     else:
                         printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} cases from {fromm} to {too} step {stepp} with all columns.")
 
-                colsp = data_profile(rowsi, colsi)
+                rows = rowsi
+                colsp = data_profile(rowsi, colsi, data, columns, rows, rows_label)
                 row_format = row_format_l(colsp)
                 #print(row_format)
 
@@ -997,7 +1067,14 @@ def do_sql(sql):
                 ncols = len(columns)
                 colsi = range(1, ncols + 1)
                 rowsi = range(1, nrows + 1)
-                colsp = data_profile(rowsi, colsi)
+                rows = range(1, nrows + 1)
+                colsp = data_profile(rowsi, colsi, data, columns, rows, rows_label)
+                profile_data = []
+                profile_columns = columns
+                profile_rows = ["Type", "Valids", "Nulls", "Min", "Max", "Mean"]
+                profile_rows_label = '(Stat)'
+                stats = ["t", "v", "n", "min", "max", "mean"]
+                '''
                 for col in colsp:
                     print(col + ":")
                     for c in colsp[col]:
@@ -1010,6 +1087,42 @@ def do_sql(sql):
                             print('\t' + c + ": " + ", ".join([str(k) + ": " + str(v) for k, v in sorted(colsp[col][c].items(), reverse = True, key = lambda x: x[1])[:profile_max_categorical]]))
                         else:
                             print('\t' + c + ": " + str(colsp[col][c].__class__))
+                '''
+
+                for i, stat in enumerate(stats):
+                    profile_data.append([])
+                    for col in colsp:
+                        if col != rows_label:
+                            for c in colsp[col]:
+                                #print(c, stat)
+                                if c == stat:
+                                    if isinstance(colsp[col][c], float):
+                                        profile_data[i].append(round(colsp[col][c],2))
+                                    elif isinstance(colsp[col][c], str):
+                                        profile_data[i].append(colsp[col][c][:5])
+                                    else:
+                                        profile_data[i].append(colsp[col][c])
+
+
+                #print(profile_data)
+
+                nrows = len(profile_data)
+                ncols = len(profile_columns)
+
+                colsi = range(1, ncols + 1)
+                rowsi = range(1, nrows + 1)
+
+                colsp = data_profile(rowsi, colsi, profile_data, profile_columns, profile_rows, profile_rows_label)
+                row_format = row_format_l(colsp)
+                #print(row_format)
+
+                print(row_format.format(*colsp))
+                for i, row in enumerate(profile_data):
+                    print(row_format.format(profile_rows[i], *[str(col) for col in row]))    # Null to None
+
+
+
+
         elif sql.startswith("\pause:"):
             if "ask" in sql:
                 asked = ""
