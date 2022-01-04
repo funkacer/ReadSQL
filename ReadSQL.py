@@ -58,7 +58,8 @@ folder_name = None
 db_version = "None: "
 show_cases = 5
 print_max_default = 100
-profile_max_categorical = 10
+profile_max_categorical = 100
+profile_show_categorical = 10
 rows_label = "(Row)"
 
 command_options = {}
@@ -238,7 +239,7 @@ def data_profile(rowsi, colsi, data, columns, rows, rows_label):
         colsp[columns[ci-1]]['c'] = {}
         colsp[columns[ci-1]]['sum'] = 0
     for ri in rowsi:
-        if len(str(ri)) > colsp[rows_label]['w']: colsp[rows_label]['w'] = len(str(ri))
+        if len(str(rows[ri-1])) > colsp[rows_label]['w']: colsp[rows_label]['w'] = len(str(rows[ri-1]))
         for ci in colsi:
             w = len(str(data[ri-1][ci-1])) + 1
             if w > colsp[columns[ci-1]]['w']: colsp[columns[ci-1]]['w'] = w
@@ -1071,9 +1072,9 @@ def do_sql(sql):
                 colsp = data_profile(rowsi, colsi, data, columns, rows, rows_label)
                 profile_data = []
                 profile_columns = columns
-                profile_rows = ["Type", "Valids", "Nulls", "Min", "Max", "Mean"]
+                profile_rows = ["Type", "Valids", "Nulls", "Valid %", "Min", "Max", "Mean", "Unique"]
                 profile_rows_label = '(Stat)'
-                stats = ["t", "v", "n", "min", "max", "mean"]
+                stats = ["t", "v", "n", "v%", "min", "max", "mean", "uni"]
                 '''
                 for col in colsp:
                     print(col + ":")
@@ -1089,19 +1090,44 @@ def do_sql(sql):
                             print('\t' + c + ": " + str(colsp[col][c].__class__))
                 '''
 
+                maxc = 0
                 for i, stat in enumerate(stats):
                     profile_data.append([])
                     for col in colsp:
                         if col != rows_label:
-                            for c in colsp[col]:
-                                #print(c, stat)
-                                if c == stat:
-                                    if isinstance(colsp[col][c], float):
-                                        profile_data[i].append(round(colsp[col][c],2))
-                                    elif isinstance(colsp[col][c], str):
-                                        profile_data[i].append(colsp[col][c][:5])
-                                    else:
-                                        profile_data[i].append(colsp[col][c])
+                            if stat == "v%":
+                                profile_data[i].append(round(100 * colsp[col]["v"] / (colsp[col]["v"] + colsp[col]["n"]) ,2))
+                            elif stat == "uni":
+                                if len(colsp[col]["c"]) < profile_max_categorical:
+                                    profile_data[i].append(len(colsp[col]["c"]))
+                                    if len(colsp[col]["c"]) > maxc: maxc = len(colsp[col]["c"])
+                                else:
+                                    profile_data[i].append("-")
+                            else:
+                                for c in colsp[col]:
+                                    #print(c, stat)
+                                    if c == stat:
+                                        if isinstance(colsp[col][c], float):
+                                            profile_data[i].append(round(colsp[col][c],2))
+                                        elif isinstance(colsp[col][c], str):
+                                            profile_data[i].append(colsp[col][c][:5])
+                                        else:
+                                            profile_data[i].append(colsp[col][c])
+
+                if maxc > profile_show_categorical:
+                    maxc = profile_show_categorical
+
+                minc = len(profile_data)
+
+                for i in range(minc, minc + maxc):
+                    profile_rows.append("Cat " + str(i - minc))
+                    profile_data.append([])
+                    for col in colsp:
+                        profile_data[i].append("-")
+
+
+
+
 
 
                 #print(profile_data)
