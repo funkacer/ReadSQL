@@ -11,6 +11,6 @@ create table test1 (id INTEGER PRIMARY KEY AUTO_INCREMENT, V integer, B integer,
 
 \insert test1;
 
-\import test1_4_analyse.sql;
+\load test1_4_analyse.sql;
 
 \print columns;

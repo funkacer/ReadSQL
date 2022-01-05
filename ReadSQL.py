@@ -59,7 +59,7 @@ db_version = "None: "
 show_cases = 5
 print_max_default = 100
 profile_max_categorical = 100
-profile_show_categorical = 10
+profile_show_categorical = 5
 rows_label = "(Row)"
 
 command_options = {}
@@ -275,6 +275,8 @@ def data_profile(rowsi, colsi, data, columns, rows, rows_label):
             colsp[columns[ci-1]]['max'] = None
             colsp[columns[ci-1]]['sum'] = None
             colsp[columns[ci-1]]['mean'] = None
+        if len(colsp[columns[ci-1]]['c']) > 0:
+            colsp[columns[ci-1]]['c'] = {k:v for k, v in sorted(colsp[columns[ci-1]]['c'].items(), reverse = True, key = lambda x: x[1])[:profile_max_categorical]}
     #print(colsp)
     return colsp
 
@@ -656,7 +658,7 @@ def parseCommand(command_line):
                 printoptions[op] = "'" + options[op] + "'"
             else:
                 printoptions[op] = options[op]
-        printYellow(f'''Command '{command}' with options {', '.join([str(str(op) + "=" + str(printoptions[op])) for op in printoptions])}.''')
+        printYellow(f'''Command '{command}' with options [{', '.join([str(str(op) + "=" + str(printoptions[op])) for op in printoptions])}].''')
         print()
 
     return command, options
@@ -721,7 +723,7 @@ def do_sql(sql):
             if options["filename"] == ":memory:":
                 print("\n" + "Using database in memory. Save or loose!")
                 try:
-                    conn = sqlite3.connect(":memory:", isolation_level=None)
+                    conn = sqlite3.connect(":memory:")
                     db_version = "Sqlite3 (memory): "
                 except Exception as e:
                     traceback.print_exc()
@@ -733,7 +735,8 @@ def do_sql(sql):
                 else:
                     print("Creating database '{}'.".format(full_filename))
                 try:
-                    conn = sqlite3.connect(full_filename, isolation_level=None)
+                    #conn = sqlite3.connect(full_filename, isolation_level=None)
+                    conn = sqlite3.connect(full_filename)
                     db_version = f"Sqlite3 ({full_filename}): "
                 except Exception as e:
                     traceback.print_exc()
@@ -762,7 +765,7 @@ def do_sql(sql):
                     conn = MySQLdb.connect(database = database, \
                     user = user, password = password, host = host, \
                     port = port, use_unicode=True,charset="utf8")
-                    conn.autocommit(True)
+                    #conn.autocommit(True)
                     #conn = mysql.connector.connect(host = "localhost", user = "root", password="admin", use_unicode=True,charset="utf8")
                     db_version = f"MySQL (Add schema!): "
                 except Exception as e:
@@ -786,7 +789,7 @@ def do_sql(sql):
                     conn = psycopg2.connect(database = database, \
                     user = user, password = password, host = host, \
                     port = port)
-                    conn.set_session(autocommit=True)
+                    #conn.set_session(autocommit=True)
                     #conn = mysql.connector.connect(host = "localhost", user = "root", password="admin", use_unicode=True,charset="utf8")
                     db_version = f"PostgreSQL (Add schema!): "
                 except Exception as e:
@@ -811,7 +814,7 @@ def do_sql(sql):
                       f'Server={server}\SQLEXPRESS;'
                       f'Database={database};'
                       'Trusted_Connection=yes;')
-                    conn.autocommit = True
+                    #conn.autocommit = True
                     #conn = mysql.connector.connect(host = "localhost", user = "root", password="admin", use_unicode=True,charset="utf8")
                     db_version = f"MsSQL (Add schema!): "
                 except Exception as e:
@@ -1119,11 +1122,34 @@ def do_sql(sql):
 
                 minc = len(profile_data)
 
-                for i in range(minc, minc + maxc):
-                    profile_rows.append("Cat " + str(i - minc))
+                for i in range(maxc):
+                    profile_rows.append("Cat " + str(i + 1) + "_1")
                     profile_data.append([])
                     for col in colsp:
-                        profile_data[i].append("-")
+                        if col != rows_label:
+                            if i < len(colsp[col]["c"]):
+                                #profile_data[i + minc].append(str(list(colsp[col]["c"].keys())[i]) + "(" + str(colsp[col]["c"][list(colsp[col]["c"].keys())[i]]) + ")")
+                                profile_data[i*3 + minc].append(str(list(colsp[col]["c"].keys())[i]))
+                            else:
+                                profile_data[i*3 + minc].append("-")
+                    profile_rows.append("Cat " + str(i + 1) + "_2")
+                    profile_data.append([])
+                    for col in colsp:
+                        if col != rows_label:
+                            if i < len(colsp[col]["c"]):
+                                #profile_data[i + minc].append(str(list(colsp[col]["c"].keys())[i]) + "(" + str(colsp[col]["c"][list(colsp[col]["c"].keys())[i]]) + ")")
+                                profile_data[i*3 + minc + 1].append(str(colsp[col]["c"][list(colsp[col]["c"].keys())[i]]))
+                            else:
+                                profile_data[i*3 + minc + 1].append("-")
+                    profile_rows.append("Cat " + str(i + 1) + "_3")
+                    profile_data.append([])
+                    for col in colsp:
+                        if col != rows_label:
+                            if i < len(colsp[col]["c"]):
+                                #profile_data[i + minc].append(str(list(colsp[col]["c"].keys())[i]) + "(" + str(colsp[col]["c"][list(colsp[col]["c"].keys())[i]]) + ")")
+                                profile_data[i*3 + minc + 2].append(str(round(100*colsp[col]["c"][list(colsp[col]["c"].keys())[i]]/colsp[col]["v"],2)) + "%")
+                            else:
+                                profile_data[i*3 + minc + 2].append("-")
 
 
 
@@ -1207,7 +1233,10 @@ def do_sql(sql):
             #conn.close()
         except Exception as e:
             #traceback.print_exc()
-            error = 1
+            #error = 1
+            pass
+        finally:
+            if conn: conn.commit()
         if data_new or columns_new:
             data = data_new
             columns = columns_new
