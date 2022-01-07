@@ -14,6 +14,7 @@ import sqlite3
 import traceback
 import socket
 import time
+from datetime import timedelta
 import random
 
 from importlib.metadata import version
@@ -35,6 +36,7 @@ print('\x1b[6;30;42m' + 'Success!' + '\x1b[0m')
 
 '''
 
+os.system('color')
 RED, YELLOW, GREEN, BLUE, COM, INVGREEN, INVRED, END = '\033[91m', '\033[33m', '\033[4m', '\033[34m', '\033[4m', '\033[97m\033[42m', '\033[97m\033[101m', '\033[0m'
 printRed = lambda sTxt: print(RED + sTxt + END)
 printYellow = lambda sTxt: print(YELLOW + sTxt + END)
@@ -710,7 +712,7 @@ def do_sql(sql):
     global conn, data, columns, db_filename, folder_exists, folder_name, db_version, db_schema, \
             fromm, too, stepp, randd, listt, colss
 
-    time.sleep(1)
+    #time.sleep(0.1)
 
     OK = 1
     if sql.startswith("\\"):
@@ -928,7 +930,10 @@ def do_sql(sql):
                     printCom(f"\n\\\\ SQL file '{full_filename}' command no {str(i+1)} \\\\")
                     #print(sql)
                     #print()
+                    start = time.perf_counter()
                     OK_returned = do_sql(sql_load)
+                    end = time.perf_counter()
+                    print("Elapsed time:", timedelta(seconds=end-start))
                     if OK_returned == 0: break
 
         elif command == "insert":
@@ -1319,7 +1324,10 @@ but {len(command_options[key1][key2])} '{key2}'.'''
                 printCom(f"\n\\\\ SQL file '{full_filename}' command no {str(i+1)} \\\\")
                 #print(sql)
                 #print()
+                start = time.perf_counter()
                 OK_returned = do_sql(sql)
+                end = time.perf_counter()
+                print("Elapsed time:", timedelta(seconds=end-start))
                 if OK_returned == 0: break
 
 
@@ -1362,7 +1370,10 @@ but {len(command_options[key1][key2])} '{key2}'.'''
                 printCom(f'''\n\\\\ SQL file '{sql_filename}' command no {str(i+1)} \\\\''')
                 #print(sql)
                 #print()
+                start = time.perf_counter()
                 OK_returned = do_sql(sql)
+                end = time.perf_counter()
+                print("Elapsed time:", timedelta(seconds=end-start))
                 if OK_returned == 0: break
             if OK_returned == 1:
                 print()
