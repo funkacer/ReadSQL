@@ -216,173 +216,176 @@ command_options["data profile"]["help2"] = []
 command_options["data profile"]["alternative"] = ["dp"]
 command_options["data profile"]["altoption"] = []
 
-
-def terminal_resize(colsp):
-    columns, rows = os.get_terminal_size()
-    #print(columns, rows)
-    width = 0
-    screen = 1
-    first = 0
-    for col in colsp:
-        if first == 0: first = colsp[col]['w']
-        width += colsp[col]['w']
-        if width > columns:
-            screen += 1
-            width = first + colsp[col]['w']
-        colsp[col]['screen'] = screen
-        #print(col, screen)
-
-
 def data_profile(rowsi, colsi, data, columns, rows, rows_label):
     nrows = len(data)
     ncols = len(columns)
     colsp = {}
-    colsp[0] = {}
-    colsp[0]['name'] = rows_label
-    colsp[0]['w'] = len(str(rows_label))  # Columns 0 is Row number with header '(Row)' = 5 chars
-    colsp[0]['t'] = "Quantitative"
-    colsp[0]['fnq'] = None
-    colsp[0]['n'] = 0
-    colsp[0]['v'] = 0
-    colsp[0]['c'] = {}
-    colsp[0]['sum'] = 0
-    colsp[0]['min'] = 0
-    colsp[0]['max'] = 0
-    colsp[0]['mean'] = 0
+    colsp[rows_label] = {}
+    colsp[rows_label]['w'] = len(str(rows_label))  # Columns 0 is Row number with header '(Row)' = 5 chars
+    colsp[rows_label]['t'] = "Quantitative"
+    colsp[rows_label]['fnq'] = None
+    colsp[rows_label]['n'] = 0
+    colsp[rows_label]['v'] = 0
+    colsp[rows_label]['c'] = {}
+    colsp[rows_label]['sum'] = 0
+    colsp[rows_label]['min'] = 0
+    colsp[rows_label]['max'] = 0
+    colsp[rows_label]['mean'] = 0
     for ci in colsi:
-        colsp[ci] = {}
-        colsp[ci]['name'] = columns[ci-1]
-        colsp[ci]['w'] = len(columns[ci-1]) + 1
+        colsp[columns[ci-1]] = {}
+        colsp[columns[ci-1]]['w'] = len(columns[ci-1]) + 1
         #colsp[columns[ci-1]]['t'] = "Categorical"
-        colsp[ci]['t'] = "Quantitative"
-        colsp[ci]['fnq'] = None
-        colsp[ci]['n'] = 0
-        colsp[ci]['v'] = 0
-        colsp[ci]['c'] = {}
-        colsp[ci]['sum'] = 0
-        colsp[ci]['m'] = []
-        colsp[ci]['q1'] = None
-        colsp[ci]['q2'] = None
-        colsp[ci]['q3'] = None
-        colsp[ci]['smd'] = 0
+        colsp[columns[ci-1]]['t'] = "Quantitative"
+        colsp[columns[ci-1]]['fnq'] = None
+        colsp[columns[ci-1]]['n'] = 0
+        colsp[columns[ci-1]]['v'] = 0
+        colsp[columns[ci-1]]['c'] = {}
+        colsp[columns[ci-1]]['sum'] = 0
+        colsp[columns[ci-1]]['m'] = []
+        colsp[columns[ci-1]]['q1'] = None
+        colsp[columns[ci-1]]['q2'] = None
+        colsp[columns[ci-1]]['q3'] = None
+        colsp[columns[ci-1]]['smd'] = 0
     for ri in rowsi:
-        if len(str(rows[ri-1])) > colsp[0]['w']: colsp[0]['w'] = len(str(rows[ri-1]))
+        if len(str(rows[ri-1])) > colsp[rows_label]['w']: colsp[rows_label]['w'] = len(str(rows[ri-1]))
         for ci in colsi:
             w = len(str(data[ri-1][ci-1])) + 1
-            if w > colsp[ci]['w']: colsp[ci]['w'] = w
+            if w > colsp[columns[ci-1]]['w']: colsp[columns[ci-1]]['w'] = w
             if data[ri-1][ci-1] is not None:
-                colsp[ci]['v'] += 1
-                if colsp[ci]['t'] == "Quantitative":
+                colsp[columns[ci-1]]['v'] += 1
+                if colsp[columns[ci-1]]['t'] == "Quantitative":
                     try:
                         a = float(data[ri-1][ci-1])
-                        if colsp[ci]['v'] == 1:
-                            colsp[ci]['min'] = data[ri-1][ci-1]
-                            colsp[ci]['max'] = data[ri-1][ci-1]
-                        elif data[ri-1][ci-1] < colsp[ci]['min']:
-                            colsp[ci]['min'] = data[ri-1][ci-1]
-                        elif data[ri-1][ci-1] > colsp[ci]['max']:
-                            colsp[ci]['max'] = data[ri-1][ci-1]
-                        colsp[ci]['sum'] += data[ri-1][ci-1]
-                        colsp[ci]['m'].append(data[ri-1][ci-1])
+                        if colsp[columns[ci-1]]['v'] == 1:
+                            colsp[columns[ci-1]]['min'] = data[ri-1][ci-1]
+                            colsp[columns[ci-1]]['max'] = data[ri-1][ci-1]
+                        elif data[ri-1][ci-1] < colsp[columns[ci-1]]['min']:
+                            colsp[columns[ci-1]]['min'] = data[ri-1][ci-1]
+                        elif data[ri-1][ci-1] > colsp[columns[ci-1]]['max']:
+                            colsp[columns[ci-1]]['max'] = data[ri-1][ci-1]
+                        colsp[columns[ci-1]]['sum'] += data[ri-1][ci-1]
+                        colsp[columns[ci-1]]['m'].append(data[ri-1][ci-1])
                     except:
-                        colsp[ci]['t'] = "Categorical"
-                        if colsp[ci]['fnq'] is None:
-                            colsp[ci]['fnq'] = data[ri-1][ci-1]
-                if data[ri-1][ci-1] not in colsp[ci]['c']:
-                    colsp[ci]['c'][data[ri-1][ci-1]] = 1
+                        colsp[columns[ci-1]]['t'] = "Categorical"
+                        if colsp[columns[ci-1]]['fnq'] is None:
+                            colsp[columns[ci-1]]['fnq'] = data[ri-1][ci-1]
+                if data[ri-1][ci-1] not in colsp[columns[ci-1]]['c']:
+                    colsp[columns[ci-1]]['c'][data[ri-1][ci-1]] = 1
                 else:
-                    colsp[ci]['c'][data[ri-1][ci-1]] += 1
+                    colsp[columns[ci-1]]['c'][data[ri-1][ci-1]] += 1
             else:
                 #count None
-                colsp[ci]['n'] += 1
+                colsp[columns[ci-1]]['n'] += 1
     for ci in colsi:
-        if colsp[ci]['v'] > 0 and colsp[ci]['t'] == "Quantitative":
-            colsp[ci]['mean'] = colsp[ci]['sum'] / colsp[ci]['v']
-            lenc = len(colsp[ci]['m'])
+        if colsp[columns[ci-1]]['v'] > 0 and colsp[columns[ci-1]]['t'] == "Quantitative":
+            colsp[columns[ci-1]]['mean'] = colsp[columns[ci-1]]['sum'] / colsp[columns[ci-1]]['v']
+            lenc = len(colsp[columns[ci-1]]['m'])
             if lenc > 0:
-                #print(ci, sorted(colsp[ci]['m']))
-                colsp[ci]['m'] = sorted(colsp[ci]['m'])
+                #print(columns[ci-1], sorted(colsp[columns[ci-1]]['m']))
+                colsp[columns[ci-1]]['m'] = sorted(colsp[columns[ci-1]]['m'])
                 if lenc >= 1 and lenc % 2:
-                    colsp[ci]['q2'] = colsp[ci]['m'][int((lenc+1)/2)-1]
+                    colsp[columns[ci-1]]['q2'] = colsp[columns[ci-1]]['m'][int((lenc+1)/2)-1]
                 if lenc >= 2 and (lenc % 2) == 0:
-                    colsp[ci]['q2'] = (colsp[ci]['m'][int(lenc/2)-1] + colsp[ci]['m'][int(lenc/2)])/2    #mean of mid cases
-            lenc = int(len(colsp[ci]['m'])/2)
+                    colsp[columns[ci-1]]['q2'] = (colsp[columns[ci-1]]['m'][int(lenc/2)-1] + colsp[columns[ci-1]]['m'][int(lenc/2)])/2    #mean of mid cases
+            lenc = int(len(colsp[columns[ci-1]]['m'])/2)
             if lenc > 0:
-                #print(ci, sorted(colsp[ci]['m']))
-                #colsp[ci]['m'] = sorted(colsp[ci]['m'])
+                #print(columns[ci-1], sorted(colsp[columns[ci-1]]['m']))
+                #colsp[columns[ci-1]]['m'] = sorted(colsp[columns[ci-1]]['m'])
                 if lenc >= 1 and lenc % 2:
-                    colsp[ci]['q1'] = colsp[ci]['m'][int((lenc+1)/2)-1]
+                    colsp[columns[ci-1]]['q1'] = colsp[columns[ci-1]]['m'][int((lenc+1)/2)-1]
                 if lenc >= 2 and (lenc % 2) == 0:
-                    colsp[ci]['q1'] = (colsp[ci]['m'][int(lenc/2)-1] + colsp[ci]['m'][int(lenc/2)])/2    #mean of mid cases
+                    colsp[columns[ci-1]]['q1'] = (colsp[columns[ci-1]]['m'][int(lenc/2)-1] + colsp[columns[ci-1]]['m'][int(lenc/2)])/2    #mean of mid cases
                 if lenc >= 1 and lenc % 2:
-                    colsp[ci]['q3'] = colsp[ci]['m'][-1*int((lenc+1)/2)]
+                    colsp[columns[ci-1]]['q3'] = colsp[columns[ci-1]]['m'][-1*int((lenc+1)/2)]
                 if lenc >= 2 and (lenc % 2) == 0:
-                    colsp[ci]['q3'] = (colsp[ci]['m'][-1*int(lenc/2)] + colsp[ci]['m'][-1*(int(lenc/2))-1])/2    #mean of mid cases
-            for i in colsp[ci]['m']:
-                colsp[ci]['smd'] += (i - colsp[ci]['mean'])**2
+                    colsp[columns[ci-1]]['q3'] = (colsp[columns[ci-1]]['m'][-1*int(lenc/2)] + colsp[columns[ci-1]]['m'][-1*(int(lenc/2))-1])/2    #mean of mid cases
+            for i in colsp[columns[ci-1]]['m']:
+                colsp[columns[ci-1]]['smd'] += (i - colsp[columns[ci-1]]['mean'])**2
         else:
-            colsp[ci]['min'] = None
-            colsp[ci]['max'] = None
-            colsp[ci]['sum'] = None
-            colsp[ci]['mean'] = None
-            colsp[ci]['q1'] = None
-            colsp[ci]['q2'] = None
-            colsp[ci]['q3'] = None
-        if len(colsp[ci]['c']) > 0:
-            colsp[ci]['c'] = {k:v for k, v in sorted(colsp[ci]['c'].items(), reverse = True, key = lambda x: x[1])[:profile_max_categorical]}
+            colsp[columns[ci-1]]['min'] = None
+            colsp[columns[ci-1]]['max'] = None
+            colsp[columns[ci-1]]['sum'] = None
+            colsp[columns[ci-1]]['mean'] = None
+            colsp[columns[ci-1]]['q1'] = None
+            colsp[columns[ci-1]]['q2'] = None
+            colsp[columns[ci-1]]['q3'] = None
+        if len(colsp[columns[ci-1]]['c']) > 0:
+            colsp[columns[ci-1]]['c'] = {k:v for k, v in sorted(colsp[columns[ci-1]]['c'].items(), reverse = True, key = lambda x: x[1])[:profile_max_categorical]}
     #print(colsp)
     return colsp
 
 
-def print_data(rowsi, colsi, data, columns, rows, rows_label):
-    #print(rows_show)
-    colsp = data_profile(rowsi, colsi, data, columns, rows, rows_label)
-    terminal_resize(colsp)
-    #print(row_format)
-    #row_format = row_format_l(colsp)
-    #print(row_format)
-    #print(row_format.format(*[colsp[ci]['name'] for ci in colsp]))
-    for ci in colsp:
-        screen_max = colsp[ci]['screen']
-    screen = 0
-    while screen < screen_max:
-        #print(row_format)
-        colspart = {}
-        if screen > 0:
-            colspart[0] = colsp[0]
-            print("...")
-        for ci in colsp:
-            if colsp[ci]['screen'] == screen + 1:
-                colspart[ci] = colsp[ci]
-        row_format = row_format_l(colspart)
-        print(row_format.format(*[colsp[ci]['name'] for ci in colspart]))
-        for ri in rowsi:
-            #print(row_format.format(profile_rows[i], *[str(col) for col in row if col in colspart]))    # Null to None
-            print(row_format.format(str(rows[ri-1]), *[str(col) for ci, col in enumerate(data[ri-1]) if ci+1 in colspart]))    # Null to None
-        screen += 1
-
-
-def show_data():
-            nrows = len(data)
-            ncols = len(columns)
-            rows = range(1, nrows + 1)
-            colsi = range(1, ncols + 1)
-            if nrows <= show_cases*2:
-                printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing all cases with all columns.")
-                rowsi = range(1, nrows + 1)
-                print_data(rowsi, colsi, data, columns, rows, rows_label)
+def data_profile_old(rowsi, colsi, data, columns, rows, rows_label):
+    nrows = len(data)
+    ncols = len(columns)
+    colsp = {}
+    colsp['(Row)'] = {}
+    colsp['(Row)']['w'] = 5  # Columns 0 is Row number with header '(Row)' = 5 chars
+    colsp['(Row)']['t'] = "Quantitative"
+    colsp['(Row)']['fnq'] = None
+    colsp['(Row)']['n'] = 0
+    colsp['(Row)']['v'] = len(rowsi)
+    colsp['(Row)']['c'] = {}
+    colsp['(Row)']['sum'] = sum(rowsi)
+    colsp['(Row)']['min'] = min(rowsi)
+    colsp['(Row)']['max'] = max(rowsi)
+    colsp['(Row)']['mean'] = sum(rowsi) / len(rowsi)
+    for ci in colsi:
+        colsp[columns[ci-1]] = {}
+        colsp[columns[ci-1]]['w'] = len(columns[ci-1]) + 1
+        #colsp[columns[ci-1]]['t'] = "Categorical"
+        colsp[columns[ci-1]]['t'] = "Quantitative"
+        colsp[columns[ci-1]]['fnq'] = None
+        colsp[columns[ci-1]]['n'] = 0
+        colsp[columns[ci-1]]['v'] = 0
+        colsp[columns[ci-1]]['c'] = {}
+        #colsp[columns[ci-1]]['min'] = data[min(rowsi)][ci-1]
+        #colsp[columns[ci-1]]['max'] = data[min(rowsi)][ci-1]
+        colsp[columns[ci-1]]['sum'] = 0
+        #colsp[columns[ci-1]]['mean'] = colsp[columns[ci-1]]['sum'] / colsp[columns[ci-1]]['v']
+    for ri in rowsi:
+        if len(str(ri)) > colsp['(Row)']['w']: colsp['(Row)']['w'] = len(str(ri))
+        if ri not in colsp['(Row)']['c']:
+            colsp['(Row)']['c'][ri] = 1
+        else:
+            colsp['(Row)']['c'][ri] += 1
+        for ci in colsi:
+            w = len(str(data[ri-1][ci-1])) + 1
+            if w > colsp[columns[ci-1]]['w']: colsp[columns[ci-1]]['w'] = w
+            if data[ri-1][ci-1] is not None:
+                colsp[columns[ci-1]]['v'] += 1
+                if colsp[columns[ci-1]]['t'] == "Quantitative":
+                    try:
+                        a = float(data[ri-1][ci-1])
+                        if colsp[columns[ci-1]]['v'] == 1:
+                            colsp[columns[ci-1]]['min'] = data[ri-1][ci-1]
+                            colsp[columns[ci-1]]['max'] = data[ri-1][ci-1]
+                        elif data[ri-1][ci-1] < colsp[columns[ci-1]]['min']:
+                            colsp[columns[ci-1]]['min'] = data[ri-1][ci-1]
+                        elif data[ri-1][ci-1] > colsp[columns[ci-1]]['max']:
+                            colsp[columns[ci-1]]['max'] = data[ri-1][ci-1]
+                        colsp[columns[ci-1]]['sum'] += data[ri-1][ci-1]
+                    except:
+                        colsp[columns[ci-1]]['t'] = "Categorical"
+                        if colsp[columns[ci-1]]['fnq'] is None:
+                            colsp[columns[ci-1]]['fnq'] = data[ri-1][ci-1]
+                if data[ri-1][ci-1] not in colsp[columns[ci-1]]['c']:
+                    colsp[columns[ci-1]]['c'][data[ri-1][ci-1]] = 1
+                else:
+                    colsp[columns[ci-1]]['c'][data[ri-1][ci-1]] += 1
             else:
-                printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing first / last {show_cases} cases with all columns.")
-                data_show = data[:show_cases]
-                data_show += [["" for c in columns]]
-                data_show += data[-show_cases:]
-                rows = list(range(1,show_cases+1))
-                rows += ["..."]
-                rows += list(range(nrows-show_cases+1, nrows +1))
-                #print("Rows:", rows)
-                rowsi = range(1, len(data_show) + 1)
-                print_data(rowsi, colsi, data_show, columns, rows, rows_label)
-
+                #count None
+                colsp[columns[ci-1]]['n'] += 1
+    for ci in colsi:
+        if colsp[columns[ci-1]]['v'] > 0 and colsp[columns[ci-1]]['t'] == "Quantitative":
+            colsp[columns[ci-1]]['mean'] = colsp[columns[ci-1]]['sum'] / colsp[columns[ci-1]]['v']
+        else:
+            colsp[columns[ci-1]]['min'] = None
+            colsp[columns[ci-1]]['max'] = None
+            colsp[columns[ci-1]]['sum'] = None
+            colsp[columns[ci-1]]['mean'] = None
+    #print(colsp)
+    return colsp
 
 def data_select():
     global fromm, too, stepp, randd, listt, colss, listi
@@ -450,7 +453,35 @@ def data_select():
             rowsi = range(fromm, too+1, stepp)
     return rowsi, colsi
 
-
+def print_data():
+    nrows = len(data)
+    rows = range(1, nrows + 1)
+    ncols = len(columns)
+    colsi = range(1, ncols + 1)
+    if nrows <= show_cases*2:
+        #print(rows_show)
+        rowsi = range(1, nrows + 1)
+        colsp = data_profile(rowsi, colsi, data, columns, rows, rows_label)
+        row_format = row_format_l(colsp)
+        #print(row_format)
+        printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing all cases with all columns.")
+        print(row_format.format(*colsp))
+        for ri in rowsi:
+            print(row_format.format(str(ri), *[str(col) for col in [data[ri-1][ci-1] for ci in colsi]]))    # Null to None
+    else:
+        rowsi = list(range(1,show_cases+1))
+        rowsi += list(range(nrows-show_cases+1, nrows +1))
+        #print(listt)
+        colsp = data_profile(rowsi, colsi, data, columns, rows, rows_label)
+        row_format = row_format_l(colsp)
+        #print(row_format)
+        printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing first / last {show_cases} cases with all columns.")
+        print(row_format.format(*colsp))
+        for ri in range(1,show_cases+1):
+            print(row_format.format(str(ri), *[str(col) for col in [data[ri-1][ci-1] for ci in colsi]]))    # Null to None
+        print(row_format.format("...", *["" for c in columns]))
+        for ri in range(nrows-show_cases+1, nrows +1):
+            print(row_format.format(str(ri), *[str(col) for col in [data[ri-1][ci-1] for ci in colsi]]))    # Null to None
 
 
 def parseArgv(argument_list):
@@ -874,7 +905,7 @@ def do_sql(sql):
                     if len(data_new) > 0:
                         data = data_new
                         columns = columns_new
-                        show_data()
+                        print_data()
                     else:
                         print()
                         print("! There are no data returned from this sql query !")
@@ -933,7 +964,6 @@ def do_sql(sql):
                     start = time.perf_counter()
                     OK_returned = do_sql(sql_load)
                     end = time.perf_counter()
-                    print()
                     print("Elapsed time:", timedelta(seconds=end-start))
                     if OK_returned == 0: break
 
@@ -1059,10 +1089,14 @@ def do_sql(sql):
                     else:
                         printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} cases from {fromm} to {too} step {stepp} with all columns.")
 
-                rows = range(1, nrows + 1)
-                #print(rows)
-                print_data(rowsi, colsi, data, columns, rows, rows_label)
+                rows = rowsi
+                colsp = data_profile(rowsi, colsi, data, columns, rows, rows_label)
+                row_format = row_format_l(colsp)
+                #print(row_format)
 
+                print(row_format.format(*colsp))
+                for ri in rowsi:
+                    print(row_format.format(str(ri), *[str(col) for col in [data[ri-1][ci-1] for ci in colsi]]))    # Null to None
 
 
         elif command == "data" or command == "data profile":
@@ -1098,48 +1132,46 @@ def do_sql(sql):
                 maxc = 0
                 for i, stat in enumerate(stats):
                     profile_data.append([])
-                    for ci in colsp:
-                        if ci > 0:  #rows_label
+                    for col in colsp:
+                        if col != rows_label:
                             if stat == "v%":
-                                profile_data[i].append(round(100 * colsp[ci]["v"] / (colsp[ci]["v"] + colsp[ci]["n"]), 2))
+                                profile_data[i].append(round(100 * colsp[col]["v"] / (colsp[col]["v"] + colsp[col]["n"]), 2))
                             elif stat == "ran":
-                                if colsp[ci]["max"] and colsp[ci]["max"]:
-                                    profile_data[i].append(round(colsp[ci]["max"] - colsp[ci]["min"], 2))
+                                if colsp[col]["max"] and colsp[col]["max"]:
+                                    profile_data[i].append(colsp[col]["max"] - colsp[col]["min"])
                                 else:
                                     profile_data[i].append("-")
                             elif stat == "iqr":
-                                if colsp[ci]["q3"] and colsp[ci]["q1"]:
-                                    profile_data[i].append(round(colsp[ci]["q3"] - colsp[ci]["q1"], 2))
+                                if colsp[col]["q3"] and colsp[col]["q1"]:
+                                    profile_data[i].append(round(colsp[col]["q3"] - colsp[col]["q1"], 2))
                                 else:
                                     profile_data[i].append("-")
                             elif stat == "var":
-                                if colsp[ci]["smd"] and colsp[ci]["v"]:
-                                    profile_data[i].append(round(colsp[ci]["smd"] / colsp[ci]["v"], 2))
+                                if colsp[col]["smd"] and colsp[col]["v"]:
+                                    profile_data[i].append(round(colsp[col]["smd"] / colsp[col]["v"], 2))
                                 else:
                                     profile_data[i].append("-")
                             elif stat == "std":
-                                if colsp[ci]["smd"] and colsp[ci]["v"]:
-                                    profile_data[i].append(round((colsp[ci]["smd"] / colsp[ci]["v"])**0.5, 2))
+                                if colsp[col]["smd"] and colsp[col]["v"]:
+                                    profile_data[i].append(round((colsp[col]["smd"] / colsp[col]["v"])**0.5, 2))
                                 else:
                                     profile_data[i].append("-")
                             elif stat == "uni":
-                                if len(colsp[ci]["c"]) < profile_max_categorical:
-                                    profile_data[i].append(len(colsp[ci]["c"]))
-                                    if len(colsp[ci]["c"]) > maxc: maxc = len(colsp[ci]["c"])
+                                if len(colsp[col]["c"]) < profile_max_categorical:
+                                    profile_data[i].append(len(colsp[col]["c"]))
+                                    if len(colsp[col]["c"]) > maxc: maxc = len(colsp[col]["c"])
                                 else:
                                     profile_data[i].append("-")
                             else:
-                                for c in colsp[ci]:
+                                for c in colsp[col]:
                                     #print(c, stat)
                                     if c == stat:
-                                        if isinstance(colsp[ci][c], float):
-                                            profile_data[i].append(round(colsp[ci][c],2))
-                                        elif isinstance(colsp[ci][c], str):
-                                            profile_data[i].append(colsp[ci][c][:5])    # Quant, Categ
-                                        elif colsp[ci][c] is None:
-                                            profile_data[i].append("-")
+                                        if isinstance(colsp[col][c], float):
+                                            profile_data[i].append(round(colsp[col][c],2))
+                                        elif isinstance(colsp[col][c], str):
+                                            profile_data[i].append(colsp[col][c][:5])
                                         else:
-                                            profile_data[i].append(colsp[ci][c])
+                                            profile_data[i].append(colsp[col][c])
 
                 if maxc > profile_show_categorical:
                     maxc = profile_show_categorical
@@ -1151,27 +1183,27 @@ def do_sql(sql):
                     profile_data.append([])
                     for col in colsp:
                         if col != rows_label:
-                            if i < len(colsp[ci]["c"]):
-                                #profile_data[i + minc].append(str(list(colsp[ci]["c"].keys())[i]) + "(" + str(colsp[ci]["c"][list(colsp[ci]["c"].keys())[i]]) + ")")
-                                profile_data[i*3 + minc].append(str(list(colsp[ci]["c"].keys())[i]))
+                            if i < len(colsp[col]["c"]):
+                                #profile_data[i + minc].append(str(list(colsp[col]["c"].keys())[i]) + "(" + str(colsp[col]["c"][list(colsp[col]["c"].keys())[i]]) + ")")
+                                profile_data[i*3 + minc].append(str(list(colsp[col]["c"].keys())[i]))
                             else:
                                 profile_data[i*3 + minc].append("-")
                     profile_rows.append("Cat " + str(i + 1) + "_2")
                     profile_data.append([])
                     for col in colsp:
                         if col != rows_label:
-                            if i < len(colsp[ci]["c"]):
-                                #profile_data[i + minc].append(str(list(colsp[ci]["c"].keys())[i]) + "(" + str(colsp[ci]["c"][list(colsp[ci]["c"].keys())[i]]) + ")")
-                                profile_data[i*3 + minc + 1].append(str(colsp[ci]["c"][list(colsp[ci]["c"].keys())[i]]))
+                            if i < len(colsp[col]["c"]):
+                                #profile_data[i + minc].append(str(list(colsp[col]["c"].keys())[i]) + "(" + str(colsp[col]["c"][list(colsp[col]["c"].keys())[i]]) + ")")
+                                profile_data[i*3 + minc + 1].append(str(colsp[col]["c"][list(colsp[col]["c"].keys())[i]]))
                             else:
                                 profile_data[i*3 + minc + 1].append("-")
                     profile_rows.append("Cat " + str(i + 1) + "_3")
                     profile_data.append([])
-                    for ci in colsp:
-                        if col > 0: # rows_label
-                            if i < len(colsp[ci]["c"]):
-                                #profile_data[i + minc].append(str(list(colsp[ci]["c"].keys())[i]) + "(" + str(colsp[ci]["c"][list(colsp[ci]["c"].keys())[i]]) + ")")
-                                profile_data[i*3 + minc + 2].append(str(round(100*colsp[ci]["c"][list(colsp[ci]["c"].keys())[i]]/colsp[ci]["v"],2)) + "%")
+                    for col in colsp:
+                        if col != rows_label:
+                            if i < len(colsp[col]["c"]):
+                                #profile_data[i + minc].append(str(list(colsp[col]["c"].keys())[i]) + "(" + str(colsp[col]["c"][list(colsp[col]["c"].keys())[i]]) + ")")
+                                profile_data[i*3 + minc + 2].append(str(round(100*colsp[col]["c"][list(colsp[col]["c"].keys())[i]]/colsp[col]["v"],2)) + "%")
                             else:
                                 profile_data[i*3 + minc + 2].append("-")
 
@@ -1184,32 +1216,13 @@ def do_sql(sql):
                 colsi = range(1, ncols + 1)
                 rowsi = range(1, nrows + 1)
 
-                #colsp = data_profile(rowsi, colsi, profile_data, profile_columns, profile_rows, profile_rows_label)
-                print_data(rowsi, colsi, profile_data, profile_columns, profile_rows, profile_rows_label)
-
-                '''
+                colsp = data_profile(rowsi, colsi, profile_data, profile_columns, profile_rows, profile_rows_label)
                 row_format = row_format_l(colsp)
                 #print(row_format)
-                for col in colsp:
-                    screen_max = colsp[ci]['screen']
-                screen = 0
-                while screen < screen_max:
-                    #print(row_format)
-                    colspart = {}
-                    if screen > 0:
-                        colspart[profile_rows_label] = colsp[profile_rows_label]
-                        print("...")
-                    for col in colsp:
-                        if colsp[ci]['screen'] == screen + 1:
-                            colspart[ci] = colsp[ci]
-                    row_format = row_format_l(colspart)
-                    print(row_format.format(*colspart))
-                    for i, row in enumerate(profile_data):
-                        #print(row_format.format(profile_rows[i], *[str(col) for col in row if col in colspart]))    # Null to None
-                        print(row_format.format(profile_rows[i], *[str(col) for ci, col in enumerate(row) if list(colsp.keys())[ci+1] in colspart]))    # Null to None
-                    screen += 1
 
-                '''
+                print(row_format.format(*colsp))
+                for i, row in enumerate(profile_data):
+                    print(row_format.format(profile_rows[i], *[str(col) for col in row]))    # Null to None
 
 
         elif sql.startswith("\pause:"):
@@ -1277,9 +1290,7 @@ def do_sql(sql):
         if data_new or columns_new:
             data = data_new
             columns = columns_new
-            show_data()
-
-
+            print_data()
         elif not error:
             printInvGreen("! There are no data returned from this sql query !")
         else:
@@ -1361,7 +1372,6 @@ but {len(command_options[key1][key2])} '{key2}'.'''
                 start = time.perf_counter()
                 OK_returned = do_sql(sql)
                 end = time.perf_counter()
-                print()
                 print("Elapsed time:", timedelta(seconds=end-start))
                 if OK_returned == 0: break
 
@@ -1408,7 +1418,6 @@ but {len(command_options[key1][key2])} '{key2}'.'''
                 start = time.perf_counter()
                 OK_returned = do_sql(sql)
                 end = time.perf_counter()
-                print()
                 print("Elapsed time:", timedelta(seconds=end-start))
                 if OK_returned == 0: break
             if OK_returned == 1:

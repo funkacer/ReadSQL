@@ -219,7 +219,7 @@ command_options["data profile"]["altoption"] = []
 
 def terminal_resize(colsp):
     columns, rows = os.get_terminal_size()
-    #print(columns, rows)
+    print(columns, rows)
     width = 0
     screen = 1
     first = 0
@@ -230,7 +230,7 @@ def terminal_resize(colsp):
             screen += 1
             width = first + colsp[col]['w']
         colsp[col]['screen'] = screen
-        #print(col, screen)
+        print(col, screen)
 
 
 def data_profile(rowsi, colsi, data, columns, rows, rows_label):
@@ -339,6 +339,7 @@ def print_data(rowsi, colsi, data, columns, rows, rows_label):
     colsp = data_profile(rowsi, colsi, data, columns, rows, rows_label)
     terminal_resize(colsp)
     #print(row_format)
+    
     #row_format = row_format_l(colsp)
     #print(row_format)
     #print(row_format.format(*[colsp[ci]['name'] for ci in colsp]))
@@ -359,6 +360,7 @@ def print_data(rowsi, colsi, data, columns, rows, rows_label):
         for ri in rowsi:
             #print(row_format.format(profile_rows[i], *[str(col) for col in row if col in colspart]))    # Null to None
             print(row_format.format(str(rows[ri-1]), *[str(col) for ci, col in enumerate(data[ri-1]) if ci+1 in colspart]))    # Null to None
+        
         screen += 1
 
 
@@ -379,10 +381,10 @@ def show_data():
                 rows = list(range(1,show_cases+1))
                 rows += ["..."]
                 rows += list(range(nrows-show_cases+1, nrows +1))
-                #print("Rows:", rows)
+                print("Rows:", rows)
                 rowsi = range(1, len(data_show) + 1)
                 print_data(rowsi, colsi, data_show, columns, rows, rows_label)
-
+                
 
 def data_select():
     global fromm, too, stepp, randd, listt, colss, listi
@@ -933,7 +935,6 @@ def do_sql(sql):
                     start = time.perf_counter()
                     OK_returned = do_sql(sql_load)
                     end = time.perf_counter()
-                    print()
                     print("Elapsed time:", timedelta(seconds=end-start))
                     if OK_returned == 0: break
 
@@ -1059,10 +1060,14 @@ def do_sql(sql):
                     else:
                         printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} cases from {fromm} to {too} step {stepp} with all columns.")
 
-                rows = range(1, nrows + 1)
-                #print(rows)
-                print_data(rowsi, colsi, data, columns, rows, rows_label)
+                rows = rowsi
+                colsp = data_profile(rowsi, colsi, data, columns, rows, rows_label)
+                row_format = row_format_l(colsp)
+                #print(row_format)
 
+                print(row_format.format(*colsp))
+                for ri in rowsi:
+                    print(row_format.format(str(ri), *[str(col) for col in [data[ri-1][ci-1] for ci in colsi]]))    # Null to None
 
 
         elif command == "data" or command == "data profile":
@@ -1098,48 +1103,46 @@ def do_sql(sql):
                 maxc = 0
                 for i, stat in enumerate(stats):
                     profile_data.append([])
-                    for ci in colsp:
-                        if ci > 0:  #rows_label
+                    for col in colsp:
+                        if col != rows_label:
                             if stat == "v%":
-                                profile_data[i].append(round(100 * colsp[ci]["v"] / (colsp[ci]["v"] + colsp[ci]["n"]), 2))
+                                profile_data[i].append(round(100 * colsp[col]["v"] / (colsp[col]["v"] + colsp[col]["n"]), 2))
                             elif stat == "ran":
-                                if colsp[ci]["max"] and colsp[ci]["max"]:
-                                    profile_data[i].append(round(colsp[ci]["max"] - colsp[ci]["min"], 2))
+                                if colsp[col]["max"] and colsp[col]["max"]:
+                                    profile_data[i].append(colsp[col]["max"] - colsp[col]["min"])
                                 else:
                                     profile_data[i].append("-")
                             elif stat == "iqr":
-                                if colsp[ci]["q3"] and colsp[ci]["q1"]:
-                                    profile_data[i].append(round(colsp[ci]["q3"] - colsp[ci]["q1"], 2))
+                                if colsp[col]["q3"] and colsp[col]["q1"]:
+                                    profile_data[i].append(round(colsp[col]["q3"] - colsp[col]["q1"], 2))
                                 else:
                                     profile_data[i].append("-")
                             elif stat == "var":
-                                if colsp[ci]["smd"] and colsp[ci]["v"]:
-                                    profile_data[i].append(round(colsp[ci]["smd"] / colsp[ci]["v"], 2))
+                                if colsp[col]["smd"] and colsp[col]["v"]:
+                                    profile_data[i].append(round(colsp[col]["smd"] / colsp[col]["v"], 2))
                                 else:
                                     profile_data[i].append("-")
                             elif stat == "std":
-                                if colsp[ci]["smd"] and colsp[ci]["v"]:
-                                    profile_data[i].append(round((colsp[ci]["smd"] / colsp[ci]["v"])**0.5, 2))
+                                if colsp[col]["smd"] and colsp[col]["v"]:
+                                    profile_data[i].append(round((colsp[col]["smd"] / colsp[col]["v"])**0.5, 2))
                                 else:
                                     profile_data[i].append("-")
                             elif stat == "uni":
-                                if len(colsp[ci]["c"]) < profile_max_categorical:
-                                    profile_data[i].append(len(colsp[ci]["c"]))
-                                    if len(colsp[ci]["c"]) > maxc: maxc = len(colsp[ci]["c"])
+                                if len(colsp[col]["c"]) < profile_max_categorical:
+                                    profile_data[i].append(len(colsp[col]["c"]))
+                                    if len(colsp[col]["c"]) > maxc: maxc = len(colsp[col]["c"])
                                 else:
                                     profile_data[i].append("-")
                             else:
-                                for c in colsp[ci]:
+                                for c in colsp[col]:
                                     #print(c, stat)
                                     if c == stat:
-                                        if isinstance(colsp[ci][c], float):
-                                            profile_data[i].append(round(colsp[ci][c],2))
-                                        elif isinstance(colsp[ci][c], str):
-                                            profile_data[i].append(colsp[ci][c][:5])    # Quant, Categ
-                                        elif colsp[ci][c] is None:
-                                            profile_data[i].append("-")
+                                        if isinstance(colsp[col][c], float):
+                                            profile_data[i].append(round(colsp[col][c],2))
+                                        elif isinstance(colsp[col][c], str):
+                                            profile_data[i].append(colsp[col][c][:5])
                                         else:
-                                            profile_data[i].append(colsp[ci][c])
+                                            profile_data[i].append(colsp[col][c])
 
                 if maxc > profile_show_categorical:
                     maxc = profile_show_categorical
@@ -1151,27 +1154,27 @@ def do_sql(sql):
                     profile_data.append([])
                     for col in colsp:
                         if col != rows_label:
-                            if i < len(colsp[ci]["c"]):
-                                #profile_data[i + minc].append(str(list(colsp[ci]["c"].keys())[i]) + "(" + str(colsp[ci]["c"][list(colsp[ci]["c"].keys())[i]]) + ")")
-                                profile_data[i*3 + minc].append(str(list(colsp[ci]["c"].keys())[i]))
+                            if i < len(colsp[col]["c"]):
+                                #profile_data[i + minc].append(str(list(colsp[col]["c"].keys())[i]) + "(" + str(colsp[col]["c"][list(colsp[col]["c"].keys())[i]]) + ")")
+                                profile_data[i*3 + minc].append(str(list(colsp[col]["c"].keys())[i]))
                             else:
                                 profile_data[i*3 + minc].append("-")
                     profile_rows.append("Cat " + str(i + 1) + "_2")
                     profile_data.append([])
                     for col in colsp:
                         if col != rows_label:
-                            if i < len(colsp[ci]["c"]):
-                                #profile_data[i + minc].append(str(list(colsp[ci]["c"].keys())[i]) + "(" + str(colsp[ci]["c"][list(colsp[ci]["c"].keys())[i]]) + ")")
-                                profile_data[i*3 + minc + 1].append(str(colsp[ci]["c"][list(colsp[ci]["c"].keys())[i]]))
+                            if i < len(colsp[col]["c"]):
+                                #profile_data[i + minc].append(str(list(colsp[col]["c"].keys())[i]) + "(" + str(colsp[col]["c"][list(colsp[col]["c"].keys())[i]]) + ")")
+                                profile_data[i*3 + minc + 1].append(str(colsp[col]["c"][list(colsp[col]["c"].keys())[i]]))
                             else:
                                 profile_data[i*3 + minc + 1].append("-")
                     profile_rows.append("Cat " + str(i + 1) + "_3")
                     profile_data.append([])
-                    for ci in colsp:
-                        if col > 0: # rows_label
-                            if i < len(colsp[ci]["c"]):
-                                #profile_data[i + minc].append(str(list(colsp[ci]["c"].keys())[i]) + "(" + str(colsp[ci]["c"][list(colsp[ci]["c"].keys())[i]]) + ")")
-                                profile_data[i*3 + minc + 2].append(str(round(100*colsp[ci]["c"][list(colsp[ci]["c"].keys())[i]]/colsp[ci]["v"],2)) + "%")
+                    for col in colsp:
+                        if col != rows_label:
+                            if i < len(colsp[col]["c"]):
+                                #profile_data[i + minc].append(str(list(colsp[col]["c"].keys())[i]) + "(" + str(colsp[col]["c"][list(colsp[col]["c"].keys())[i]]) + ")")
+                                profile_data[i*3 + minc + 2].append(str(round(100*colsp[col]["c"][list(colsp[col]["c"].keys())[i]]/colsp[col]["v"],2)) + "%")
                             else:
                                 profile_data[i*3 + minc + 2].append("-")
 
@@ -1184,14 +1187,13 @@ def do_sql(sql):
                 colsi = range(1, ncols + 1)
                 rowsi = range(1, nrows + 1)
 
-                #colsp = data_profile(rowsi, colsi, profile_data, profile_columns, profile_rows, profile_rows_label)
-                print_data(rowsi, colsi, profile_data, profile_columns, profile_rows, profile_rows_label)
+                colsp = data_profile(rowsi, colsi, profile_data, profile_columns, profile_rows, profile_rows_label)
+                terminal_resize(colsp)
 
-                '''
                 row_format = row_format_l(colsp)
                 #print(row_format)
                 for col in colsp:
-                    screen_max = colsp[ci]['screen']
+                    screen_max = colsp[col]['screen']
                 screen = 0
                 while screen < screen_max:
                     #print(row_format)
@@ -1200,16 +1202,14 @@ def do_sql(sql):
                         colspart[profile_rows_label] = colsp[profile_rows_label]
                         print("...")
                     for col in colsp:
-                        if colsp[ci]['screen'] == screen + 1:
-                            colspart[ci] = colsp[ci]
+                        if colsp[col]['screen'] == screen + 1:
+                            colspart[col] = colsp[col]
                     row_format = row_format_l(colspart)
                     print(row_format.format(*colspart))
                     for i, row in enumerate(profile_data):
                         #print(row_format.format(profile_rows[i], *[str(col) for col in row if col in colspart]))    # Null to None
                         print(row_format.format(profile_rows[i], *[str(col) for ci, col in enumerate(row) if list(colsp.keys())[ci+1] in colspart]))    # Null to None
                     screen += 1
-
-                '''
 
 
         elif sql.startswith("\pause:"):
@@ -1279,7 +1279,7 @@ def do_sql(sql):
             columns = columns_new
             show_data()
 
-
+            
         elif not error:
             printInvGreen("! There are no data returned from this sql query !")
         else:
@@ -1361,7 +1361,6 @@ but {len(command_options[key1][key2])} '{key2}'.'''
                 start = time.perf_counter()
                 OK_returned = do_sql(sql)
                 end = time.perf_counter()
-                print()
                 print("Elapsed time:", timedelta(seconds=end-start))
                 if OK_returned == 0: break
 
@@ -1408,7 +1407,6 @@ but {len(command_options[key1][key2])} '{key2}'.'''
                 start = time.perf_counter()
                 OK_returned = do_sql(sql)
                 end = time.perf_counter()
-                print()
                 print("Elapsed time:", timedelta(seconds=end-start))
                 if OK_returned == 0: break
             if OK_returned == 1:
