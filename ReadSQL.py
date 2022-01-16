@@ -264,7 +264,8 @@ def data_profile(rowsi, colsi, data, columns, rows, rows_label):
         colsp[ci]['q1'] = None
         colsp[ci]['q2'] = None
         colsp[ci]['q3'] = None
-        colsp[ci]['smd'] = 0
+        colsp[ci]['smd2'] = 0
+        colsp[ci]['smd3'] = 0
     for ri in rowsi:
         if len(str(rows[ri-1])) > colsp[0]['w']: colsp[0]['w'] = len(str(rows[ri-1]))
         for ci in colsi:
@@ -319,7 +320,8 @@ def data_profile(rowsi, colsi, data, columns, rows, rows_label):
                 if lenc >= 2 and (lenc % 2) == 0:
                     colsp[ci]['q3'] = (colsp[ci]['m'][-1*int(lenc/2)] + colsp[ci]['m'][-1*(int(lenc/2))-1])/2    #mean of mid cases
             for i in colsp[ci]['m']:
-                colsp[ci]['smd'] += (i - colsp[ci]['mean'])**2
+                colsp[ci]['smd2'] += (i - colsp[ci]['mean'])**2
+                colsp[ci]['smd3'] += (i - colsp[ci]['mean'])**3
         else:
             colsp[ci]['min'] = None
             colsp[ci]['max'] = None
@@ -1077,29 +1079,15 @@ def do_sql(sql):
                 colsp = data_profile(rowsi, colsi, data, columns, rows, rows_label)
                 profile_data = []
                 profile_columns = columns
-                profile_rows = ["Type", "Valids", "Nulls", "Valid %", "Sum", "Min", "Max", "Mean", "Q1", "Median", "Q3", "Range", "IQR", "Variance", "STD", "Unique"]
+                profile_rows = ["Type", "Valids", "Nulls", "Valid %", "Sum", "Min", "Max", "Mean", "Q1", "Median", "Q3", "Range", "IQR", "Variance", "STD", "Skew", "Unique"]
                 profile_rows_label = '(Stat)'
-                stats = ["t", "v", "n", "v%", "sum", "min", "max", "mean", "q1", "q2", "q3", "ran", "iqr", "var", "std", "uni"]
-                '''
-                for col in colsp:
-                    print(col + ":")
-                    for c in colsp[col]:
-                        if isinstance(colsp[col][c], int) or isinstance(colsp[col][c], float):
-                            print('\t' + c + ": " + str(colsp[col][c]))
-                        elif isinstance(colsp[col][c], str):
-                            print('\t' + c + ": '" + colsp[col][c] + "'")
-                        elif isinstance(colsp[col][c], dict):
-                            # print n most common
-                            print('\t' + c + ": " + ", ".join([str(k) + ": " + str(v) for k, v in sorted(colsp[col][c].items(), reverse = True, key = lambda x: x[1])[:profile_max_categorical]]))
-                        else:
-                            print('\t' + c + ": " + str(colsp[col][c].__class__))
-                '''
+                stats = ["t", "v", "n", "v%", "sum", "min", "max", "mean", "q1", "q2", "q3", "ran", "iqr", "var", "std", "skw","uni"]
 
                 maxc = 0
                 for i, stat in enumerate(stats):
                     profile_data.append([])
                     for ci in colsp:
-                        if ci > 0:  #rows_label
+                        if ci > 0:  # rows_label
                             if stat == "v%":
                                 profile_data[i].append(round(100 * colsp[ci]["v"] / (colsp[ci]["v"] + colsp[ci]["n"]), 2))
                             elif stat == "ran":
@@ -1113,13 +1101,18 @@ def do_sql(sql):
                                 else:
                                     profile_data[i].append("-")
                             elif stat == "var":
-                                if colsp[ci]["smd"] and colsp[ci]["v"]:
-                                    profile_data[i].append(round(colsp[ci]["smd"] / colsp[ci]["v"], 2))
+                                if colsp[ci]["smd2"] and colsp[ci]["v"]:
+                                    profile_data[i].append(round(colsp[ci]["smd2"] / colsp[ci]["v"], 2))
                                 else:
                                     profile_data[i].append("-")
                             elif stat == "std":
-                                if colsp[ci]["smd"] and colsp[ci]["v"]:
-                                    profile_data[i].append(round((colsp[ci]["smd"] / colsp[ci]["v"])**0.5, 2))
+                                if colsp[ci]["smd2"] and colsp[ci]["v"]:
+                                    profile_data[i].append(round((colsp[ci]["smd2"] / colsp[ci]["v"])**0.5, 2))
+                                else:
+                                    profile_data[i].append("-")
+                            elif stat == "skw":
+                                if colsp[ci]["smd3"] and colsp[ci]["smd2"] and colsp[ci]["v"]:
+                                    profile_data[i].append(round(colsp[ci]["smd3"] / (colsp[ci]["v"] * (colsp[ci]["smd2"] / colsp[ci]["v"])**1.5), 2))
                                 else:
                                     profile_data[i].append("-")
                             elif stat == "uni":
@@ -1149,8 +1142,8 @@ def do_sql(sql):
                 for i in range(maxc):
                     profile_rows.append("Cat " + str(i + 1) + "_1")
                     profile_data.append([])
-                    for col in colsp:
-                        if col != rows_label:
+                    for ci in colsp:
+                        if ci > 0:  # rows_label
                             if i < len(colsp[ci]["c"]):
                                 #profile_data[i + minc].append(str(list(colsp[ci]["c"].keys())[i]) + "(" + str(colsp[ci]["c"][list(colsp[ci]["c"].keys())[i]]) + ")")
                                 profile_data[i*3 + minc].append(str(list(colsp[ci]["c"].keys())[i]))
@@ -1158,8 +1151,8 @@ def do_sql(sql):
                                 profile_data[i*3 + minc].append("-")
                     profile_rows.append("Cat " + str(i + 1) + "_2")
                     profile_data.append([])
-                    for col in colsp:
-                        if col != rows_label:
+                    for ci in colsp:
+                        if ci > 0:  # rows_label
                             if i < len(colsp[ci]["c"]):
                                 #profile_data[i + minc].append(str(list(colsp[ci]["c"].keys())[i]) + "(" + str(colsp[ci]["c"][list(colsp[ci]["c"].keys())[i]]) + ")")
                                 profile_data[i*3 + minc + 1].append(str(colsp[ci]["c"][list(colsp[ci]["c"].keys())[i]]))
@@ -1168,7 +1161,7 @@ def do_sql(sql):
                     profile_rows.append("Cat " + str(i + 1) + "_3")
                     profile_data.append([])
                     for ci in colsp:
-                        if col > 0: # rows_label
+                        if ci > 0: # rows_label
                             if i < len(colsp[ci]["c"]):
                                 #profile_data[i + minc].append(str(list(colsp[ci]["c"].keys())[i]) + "(" + str(colsp[ci]["c"][list(colsp[ci]["c"].keys())[i]]) + ")")
                                 profile_data[i*3 + minc + 2].append(str(round(100*colsp[ci]["c"][list(colsp[ci]["c"].keys())[i]]/colsp[ci]["v"],2)) + "%")
@@ -1186,30 +1179,6 @@ def do_sql(sql):
 
                 #colsp = data_profile(rowsi, colsi, profile_data, profile_columns, profile_rows, profile_rows_label)
                 print_data(rowsi, colsi, profile_data, profile_columns, profile_rows, profile_rows_label)
-
-                '''
-                row_format = row_format_l(colsp)
-                #print(row_format)
-                for col in colsp:
-                    screen_max = colsp[ci]['screen']
-                screen = 0
-                while screen < screen_max:
-                    #print(row_format)
-                    colspart = {}
-                    if screen > 0:
-                        colspart[profile_rows_label] = colsp[profile_rows_label]
-                        print("...")
-                    for col in colsp:
-                        if colsp[ci]['screen'] == screen + 1:
-                            colspart[ci] = colsp[ci]
-                    row_format = row_format_l(colspart)
-                    print(row_format.format(*colspart))
-                    for i, row in enumerate(profile_data):
-                        #print(row_format.format(profile_rows[i], *[str(col) for col in row if col in colspart]))    # Null to None
-                        print(row_format.format(profile_rows[i], *[str(col) for ci, col in enumerate(row) if list(colsp.keys())[ci+1] in colspart]))    # Null to None
-                    screen += 1
-
-                '''
 
 
         elif sql.startswith("\pause:"):
