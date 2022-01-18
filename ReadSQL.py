@@ -858,6 +858,7 @@ def do_sql(sql):
                     columns_new = []
                     i = 0
                     data_line = f.readline()
+                    print("."+data_line+".")
                     while data_line:
                         if data_line[-1] == "\n": data_line = data_line[:-1]
                         row_new = []
