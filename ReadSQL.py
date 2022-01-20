@@ -38,8 +38,9 @@ print('\x1b[6;30;42m' + 'Success!' + '\x1b[0m')
 
 #\033[34m too dark blue text
 os.system('color')
-RED, YELLOW, GREEN, BLUE, COM, INVGREEN, INVRED, END = '\033[91m', '\033[33m', '\033[4m', '\033[96m', '\033[4m', '\033[97m\033[42m', '\033[97m\033[101m', '\033[0m'
+RED, YELLOW, GREEN, BLUE, COM, INVGREEN, INVRED, END = '\033[91m', '\033[33m', '\033[92m', '\033[96m', '\033[4m', '\033[97m\033[42m', '\033[97m\033[101m', '\033[0m'
 printRed = lambda sTxt: print(RED + sTxt + END)
+printGreen = lambda sTxt: print(GREEN + sTxt + END)
 printYellow = lambda sTxt: print(YELLOW + sTxt + END)
 printBlue = lambda sTxt: print(BLUE + sTxt + END)
 printCom = lambda sTxt: print(COM + sTxt + END)
@@ -1016,6 +1017,7 @@ def do_sql(sql):
                 print("! There are no data returned from this sql query !")
             except Exception as e:
                 traceback.print_exc()
+                if OK: OK = 2
 
         elif command == "print" or command == "print data" or command == "print columns":
             if command == "print columns": options["what"] = "columns"
@@ -1248,12 +1250,11 @@ def do_sql(sql):
             data = data_new
             columns = columns_new
             show_data()
-
-
         elif not error:
             printInvGreen("! There are no data returned from this sql query !")
         else:
             printInvRed("! Error exexuting this sql query !")
+            if OK: OK = 2
 
     # this checks dtb
     if db_version[:5] == "MySQL":
@@ -1332,8 +1333,12 @@ but {len(command_options[key1][key2])} '{key2}'.'''
                 OK_returned = do_sql(sql)
                 end = time.perf_counter()
                 print()
-                print("Elapsed time:", timedelta(seconds=end-start))
-                if OK_returned == 0: break
+                if OK_returned == 1:
+                    print("Elapsed time: " + str(timedelta(seconds=end-start)))
+                elif OK_returned > 1:
+                    printRed("Elapsed time: " + str(timedelta(seconds=end-start)))
+                    time.sleep(2)
+                else: break
 
 
     if len(vars(namespace)["sql_files"]) == 0 and isinstance(vars(namespace)["interactive"], str) or vars(namespace)["interactive"]:
@@ -1364,7 +1369,7 @@ but {len(command_options[key1][key2])} '{key2}'.'''
         sql = input(db_version)
         OK_returned = 1
 
-        while OK_returned == 1:
+        while OK_returned:
 
             interactive_pass += 1
 
@@ -1379,9 +1384,13 @@ but {len(command_options[key1][key2])} '{key2}'.'''
                 OK_returned = do_sql(sql)
                 end = time.perf_counter()
                 print()
-                print("Elapsed time:", timedelta(seconds=end-start))
-                if OK_returned == 0: break
-            if OK_returned == 1:
+                if OK_returned == 1:
+                    print("Elapsed time: " + str(timedelta(seconds=end-start)))
+                elif OK_returned > 1:
+                    printRed("Elapsed time: " + str(timedelta(seconds=end-start)))
+                    time.sleep(1)
+                else: break
+            if OK_returned:
                 print()
                 sql = input(db_version)
 

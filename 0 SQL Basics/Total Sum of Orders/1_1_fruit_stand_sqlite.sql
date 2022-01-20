@@ -1,5 +1,5 @@
-\f "2 Udacity BA";
-\s "Udacity_3_19_fruit_stand.db";
+\f "0 SQL Basics\Total Sum of Orders";
+\s "1_1_fruit_stand.db";
 
 drop table if exists f_order;
 create table f_order (id integer primary key autoincrement, "Order" int, Item text, Qty int);
@@ -7,11 +7,11 @@ create table f_order (id integer primary key autoincrement, "Order" int, Item te
 drop table if exists f_price;
 create table f_price (id integer primary key autoincrement, Item text, Price int);
 
-\r Udacity_3_19_fruit_stand3.csv, ";";
+\r 1_1_fruit_stand_orders.csv, ";";
 \dp;
 \i f_order;
 
-\r Udacity_3_19_fruit_stand2.csv, ";";
+\r 1_1_fruit_stand_prices.csv, ";";
 \dp;
 \i f_price;
 
@@ -32,3 +32,6 @@ from (SELECT fo.Item, fo."Order", fo.Qty, fp.Item, fp.Price, fo.Qty * fp.Price a
 FROM f_order AS fo
 LEFT JOIN f_price AS fp
 ON fo.Item = fp.Item);
+
+select a from b;
+\dp;
