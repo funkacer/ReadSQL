@@ -135,7 +135,7 @@ command_options["read"]["default"] = [None, "	", None]
 command_options["read"]["help1"] = "Help for command 'folder'"
 command_options["read"]["help2"] = ["Blabla1", "Blablabla2", "Blablabla3"]
 command_options["read"]["alternative"] = ["r"]
-command_options["read"]["altoption"] = [["f"],["d"],["t"]]
+command_options["read"]["altoption"] = [["f"],["d"],["t","tq"]]
 
 command_options["export"] = {}
 command_options["export"]["name"] = ["filename", "delimiter"]
@@ -845,18 +845,18 @@ def do_sql(sql):
             #folder = os.path.isdir(folder_name)
             folder_exists, full_foldername = check_foldername(folder_name, folder_name_old)
             if folder_exists:
-                print(f'''Using folder '{full_foldername}'.''')
+                printInvGreen(f'''Using folder '{full_foldername}'.''')
                 folder_name = full_foldername
             else:
                 if folder_exists_old:
-                    printRed(f'''Folder '{folder_name}' does not exist. Using current folder '{folder_name_old}'.''')
+                    printInvRed(f'''Folder '{folder_name}' does not exist. Using current folder '{folder_name_old}'.''')
                     folder_exists = folder_exists_old
                     folder_name = folder_name_old
                 else:
                     # folder_name_old is None if sql imported file has wrong \folder command
-                    printRed("Folder '{}' does not exist. Using working directory '{}'.".format(folder_name, os.getcwd()))
+                    printInvRed("Folder '{}' does not exist. Using working directory '{}'.".format(folder_name, os.getcwd()))
                     folder_name = os.getcwd()
-                    OK = 2
+                OK = 2
 
         elif command == "read":
             read_filename = options["filename"]
@@ -884,7 +884,7 @@ def do_sql(sql):
                                 if i == 0:
                                     columns_new.append(c)
                                 else:
-                                    if len(c) > 2:
+                                    if len(c) >= 2:
                                         if c[0] == read_text_qualifier and c[-1] == read_text_qualifier: c = c[1:-1]
                                         #print(c)
                                     if c != "":
@@ -901,6 +901,7 @@ def do_sql(sql):
                                     else:
                                         row_new.append(None)
                         if i > 0: data_new.append(row_new)
+                        #print(row_new)
                         i += 1
                         data_line = f.readline()
                     #print(data_new)
@@ -909,7 +910,6 @@ def do_sql(sql):
                         columns = columns_new
                         show_data()
                     else:
-                        print()
                         printInvRed("! There are no data returned from this file !")
                         OK = 2
             except Exception as e:
