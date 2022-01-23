@@ -128,14 +128,14 @@ command_options["mssql"]["alternative"] = ["ms"]
 command_options["mssql"]["altoption"] = [["d"],["u"],["p"],["h"],["po"]]
 
 command_options["read"] = {}
-command_options["read"]["name"] = ["filename", "delimiter"]
-command_options["read"]["required"] = [True, False]
-command_options["read"]["type"] = ["str", "str"]
-command_options["read"]["default"] = [None, ";"]
+command_options["read"]["name"] = ["filename", "delimiter", "text_qualifier"]
+command_options["read"]["required"] = [True, False, False]
+command_options["read"]["type"] = ["str", "str", "str"]
+command_options["read"]["default"] = [None, "	", None]
 command_options["read"]["help1"] = "Help for command 'folder'"
-command_options["read"]["help2"] = ["Blabla1", "Blablabla2"]
+command_options["read"]["help2"] = ["Blabla1", "Blablabla2", "Blablabla3"]
 command_options["read"]["alternative"] = ["r"]
-command_options["read"]["altoption"] = [["f"],["d"]]
+command_options["read"]["altoption"] = [["f"],["d"],["t"]]
 
 command_options["export"] = {}
 command_options["export"]["name"] = ["filename", "delimiter"]
@@ -471,20 +471,26 @@ def parseArgv(argument_list):
 
     return parser.parse_args(argument_list)
 
-def parseText(myText, delimiter):
+
+
+def parseText(myText, delimiter, text_qualifiers = ['"', "'", "["], do_strip = True):
 
     #print("Uvozovky", myText.count('"'), myText.count("'"))
 
     lst_new = []
     apos = None
     maxs = -1
-    spl = delimiter
     for i, chr in enumerate(myText):
-        if not apos and (chr == spl):
-            app_text = myText[maxs+1:i].strip()
-            if app_text != "": lst_new.append(app_text)
+        if not apos and (chr == delimiter):
+            if do_strip:
+                app_text = myText[maxs+1:i].strip()
+                if app_text != "": lst_new.append(app_text)
+            else:
+                app_text = myText[maxs+1:i]
+                lst_new.append(app_text)
             maxs = i
-        elif not apos and (chr == '"' or chr == "'" or chr == "["):
+        #elif not apos and (chr == '"' or chr == "'" or chr == "["):
+        elif not apos and chr in text_qualifiers:
             # Are there any items before the first apostrophe?
             #lst_new += [o.strip() for o in myText[maxx+1:i].split(spl) if o.strip() is not ""]
             apos = chr
@@ -500,8 +506,11 @@ def parseText(myText, delimiter):
         # Are there any items after the last apostrophe?
         #if maxa < len(myText): lst_new += [o.strip() for o in myText[maxa+1:].split(spl) if o.strip() is not ""]
 
-    app_text = myText[maxs+1:].strip()
-    if app_text != "": lst_new.append(app_text)
+    if do_strip:
+        app_text = myText[maxs+1:].strip()
+        if app_text != "": lst_new.append(app_text)
+    else:
+        if maxs < len(myText): lst_new.append(myText[maxs+1:])
 
     #print(lst_new)
 
@@ -847,10 +856,16 @@ def do_sql(sql):
                     # folder_name_old is None if sql imported file has wrong \folder command
                     printRed("Folder '{}' does not exist. Using working directory '{}'.".format(folder_name, os.getcwd()))
                     folder_name = os.getcwd()
+                    OK = 2
 
         elif command == "read":
             read_filename = options["filename"]
             read_delimiter = options["delimiter"]
+            if options.get("text_qualifier"):
+                read_text_qualifier = options["text_qualifier"]
+            else:
+                read_text_qualifier = None
+
             file_exists, full_filename = check_filename(read_filename)
             #print("Read: '{}'".format(read_filename))
             try:
@@ -859,31 +874,48 @@ def do_sql(sql):
                     columns_new = []
                     i = 0
                     data_line = f.readline()
-                    print("."+data_line+".")
+                    #print("."+data_line+".")
                     while data_line:
+                        #print("."+data_line+".")
                         if data_line[-1] == "\n": data_line = data_line[:-1]
                         row_new = []
-                        for c in data_line.split(read_delimiter):
-                            if i == 0:
-                                columns_new.append(c)
-                            else:
-                                if c != "":
-                                    row_new.append(c)
+                        if read_text_qualifier:
+                            for c in parseText(data_line, read_delimiter, [read_text_qualifier], False):
+                                if i == 0:
+                                    columns_new.append(c)
                                 else:
-                                    row_new.append(None)
+                                    if len(c) > 2:
+                                        if c[0] == read_text_qualifier and c[-1] == read_text_qualifier: c = c[1:-1]
+                                        #print(c)
+                                    if c != "":
+                                        row_new.append(c)
+                                    else:
+                                        row_new.append(None)
+                        else:
+                            for c in data_line.split(read_delimiter):
+                                if i == 0:
+                                    columns_new.append(c)
+                                else:
+                                    if c != "":
+                                        row_new.append(c)
+                                    else:
+                                        row_new.append(None)
                         if i > 0: data_new.append(row_new)
                         i += 1
                         data_line = f.readline()
                     #print(data_new)
-                    if len(data_new) > 0:
+                    if len(data_new) > 0 or len(columns_new) > 0:
                         data = data_new
                         columns = columns_new
                         show_data()
                     else:
                         print()
-                        print("! There are no data returned from this sql query !")
+                        printInvRed("! There are no data returned from this file !")
+                        OK = 2
             except Exception as e:
                 traceback.print_exc()
+                printInvRed(str(e))
+                OK = 2
 
         elif command == "export":
             export_filename = options["filename"]
@@ -938,8 +970,12 @@ def do_sql(sql):
                     OK_returned = do_sql(sql_load)
                     end = time.perf_counter()
                     print()
-                    print("Elapsed time:", timedelta(seconds=end-start))
-                    if OK_returned == 0: break
+                    if OK_returned == 1:
+                        print("Elapsed time: " + str(timedelta(seconds=end-start)))
+                    elif OK_returned > 1:
+                        printRed("Elapsed time: " + str(timedelta(seconds=end-start)))
+                        time.sleep(2)
+                    else: break
 
         elif command == "insert":
             tablename = options["tablename"]
@@ -1005,18 +1041,21 @@ def do_sql(sql):
                 for col in columns:
                     columns_print.append(f'''"{col}"''')
 
-            print()
-            print(db_version + sql)
+            #print()
+            #print(db_version + sql)
+            print(db_version + sql.format(columns_print))
             #print(columns, data)
             try:
                 c = conn.cursor()
                 #print(columns_print)
-                print(sql.format(columns_print))
+                #print(sql.format(columns_print))
                 c.executemany(sql.format(columns_print), data)
                 conn.commit()
-                print("! There are no data returned from this sql query !")
+                print()
+                printInvGreen("! There are no data returned from this sql query !")
             except Exception as e:
                 traceback.print_exc()
+                printInvRed(str(e))
                 if OK: OK = 2
 
         elif command == "print" or command == "print data" or command == "print columns":
