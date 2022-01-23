@@ -1,0 +1,1165 @@
+Code	Airport Name
+0AK	Pilot Station Airport
+16A	Nunapitchuk Airport
+1G4	Grand Canyon West Airport
+2A3	Larsen Bay Airport
+2A9	Kotlik Airport
+3A5	Marshall Don Hunter Sr
+3T7	Middle Bass Island Airport
+3W2	Put - in - Bay Airport
+6R7	Old Harbor Airport
+74S	Anacortes Airport
+A61	Tuntutuliak Airport
+A85	Kwigillingok Airport
+AAL	Aalborg Airport
+AAR	Aarhus Airport
+ABE	Lehigh Valley International Airport
+ABI	Abilene Regional Airport
+ABJ	Felix Houphouet-Boigny Airport
+ABQ	Albuquerque International Sunport
+ABR	Aberdeen Regional Airport
+ABV	Nnamdi Azikiwe Airport
+ABY	Southwest Georgia Regional Airport
+ABZ	Dyce Airport
+ACA	Juan N Alvarez International Airport
+ACB	Bellaire/Antrim County Airport
+ACC	Kotoka International Airport
+ACK	Nantucket Memorial Airport
+ACT	Waco Regional Airport
+ACV	Arcata Airport
+ACY	Atlantic City International Airport
+ADD	Bole International Airport
+ADJ	Marka International Airport
+ADK	Adak Airport
+ADL	Adelaide International Airport
+ADQ	Kodiak Airport
+AEX	Alexandria International Airport
+AFM	Ambler Airport
+AGA	Al-Massira Airport
+AGC	Allegheny County Airport
+AGN	Angoon Seaplane Base
+AGP	Malaga International Airport
+AGS	Augusta Regional Airport
+AGU	Jesus Teran International Airport
+AHN	Athens/Ben Epps Airport
+AIA	Alliance Municipal Airport
+AID	Anderson Municipal Airport
+AIY	Atlantic City Municipal Airport/Bader Field
+AIZ	Lee C Fine Memorial Airport
+AKJ	Asahikawa Airport
+AKL	Auckland International Airport
+AKN	King Salmon Airport
+AKP	Anaktuvuk Pass Airport
+AKW	Klawock Airport
+ALA	Almaty Airport
+ALB	Albany International Airport
+ALC	Alicante
+ALM	Alamogordo-White Sands Regional Airport
+ALN	St Louis Regional Airport
+ALO	Waterloo Regional Airport
+ALP	Aleppo International Airport
+ALS	San Luis Valley Regional Airport
+ALW	Walla Walla Regional Airport
+AMA	Amarillo International Airport
+AMD	Ahmedabad International Airport
+AMM	Queen Alia International Airport
+AMS	Schipol Airport
+ANB	Anniston Municipal Airport
+ANC	Anchorage International Airport
+AND	Anderson Regional Airport
+ANF	Cerro Moreno International Airport
+ANI	Aniak Airport
+ANU	VC Bird International Airport
+AOI	Falconara Airport
+AOJ	Aomori Airport
+AOO	Altoona-Blair County Airport
+APF	Naples Municipal Airport
+APN	Alpena County Regional Airport
+APW	Faleolo International Airport
+AQH	Quinhagak Airport
+AQT	Nuiqsut Airport
+ARN	Arlanda International Airport
+ART	Watertown International Airport
+ASD	Andros Town International Airport
+ASE	Aspen-Pitkin County Airport
+ASN	Talladega Municipal Airport
+AST	Astoria Regional Airport
+ATH	Athens International Airport
+ATK	Atqasuk Edward Burnell Sr Memorial Airport
+ATL	Atlanta International Airport
+ATW	Outagamie County Regional Airport
+ATY	Watertown Municipal Airport
+AUA	Queen Beatrix International Airport
+AUG	Augusta State Airport
+AUH	Abu Dhabi International Airport
+AUK	Alakanuk Airport
+AUS	Austin-Bergstrom International Airport
+AVL	Asheville Regional Airport
+AVP	Wilkes-Barre/Scranton International Airport
+AWI	Wainwright Airport
+AXA	Wallblake Airport
+AXN	Chandler Field Airport
+AXT	Akita Airport
+AZO	Kalamazoo/Battle Creek International Airport
+BAF	Barnes Municipal Airport
+BAH	Bahrain International Airport
+BAK	Columbus Municipal Airport
+BAK	Baku Airport
+BAQ	Ernesto Cortissoz Airport
+BCE	Bryce Canyon Airport
+BCN	Barcelona Airport
+BDA	Bermuda International Airport
+BDE	Baudette International Airport
+BDL	Bradley International Airport
+BDR	Igor I Sikorsky Memorial Airport
+BDS	Brindisi P Casale Airport
+BED	Bedford Hanscom Field
+BEG	Belgrade Airport
+BEH	Southwest Michigan Regional Airport
+BES	Guipavas Airport
+BET	Bethel Airport
+BEY	Beirut International Airport
+BFD	Bradford Regional Airport
+BFF	Western Nebraska Regional Airport
+BFI	Boeing Field/King County International Airport
+BFL	Meadows Field Airport
+BFS	Belfast International Airport
+BGI	Grantley Adams International Airport
+BGM	Greater Binghamton Airport
+BGO	Flesland Airport
+BGR	Bangor International Airport
+BHB	Hancock County-Bar Harbor Airport
+BHD	Belfast City Airport
+BHM	Birmingham International Airport
+BHX	Birmingham International Airport
+BID	Block Island State Airport
+BIG	Allen Aaf Airport
+BIL	Billings Logan International Airport
+BIM	Bimini Island International Airport
+BIO	Bilbao Airport
+BIQ	Bayonne-Anglet Airport
+BIS	Bismarck Municipal Airport
+BJI	Bemidji Regional Airport
+BJL	Banjul International Airport
+BJX	De Guanajuato International Airport
+BKK	Don Muang International Airport
+BKL	Burke Lakefront Airport
+BKO	Senou International Airport
+BKW	Raleigh County Memorial Airport
+BKX	Brookings Municipal Airport
+BLI	Bellingham International Airport
+BLL	Billund Airport
+BLM	Monmouth Executive Airport
+BLQ	Borgo Panigale Airport
+BLR	Hindustan International Airport
+BLV	Midamerica Airport
+BMG	Monroe County Airport
+BMI	Central Illinois Regional Airport
+BNA	Nashville International Airport
+BNE	Brisbane International Airport
+BOD	Merignac Airport
+BOG	Eldorado International Airport
+BOI	Boise Airport
+BOM	Sahar International Airport
+BON	Flamingo Airport
+BOS	Boston Logan International Airport
+BPK	Baxter County Regional Airport
+BPT	Southeast Texas Regional Airport
+BQK	Brunswick Golden Isles Airport
+BQN	Aguadilla Airport
+BQN	Rafael Hernandez Airport
+BRD	Brainerd Lakes Regional Airport
+BRE	Bremen Airport
+BRI	Palese Macchie Airport
+BRL	Southeast Iowa Regional Airport
+BRO	Brownsville/South Padre Island International Airport
+BRS	Bristol Airport
+BRU	Brussels International Airport
+BRW	Wiley Post-Will Rogers Memorial Airport
+BSB	Kubitschek International Airport
+BSL	Basel International Airport
+BTI	Barter Island LRRS Airport
+BTL	W K Kellogg Airport
+BTM	Bert Mooney Airport
+BTR	Baton Rouge International Airport
+BTS	M R Stefanik Airport
+BTV	Burlington International Airport
+BUD	Ferihegy Airport
+BUF	Buffalo Niagara International Airport
+BUR	Burbank Bob Hope Airport
+BVK	Buckland Airport
+BWG	Bowling Green-Warren County Regional Airport
+BWI	Baltimore / Washington International Airport
+BZE	Phillip S W Goldson Airport
+BZN	Bozeman Gallatin Field Airport
+BZV	Maya-Maya Airport
+CAE	Columbia Metropolitan Airport
+CAI	Cairo International Airport
+CAK	Akron-Canton Airport
+CAN	Baiyun Airport
+CBR	Canberra Airport
+CCP	Carriel Sur International Airport
+CCR	Buchanan Field Airport
+CCS	Simon Bolivar International Airport
+CDB	Cold Bay Airport
+CDC	Cedar City Regional Airport
+CDG	Charles De Gaulle International Airport
+CDV	Cordova Municipal Airport
+CDW	Essex County Airport
+CEC	Jack Mc Namara Field Airport
+CEF	Westover Metropolitan Airport
+CEZ	Cortez Municipal Airport
+CFE	Aulnat Airport
+CFK	Chefornak Airport
+CGA	Craig Airport
+CGB	Marechal Rondon International Airport
+CGF	Cuyahoga County Airport
+CGH	Congonhas International Airport
+CGI	Cape Girardeau Regional Airport
+CGK	Soekarno-Hatta International Airport
+CGN	Cologne-Bonn Airport
+CGR	Campo Grande International Airport
+CGX	Merrill C Meigs Field
+CHA	Chattanooga Metropolitan Airport
+CHC	Christchurch International Airport
+CHO	Charlottesville-Albemarle Airport
+CHS	Charleston International Airport
+CIA	Ciampino Airport
+CIC	Chico Municipal Airport
+CID	Cedar Rapids Eastern Iowa Airport
+CIU	Chippewa County International Airport
+CIW	Canouan Island Airport
+CJS	Gonzalez International Airport
+CKB	Harrison/Marion Regional Airport
+CKG	Jiangbei Airport
+CKY	Gbessia
+CLE	Cleveland Hopkins International Airport
+CLL	Easterwood Airport
+CLM	William R Fairchild International Airport
+CLO	Aragon International Airport
+CLT	Charlotte/Douglas International Airport
+CME	Ciudad del Carmen Airport
+CMH	Port Columbus International Airport
+CMI	Champaign Willard Airport
+CMN	Mohammed V International Airport
+CMX	Houghton County Memorial Airport
+CNM	Cavern City Air Terminal
+CNS	Cairns International Airport
+CNY	Canyonlands Field
+COD	Yellowstone Regional Airport
+COE	Coeur D'alene Airport
+COO	Cadjehoun Airport
+COS	Colorado Springs Airport
+COU	Columbia Regional Airport
+CPH	Kastrup International Airport
+CPR	Natrona County International Airport
+CPT	Capetown International Airport
+CPX	Culebra Airport
+CRL	Charleroi Airport
+CRP	Corpus Christi International Airport
+CRQ	Mc Clellan-Palomar Airport
+CRW	Charleston Yeager Airport
+CSG	Columbus Metropolitan Airport
+CTA	Fontanarossa Airport
+CTG	Rafael Nunez Airport
+CTM	Chetumal International Airport
+CTS	New Chitose Airport
+CTU	Shuangliu Airport
+CUL	Culiacan International Airport
+CUN	Cancun International Airport
+CUR	Hato International Airport
+CUU	General Fierro Villalobos Airport
+CVG	Cincinnati / Northern Kentucky International Airport
+CVO	Corvallis Municipal Airport
+CVX	Charlevoix Municipal Airport
+CWA	Central Wisconsin Airport
+CWB	Afonso Pena International Airport
+CWI	Clinton Municipal Airport
+CWL	Cardiff Airport
+CYS	Cheyenne Regional Airport
+CZM	Cozumel International Airport
+D76	Robert (Bob) Curtis Memorial Airport
+DAB	Daytona Beach International Airport
+DAC	Zia International Airport
+DAL	Dallas Love Field
+DAM	Damascus International Airport
+DAN	Danville Regional Airport
+DAR	Dar-Es-Salaam International Airport
+DAY	Dayton International Airport
+DBQ	Dubuque Regional Airport
+DCA	Ronald Reagan Washington National Airport
+DDC	Dodge City Regional Airport
+DDH	William H. Morse State Airport
+DEC	Decatur Airport
+DEL	Indira Gandhi International Airport
+DEN	Denver International Airport
+DET	Detroit City Airport
+DFW	Dallas/Fort Worth International Airport
+DGO	Durango Airport
+DHN	Dothan Regional Airport
+DIK	Dickinson - Theodore Roosevelt Regional Airport
+DKR	Dakar - Yoff International Airport
+DLA	Douala Airport
+DLG	Dillingham Airport
+DLH	Duluth International Airport
+DME	Domodedovo Airport
+DMM	King Fahad International Airport
+DNA	Okinawa Kadena Airport
+DNV	Vermilion County Airport
+DOH	Doha International Airport
+DOM	Melville Hall Airport
+DPS	Bali International Airport
+DRO	Durango-La Plata County Airport
+DRT	Del Rio International Airport
+DRW	Darwin International Airport
+DSM	Des Moines International Airport
+DTW	Detroit Metro Airport
+DUB	Dublin International Airport
+DUD	Dunedin Airport
+DUJ	Du Bois-Jefferson County Airport
+DUR	Durban International Airport
+DUS	Duesseldorf International Airport
+DUT	Unalaska Airport
+DUY	Kongiganak Airport
+DVL	Devils Lake Municipal Airport
+DVT	Deer Valley Municipal Airport
+DXB	Dubai International Airport
+DXR	Danbury Municipal Airport
+EAR	Kearney Municipal Airport
+EAT	Pangborn Memorial Airport
+EAU	Chippewa Valley Regional Airport
+EBB	Entebbe International Airport
+EDI	Edinburgh Airport
+EEK	Eek Airport
+EEN	Keene/Dillant-Hopkins Airport
+EFD	Ellington Field
+EFK	Newport State Airport
+EGE	Eagle County Regional Airport
+EIS	Beef Island International Airport
+EKM	Elkhart Municipal Airport
+EKO	Elko Regional Airport
+ELH	North Eleuthera Airport
+ELI	Elim Airport
+ELM	Elmira / Corning Regional Airport
+ELO	Ely Municipal Airport
+ELP	El Paso International Airport
+ELS	East London Airport
+ELY	Ely Airport
+ENA	Kenai Municipal Airport
+ENM	Emmonak Airport
+ENW	Kenosha Regional Airport
+ERI	Erie International Airport
+ESC	Delta County Airport
+ESF	Esler Regional Airport
+EUG	Eugene Airport
+EVV	Evansville Regional Airport
+EWB	New Bedford Regional Airport
+EWN	Craven County Regional Airport
+EWR	Newark Liberty International Airport
+EWU	Newtok Airport
+EYW	Key West International Airport
+EZE	Ministro Pistarini International Airport
+FAI	Fairbanks International Airport
+FAQ	Fitiuta Airport
+FAR	Hector International Airport
+FAT	Fresno Air Terminal
+FAY	Fayetteville Regional/Grannis Field Airport
+FCO	Fiumicino Airport
+FHR	Friday Harbor Airport
+FHU	Sierra Vista Municipal Airport
+FKL	Venango Regional Airport
+FKS	Fukushima Airport
+FLG	Flagstaff Pulliam Airport
+FLL	Fort Lauderdale Hollywood International Airport
+FLN	Hercillio Luz International Airport
+FLO	Florence Regional Airport
+FLR	Peretola Airport
+FMN	Four Corners Regional Airport
+FNL	Fort Collins-Loveland Municipal Airport
+FNT	Bishop International Airport
+FOC	Changle Airport
+FOD	Fort Dodge Regional Airport
+FOE	Forbes Field Airport
+FOR	Pinto Martins International Airport
+FPO	Freeport International Airport
+FRA	Frankfurt International Airport
+FRG	Republic Airport
+FRM	Fairmont Municipal Airport
+FRS	Tikal International Airport
+FSD	Sioux Falls Regional Airport
+FSM	Fort Smith Airport
+FTW	Fort Worth Meacham International Airport
+FUK	Fukuoka Airport
+FWA	Fort Wayne International Airport
+FYU	Fort Yukon Airport
+FYV	Drake Field
+GAL	Edward G. Pitka Sr Airport
+GAM	Gambell Airport
+GBD	Great Bend Municipal Airport
+GBH	Galbraith Lake Airport
+GCC	Gillette-Campbell County Airport
+GCI	Guernsey Airport
+GCK	Garden City Regional Airport
+GCM	Owen Roberts International Airport
+GCN	Grand Canyon National Park Airport
+GDL	Don Miguel Hidalgo International Airport
+GED	Sussex County Airport
+GEG	Spokane International Airport
+GEO	Cheddi Jagan International Airport
+GFK	Grand Forks International Airport
+GFL	Floyd Bennett Memorial Airport
+GGG	East Texas Regional Airport
+GGT	Exuma International Airport
+GGV	Kwigillingok Airport
+GGW	Wokal Field/Glasgow International Airport
+GIG	Rio de Janeiro International Airport
+GJT	Walker Field Airport
+GKN	Gulkana Airport
+GLA	Glasgow International Airport
+GLD	Goodland Municipal Airport
+GLH	Mid Delta Regional Airport
+GLR	Gaylord Regional Airport
+GLS	Galveston/Scholes International Airport
+GMP	Gimpo Airport
+GNB	St Geoirs Airport
+GND	Point Salines International Airport
+GNV	Gainesville Regional Airport
+GOA	Sestri Airport
+GON	Groton-New London Airport
+GOT	Landvetter Airport
+GPI	Glacier Park International Airport
+GPT	Gulfport-Biloxi International Airport
+GPZ	Grand Rapids/Itasca County Airport
+GRB	Austin Straubel International Airport
+GRI	Central Nebraska Regional Airport
+GRJ	George Airport
+GRK	Killeen-Fort Hood Regional Airport
+GRO	Rota International Airport
+GRR	Gerald R. Ford International Airport
+GRU	Guarulhos International Airport
+GSN	Saipan International Airport
+GSO	Piedmont Triad International Airport
+GSP	Greenville / Spartanburg Airport
+GST	Gustavus Airport
+GTF	Great Falls International Airport
+GTR	Golden Triangle Regional Airport
+GUA	La Aurora International Airport
+GUB	Guerrero Negro Airport
+GUC	Gunnison-Crested Butte Regional Airport
+GUM	Guam International Airport
+GUP	Gallup Municipal Airport
+GVA	Cointrin International Airport
+GYE	Simon Bolivar International Airport
+GYH	Donaldson Center Airport
+GYR	Phoenix Goodyear Airport
+GYY	Gary Regional Airport
+HAJ	Hannover Airport
+HAM	Hamburg Airport
+HAN	Noibai International Airport
+HAV	Jose Marti International Airport
+HBA	Hobart Airport
+HBE	Borg El Arab International Airport
+HDN	Yampa Valley Regional Airport
+HEL	Vantaa International Airport
+HFD	Hartford-Brainard Airport
+HGR	Hagerstown Regional Airport
+HIB	Chisholm-Hibbing Airport
+HII	Lake Havasu City Airport
+HIJ	Hiroshima Airport
+HKD	Hakodate Airport
+HKG	Hong Kong International Airport
+HKS	Hawkins Field Airport
+HKY	Hickory Regional Airport
+HLA	Huslia Airport
+HLN	Helena Regional Airport
+HMO	Garcia Airport
+HND	Henderson Executive Airport
+HND	Tokyo International Airport
+HNH	Hoonah Airport
+HNL	Honolulu International Airport
+HNM	Hana Airport
+HNS	Haines Airport
+HOB	Lea County Regional Airport
+HOM	Homer Airport
+HON	Huron Regional Airport
+HOT	Memorial Field Airport
+HOU	Hobby Airport
+HPB	Hooper Bay Airport
+HPN	Westchester County Airport
+HRL	Valley International Airport
+HRO	Boone County Airport
+HSL	Huslia Airport
+HSV	Huntsville International Airport
+HTS	Tri-State Airport
+HUF	Terre Haute International Airport
+HUT	Hutchinson Municipal Airport
+HUX	Huatulco International Airport
+HUY	Humberside Airport
+HVN	Tweed New Haven Regional Airport
+HXD	Hilton Head Airport
+HYA	Barnstable Municipal Airport
+HYL	Hollis Seaplane Base
+HYS	Hays Regional Airport
+IAD	Washington Dulles International Airport
+IAH	Bush Intercontinental Airport
+IAN	Bob Baker Memorial Airport
+ICN	Incheon International Airport
+ICT	Wichita Mid-Continent Airport
+IDA	Idaho Falls Regional Airport
+IEV	Zhulyany International Airport
+IFP	Laughlin/Bullhead International Airport
+IGM	Kingman Airport
+IGU	Iguassa Falls Airport
+IIK	Kipnuk Airport
+ILE	Skylark Field
+ILG	New Castle Airport
+ILI	Iliamna Airport
+ILL	Willmar Municipal Airport
+ILM	Wilmington International Airport
+IMT	Iron Mountain Airport
+IND	Indianapolis International Airport
+INL	Falls International Airport
+INN	Innsbruck Airport
+INT	Smith Reynolds Airport
+INV	Inverness Airport
+IPC	Easter Island Airport
+IPL	Imperial County Airport
+IPT	Williamsport Regional Airport
+IQQ	Diego Aracena International Airport
+IRK	Kirksville Regional Airport
+ISB	Islamabad International Airport
+ISN	Sloulin Field International Airport
+ISO	Kinston Regional Jetport
+ISP	Macarthur Airport
+IST	Ataturk International Airport
+ITH	Ithaca Tompkins Regional Airport
+ITM	Osaka International Airport
+ITO	Hilo International Airport
+IWA	Williams Gateway Airport
+IWD	Gogebic-Iron County Airport
+IXD	Olathe/New Century Aircenter Airport
+IYK	Inyokern Airport
+JAC	Jackson Hole Airport
+JAN	Jackson-Evers International Airport
+JAX	Jacksonville International Airport
+JBR	Jonesboro Municipal Airport
+JED	King Abdulaziz International Airport
+JEF	Jefferson City Memorial Airport
+JER	Jersey Airport
+JFK	John F. Kennedy International Airport
+JHW	Chautauqua County/Jamestown Airport
+JLN	Joplin Regional Airport
+JMS	Jamestown Regional Airport
+JNB	Johannesburg International Airport
+JNU	Juneau International Airport
+JRB	Downtown Manhattan Heliport
+JRO	Kilimanjaro International Airport
+JST	Johnstown-Cambria County Airport
+JVL	Southern Wisconsin Regional Airport
+JXN	Jackson County Airport
+KAE	Kake Airport
+KAL	Kaltag Airport
+KAN	Mallam Aminu Kano Airport
+KBP	Borispol Airport
+KDK	Kodiak Municipal Airport
+KEB	English Bay Airport
+KEF	Keflavik International Airport
+KHH	Kaohsiung International Airport
+KHI	Quaid-E-Azam International Airport
+KIJ	Niigata Airport
+KIN	Norman Manley International Airport
+KIX	Kansai International Airport
+KKA	Koyuk Airport
+KLG	Kalskag Airport
+KOA	Kona International Airport
+KOJ	Kagoshima Airport
+KRK	John Paul II Balice International Airport
+KSA	Kosrae Island Airport
+KSC	Kosice Airport
+KSM	St Mary's Airport
+KTB	Thorne Bay Airport
+KTN	Ketchikan International Airport
+KUL	Kuala Lumpur International Airport
+KVC	King Cove Airport
+KVL	Kivalina Airport
+KWA	Kwajalein International Airport
+KWI	Kuwait International Airport
+KWT	Kwethluk Airport
+LAA	Lamar Municipal Airport
+LAF	Purdue University Airport
+LAL	Lakeland Linder Regional Airport
+LAN	Lansing Capital City Airport
+LAP	Manuel de Leon Airport
+LAR	Laramie Regional Airport
+LAS	Mccarran International Airport
+LAW	Lawton-Fort Sill Regional Airport
+LAX	Los Angeles International Airport
+LBA	Leeds Bradford Airport
+LBB	Lubbock International Airport
+LBE	Arnold Palmer Regional Airport
+LBF	North Platte Regional Airport Lee Bird Field
+LBG	Le Bourget Airport
+LBL	Liberal Municipal Airport
+LBV	Leon M'ba
+LBX	Brazoria County Airport
+LCA	Larnaca International Airport
+LCH	Lake Charles Regional Airport
+LCK	Rickenbacker International Airport
+LCY	London City Airport
+LDB	Londrina Airport
+LEB	Lebanon Municipal Airport
+LED	Pulkovo International Airport
+LEX	Blue Grass Airport
+LFT	Lafayette Regional Airport
+LFW	Tokoin Airport
+LGA	La Guardia Airport
+LGB	Long Beach Airport
+LGW	London Gatwick Airport
+LHD	Lake Hood Airport
+LHE	Lahore International Airport
+LHR	London Heathrow Airport
+LIG	Bellegarde Airport
+LIH	Lihue Airport
+LIM	Jorge Chavez International Airport
+LIN	Linate Airport
+LIR	Daniel Oduber Quiros International Airport
+LIS	Lisbon International Airport
+LIT	Little Rock National Airport
+LMM	Valle Del Fuerte International Airport
+LMT	Klamath Falls Airport
+LNK	Lincoln Airport
+LNS	Lancaster Airport
+LNY	Lanai Airport
+LOS	Lagos International Airport
+LOV	Monclova International Airport
+LPB	El Alto International Airport
+LPR	Lorain County Regional Airport
+LRD	Laredo International Airport
+LRM	La Romana International Airport
+LRU	Las Cruces International Airport
+LSE	La Crosse Municipal Airport
+LST	Launceston Airport
+LTO	Loreto International Airport
+LUK	Cincinnati Municipal Airport Lunken Field
+LUN	Lusaka International Airport
+LUX	Luxembourg Airport
+LWB	Greenbrier Valley Airport
+LWS	Lewiston-Nez Perce County Airport
+LYH	Lynchburg Regional Airport/Preston Glenn Field
+LYS	Satolas Airport
+MAA	Chennai International Airport
+MAD	Barajas International Airport
+MAF	Midland International Airport
+MAJ	Marshall Islands International Airport
+MAN	Manchester International Airport
+MAO	Eduardo Gomes International Airport
+MAR	La Chinita International Airport
+MAZ	Mayaquez Airport
+MAZ	Eugenio Maria De Hostos Airport
+MBA	Manokotak Airport
+MBJ	Sangster International Airport
+MBL	Manistee County-Blacker
+MBS	Saginaw International Airport
+MCC	Mc Clellan Airfield
+MCE	Merced Municipal Airport
+MCG	McGrath Airport
+MCI	Kansas City International Airport
+MCK	Mc Cook Regional Airport
+MCN	Middle Georgia Regional Airport
+MCO	Orlando International Airport
+MCT	Seeb International Airport
+MCW	Mason City Municipal Airport
+MDE	Jose Maria Cordova International Airport
+MDH	Southern Illinois Airport
+MDM	Marshall Don Hunter Sr Airport
+MDT	Harrisburg International Airport
+MDW	Chicago Midway Airport
+MDY	Henderson Field Airport
+MEI	Key Field Airport
+MEL	Melbourne International Airport
+MEM	Memphis Airport
+MEX	Benito Juarez International Airport
+MFD	Mansfield Lahm Regional Airport
+MFE	Mcallen-Miller International Airport
+MFR	Medford Rogue Valley International Airport
+MGA	Managua International Airport
+MGM	Montgomery Regional Airport
+MGW	Morgantown Municipal Airport
+MHE	Mitchell Municipal Airport
+MHH	Marsh Harbour Airport
+MHK	Manhattan Regional Airport
+MHT	Manchester Airport
+MIA	Miami International Airport
+MID	Licenciado Manuel International Airport
+MIE	Delaware County Airport
+MIV	Millville Municipal Airport
+MJX	Robert J. Miller Air Park
+MKC	Charles B. Wheeler Downtown Airport
+MKE	General Mitchell International Airport
+MKG	Muskegon County Airport
+MKK	Molokai Airport
+MKL	Mc Kellar-Sipes Regional Airport
+MKT	Mankato Regional Airport
+MLB	Melbourne International Airport
+MLH	Basle-Mulhouse Airport
+MLI	Quad City International Airport
+MLL	Marshall Airport
+MLM	Mujica International Airport
+MLU	Monroe Regional Airport
+MME	Durham Tees Valley Airport
+MMH	Mammoth Yosemite Airport
+MMU	Morristown Municipal Airport
+MMV	Mc Minnville Municipal Airport
+MNL	Ninoy Aquino International Airport
+MNM	Menominee-Marinette Twin County Airport
+MOB	Mobile Regional Airport
+MOD	Modesto City-County Airport
+MOT	Minot International Airport
+MOU	Mountain Village Airport
+MPL	Montpellier Airport
+MPV	Edward F. Knapp State Airport
+MQI	Dare County Regional Airport
+MQJ	Mount Comfort Airport
+MQY	Smyrna Airport
+MRI	Merrill Field
+MRS	Marseille / Provence Airport
+MRY	Monterey Peninsula Airport
+MSL	Northwest Alabama Regional Airport
+MSN	Dane County Regional Airport
+MSO	Missoula International Airport
+MSP	Minneapolis/St. Paul International Airport
+MSS	Massena International Airport
+MST	Maastricht-Aachen Airport
+MSV	Sullivan County International Airport
+MSY	New Orleans International Airport
+MTH	Florida Keys Marathon Airport
+MTJ	Montrose Regional Airport
+MTM	Metlakatla Airport
+MTO	Coles County Memorial Airport
+MTT	Minitatlan Airport
+MTY	Monterrey International Airport
+MUC	Franz Josef Strauss International Airport
+MUE	Waimea - Kohala Airport
+MVD	Carrasco International Airport
+MVL	Morrisville-Stowe State Airport
+MVN	Mount Vernon Airport
+MVY	Martha's Vineyard Airport
+MWA	Williamson County Regional Airport
+MWH	Grant County International Airport
+MXL	Toboada International Airport
+MXP	Malpensa International Airport
+MYR	Myrtle Beach Airport
+MZJ	Pinal Airpark
+MZT	Mazatlan International Airport
+N93	Golovin Airport
+NAN	Nadi International Airport
+NAP	Capodichino Airport
+NAS	Nassau International Airport
+NBO	Jomo Kenyatta Airport
+NCE	Cote d'Azur International Airport
+NCL	Newcastle Airport
+NDJ	N'Djamena Airport
+NEV	Newcastle Airport
+NEW	Lakefront Airport
+NGO	Nagoya Airport
+NGS	Nagasaki Airport
+NIM	Diori Hamani Airport
+NKC	Nouakchott Airport
+NQA	Millington Regional Jetport
+NRT	Narita International Airport
+NSI	Nsimalen Airport
+NTE	Nantes Airport
+NTR	Del Norte International Airport
+NUE	Nuremberg Airport
+NUL	Nulato Airport
+NVT	Navegantes-Itajai Airport
+NWI	Norwich Airport
+OAJ	Jacksonville/Albert J Ellis Airport
+OAK	Oakland International Airport
+OAX	Xoxocotlan International Airport
+OCF	Ocala International Airport
+OFK	Karl Stefan Memorial Airport
+OGD	Ogden-Hinckley Airport
+OGG	Kahului Airport
+OGS	Ogdensburg International Airport
+OIT	Oita Airport
+OKC	Will Rogers World Airport
+OKJ	Okayama Airport
+OLM	Olympia Airport
+OMA	Eppley Airfield
+OME	Nome Airport
+ONP	Newport Municipal Airport
+ONT	Ontario International Airport
+OOK	Toksook Bay Airport
+OOL	Gold Coast Airport
+OPO	Francisco Sa Carneiro Airport
+OQU	Quonset State Airport
+ORD	Chicago O'hare International Airport
+ORF	Norfolk International Airport
+ORH	Worcester Regional Airport
+ORI	Port Lions Airport
+ORS	Orcas Island Airport
+ORV	Robert (Bob) Curtis Memorial Airport
+ORY	Orly Airport
+OSH	Wittman Regional Airport
+OSL	Oslo Airport, Gardermoen
+OSR	Mosnov Airport
+OSU	Ohio State University Airport
+OTG	Worthington Municipal Airport
+OTH	North Bend Municipal Airport
+OTM	Ottumwa Industrial Airport
+OTP	Otopeni International Airport
+OTZ	Ralph Wien Memorial Airport
+OUA	Ouagadougou Airport
+OWB	Owensboro-Daviess County Airport
+OXC	Waterbury-Oxford Airport
+OXR	Oxnard Airport
+PAE	Snohomish County Airport (Paine Field)
+PAH	Paducah Barkley Regional Airport
+PAP	Port-au-Prince International Airport
+PBC	Hermanos Serdan International Airport
+PBI	Palm Beach International Airport
+PCW	Carl R Keller Field
+PDT	Eastern Oregon Regional Airport At Pendleton
+PDX	Portland International Airport
+PEI	Matecana International Airport
+PEK	Beijing Capital International Airport
+PEN	Penang International Airport
+PER	Perth International Airport
+PFN	Panama City-Bay County International Airport
+PFN	Panama City Airport
+PGA	Page Municipal Airport
+PGD	Charlotte County Airport
+PGM	Port Graham Airport
+PGV	Pitt-Greenville Airport
+PHC	Port Harcourt Airport
+PHF	Newport News/Williamsburg International Airport
+PHL	Philadelphia International Airport
+PHO	Point Hope Airport
+PHX	Phoenix Sky Harbor International Airport
+PIA	Peoria Regional Airport
+PIB	Hattiesburg-Laurel Regional Airport
+PIE	St. Petersburg-Clearwater International Airport
+PIH	Pocatello Regional Airport
+PIR	Pierre Regional Airport
+PIT	Pittsburgh International Airport
+PKB	Mid-Ohio Valley Regional Airport
+PLB	Clinton County Airport
+PLK	M Graham Clark - Taney County Airport
+PLN	Pellston Regional Airport
+PLS	Providenciales International Airport
+PLZ	Port Elizabeth Airport
+PMC	El Tepual International Airport
+PMD	Palmdale Regional Airport
+PMI	Palma De Mallorca Airport
+PMO	Punta Raisi Airport
+PNC	Ponca City Regional Airport
+PNI	Pohnpei International Airport
+PNS	Pensacola Regional Airport
+POA	Salgado Filho International Airport
+POP	La Union International Airport
+POS	Piarco International Airport
+POU	Dutchess County Airport
+PPC	Prospect Creek Airport
+PPG	Pago Pago International Airport
+PPT	Papeete Faaa Airport
+PQI	Northern Maine Regional Airport
+PQL	Trent Lott International Airport
+PRB	Paso Robles Municipal Airport
+PRC	Ernest A. Love Field Airport
+PRG	Ruzyne International Airport
+PSA	San Giusto Airport
+PSC	Tri-Cities Airport
+PSE	Mercedita Airport
+PSG	Petersburg Airport
+PSM	Pease International Airport
+PSP	Palm Springs International Airport
+PTH	Port Heiden Airport
+PTK	Oakland County International Airport
+PTP	Le Raizet International Airport
+PTY	Tocumen International Airport
+PUB	Pueblo Memorial Airport
+PUJ	Punta Cana International Airport
+PUQ	Punta Arenas International Airport
+PUS	Kimhae International Airport
+PUW	Pullman / Moscow Regional Airport
+PVC	Provincetown Municipal Airport
+PVD	T.F. Green Airport
+PVG	Pudong Airport
+PVR	Lic Gustavo Diaz Ordaz International Air
+PVU	Provo Municipal Airport
+PWM	Portland International Jetport
+PWT	Bremerton National Airport
+PXM	Puerto Escondido Airport
+QRO	Ingeniero International Airport
+RAK	Menara Airport
+RAP	Rapid City Regional Airport
+RAR	Rarotonga International Airport
+RBA	Sale Airport
+RDD	Redding Municipal Airport
+RDG	Reading Regional Airport
+RDM	Roberts Field
+RDU	Raleigh-Durham International Airport
+REC	Guararapes International Airport
+REG	Reggio Calabria Airport
+RFD	Greater Rockford Airport
+RHI	Rhinelander-Oneida County Airport
+RIC	Richmond International Airport
+RIW	Riverton Regional Airport
+RIX	Riga International Airport
+RKD	Knox County Regional Airport
+RKS	Rock Springs-Sweetwater County Airport
+RME	Griffiss Airpark
+RMG	Richard B Russell Airport
+RNO	Reno-Tahoe International Airport
+RNS	St Jacques Airport
+ROA	Roanoke Regional Airport
+ROC	Greater Rochester International Airport
+ROP	Rota Island International Airport
+ROR	Babelthuap/Koror Airport
+ROW	Roswell Industrial Air Center Airport
+RSH	Russian Mission Airport
+RST	Rochester International Airport
+RSW	Southwest Florida International Airport
+RTB	Roatan Island Airport
+RUH	King Khaled International Airport
+RUT	Rutland State Airport
+RWI	Rocky Mount-Wilson Regional Airport
+SAF	Santa Fe Municipal Airport
+SAL	Comalapa International Airport
+SAN	San Diego International Airport
+SAP	La Mesa International Airport
+SAT	San Antonio International Airport
+SAV	Savannah/Hilton Head International Airport
+SAW	Sawyer International Airport
+SBA	Santa Barbara Airport
+SBD	San Bernardino International Airport
+SBN	South Bend Regional Airport
+SBP	San Luis County Regional Airport
+SBY	Salisbury-Ocean City Wicomico Regional Airport
+SCC	Deadhorse Airport
+SCK	Stockton Metropolitan Airport
+SCL	Benitez International Airport
+SCM	Scammon Bay Airport
+SDF	Louisville International Airport
+SDJ	Sendai Airport
+SDP	Sand Point Airport
+SDQ	Las Americas International Airport
+SDY	Sidney-Richland Municipal Airport
+SEA	Seattle/Tacoma International Airport
+SFB	Orlando Sanford International Airport
+SFO	San Francisco International Airport
+SFZ	North Central State Airport
+SGF	Springfield Branson Regional Airport
+SGH	Springfield-Beckley Municipal Airport
+SGJ	St Augustine Airport
+SGN	Tansonnhat Airport
+SGU	St George Municipal Airport
+SGY	Skagway Airport
+SHA	Hongqiao International Airport
+SHD	Shenandoah Valley Regional Airport
+SHE	Taoxian Airport
+SHG	Shungnak Airport
+SHH	Shishmaref Airport
+SHR	Sheridan County Airport
+SHV	Shreveport Regional Airport
+SID	Amilcar Cabral International Airport
+SIG	Fernando Luis Ribas Dominicci Airport
+SIN	Changi International Airport
+SIT	Sitka Rocky Gutierrez Airport
+SJC	San Jose International Airport
+SJD	Los Cabos International Airport
+SJO	Juan Santa Maria International Airport
+SJT	San Angelo Regional Airport/Mathis Field
+SJU	Luis Munoz Marin International Airport
+SJU	Luiz Munoz Marin International Airport
+SKB	Robert Bradshaw International Airport
+SKX	Taos Regional Airport
+SLC	Salt Lake City International Airport
+SLE	Salem Municipal Airport - McNary Field
+SLK	Adirondack Regional Airport
+SLN	Salina Municipal Airport
+SLP	Ponciano Arriaga International Airport
+SLU	Vigie Airport
+SLW	Plan De Guadalupe International Airport
+SMF	Sacramento International Airport
+SMX	Santa Maria Public Airport
+SNA	John Wayne Airport
+SNN	Shannon International Airport
+SNP	Saint Paul Island Airport
+SOP	Moore County Airport
+SOU	Southampton International Airport
+SOV	Seldovia Airport
+SOW	Show Low Regional Airport
+SPC	La Palma Airport
+SPI	Abraham Lincoln Capital Airport
+SPN	Saipan International Airport
+SPS	Wichita Falls Municipal Airport
+SPU	Kastela Airport
+SQI	Whiteside County Airport
+SRQ	Sarasota-Bradenton International Airport
+SRR	Sierra Blanca Regional Airport
+SSA	Salvador International Airport
+SSG	Malabo Airport
+STC	St Cloud Regional Airport
+STI	Cibao International Airport
+STJ	Rosecrans Memorial Airport
+STL	Lambert-St. Louis International Airport
+STN	Stansted Airport
+STP	St Paul Downtown Airport / Holman Field
+STR	Echterdingen International Airport
+STS	Sonoma County Airport
+STT	Cyril E King Airport
+STT	Cyril E King International Airport
+STX	Henry E Rohlsen Airport
+SUB	Juanda Airport
+SUF	Terme Airport
+SUJ	Satu Mare International Airport
+SUN	Friedman Memorial Airport
+SUS	Spirit Of St Louis Airport
+SUX	Sioux Gateway Airport
+SVA	Savoonga Airport
+SVC	Grant County Airport
+SVG	Sola Airport
+SVO	Sheremetyevo International Airport
+SWF	Stewart International Airport
+SWO	Stillwater Regional Airport
+SXB	Entzheim Airport
+SXF	Schonefeld Airport
+SXM	Princess Juliana International Airport
+SYD	Kingsford Smith International Airport
+SYR	Syracuse Hancock International Airport
+SZX	Huangtian Airport
+T44	Trident Basin Seaplane Base
+TAL	Ralph M Calhoun Memorial Airport
+TAM	Tampico Airport
+TAP	Tapachula International Airport
+TAS	Vostochny International Airport
+TBI	New Bight Airport
+TBN	Waynesville Regional Airport At Forney Field
+TCB	Treasure Cay Airport
+TCL	Tuscaloosa Regional Airport
+TEB	Teterboro Airport
+TEX	Telluride Regional Airport
+TFN	Los Rodeos Airport
+TGU	Toncontin International Airport
+TGZ	Francisco Sarabia Airport
+THR	Mehrabad International Airport
+TIA	Rinas Airport
+TIJ	Rodriguez International Airport
+TIX	Space Coast Regional Airport
+TKK	Truk Airport
+TLC	Toluca International Airport
+TLH	Tallahassee Regional Airport
+TLL	Ulemiste Airport
+TLS	Blagnac Airport
+TLT	Tuluksak Airport
+TLV	Ben Gurion International Airport
+TNG	Ibn Batouta Airport
+TNI	Tinian International Airport
+TOG	Togiak Airport
+TOJ	Torrejon Airport
+TOL	Toledo Express Airport
+TOY	Toyama Airport
+TPA	Tampa International Airport
+TPE	Chiang Kai-Shek International Airport
+TPL	Draughon-Miller Central Texas Regional Airport
+TRC	Torreon International Airport
+TRD	Trondheim Airport
+TRF	Sandefjord Airport
+TRI	Tri-Cities Regional Airport
+TRN	Caselle Airport
+TRS	Ronchi Dei Legionari Airport
+TSR	Timisoara Airport
+TTN	Trenton Mercer Airport
+TUL	Tulsa International Airport
+TUN	Carthage Airport
+TUP	Tupelo Regional Airport
+TUS	Tucson International Airport
+TVC	Cherry Capital Airport
+TVF	Thief River Falls Regional Airport
+TVL	Lake Tahoe Airport
+TVR	Vicksburg Tallulah Regional Airport
+TWF	Magic Valley Regional Airport
+TXK	Texarkana Regional Airport
+TXL	Tegel Airport
+TYR	Tyler Pounds Regional Airport
+TYS	Mcghee Tyson Airport
+UCA	Oneida County Airport
+UIN	Quincy Regional Airport - Baldwin Field
+UIO	Mariscal Sucre International Airport
+UNK	Unalakleet Airport
+UNV	University Park Airport
+UOX	University-Oxford Airport
+UUU	Newport State Airport
+UVF	Hewanorra International Airport
+VAK	Chevak Airport
+VCE	Tessera Airport
+VCT	Victoria Regional Airport
+VCV	Southern California Logistics Airport
+VDZ	Valdez Pioneer Field
+VER	Veracruz International Airport
+VGT	North Las Vegas Air Terminal
+VIE	Vienna International Airport
+VIS	Visalia Municipal Airport
+VLD	Valdosta Regional Airport
+VPS	Fort Walton Beach Airport
+VPZ	Porter County Municipal Airport
+VQQ	Cecil Field Airport
+VQS	Vieques Airport
+VQS	Antonio Rivera Rodriguez Airport
+VRB	Vero Beach Municipal Airport
+VSA	Carlos Rovirosa International Airport
+VTE	Wattay International Airport
+VVI	Viru Viru International Airport
+WAW	Okecie International Airport
+WBB	Stebbins Airport
+WDG	Woodring Municipal Airport
+WDH	Hosea Kutako International Airport
+WLG	Wellington International Airport
+WLK	Selawik Airport
+WNA	Napakiak Airport
+WRG	Wrangell Airport
+WRL	Worland Municipal Airport
+WST	Westerly State Airport
+WTK	Noatak Airport
+WWD	Cape May County Airport
+WYS	West Yellowstone Airport
+X44	Miami Airport
+X95	Diego Jimenez Torres Airport
+XIY	Xianyang Airport
+XNA	Northwest Arkansas Regional Airport
+YAK	Yakutat Airport
+YAP	Yap International Airport
+YEG	Edmonton International Airport
+YFC	Greater Fredericton Airport
+YHZ	Halifax International Airport
+YKM	Yakima Air Terminal/Mcallister Field
+YKN	Chan Gurney Municipal Airport
+YLW	City of Kelowna Airport
+YMX	Mirabel International Airport
+YNG	Youngstown Regional Airport
+YOW	Ottawa International Airport
+YQB	Jean Lesage International Airport
+YQM	Moncton International Airport
+YQR	Regina International Airport
+YQT	Thunder Bay International Airport
+YQY	Sydney Airport
+YUL	Montreal Dorval Airport
+YUM	Yuma International Airport
+YVR	Vancouver International Airport
+YWG	Winnipeg International Airport
+YXE	Saskatoon International Airport
+YXU	London Airport
+YYC	Calgary International Airport
+YYJ	Victoria International Airport
+YYT	St John's International Airport
+YYZ	Lester B Pearson International Airport
+Z08	Ofu Airport
+Z09	Kasigluk Airport
+ZAG	Pleso Airport
+ZCL	Ruiz International Airport
+ZIH	Ixtapa-Zihuatanejo International Airport
+ZLO	Playa De Oro International Airport
+ZQN	Queenstown Airport
+ZRH	Zurich International Airport

@@ -1,0 +1,486 @@
+Code	Airline Name
+2K	Kitty Hawk
+2M	Moldavian Airlines
+2P	Air Philippines
+2S	Sun Air
+2Y	HelenAir Caribbean
+3C	Corporate Express
+3D	Denim Airways
+3H	Air Inuit
+3L	InterSky
+3M	Continental Connection (Gulfstream)
+3R	Air Moldova International
+3S	Air Antilles
+3S	Shuswap Air
+3U	Sichuan Airlines
+3Z	Necon Air
+4L	Air Alma
+4N	Air North
+4V	Voyageur Airways
+4Y	Yute Air
+4Z	South African Airlink
+5F	Arctic Circle Air Service
+5J	Cebu Pacific Air
+5K	Kenmore Air
+5U	Skagway Air Service
+5Y	Atlas Air
+6A	Aviacsa Airlines
+6E	Malmo Aviation
+6N	Nordic Leisure
+6N	TTA TransTravel
+6P	Club Air
+6Q	Slovak Airlines
+6U	Air Ukraine Cargo
+6V	Air Vegas
+7A	Haines/Alaska Coastal Airways
+7B	KrasAir
+7C	Coyne Airways
+7F	First Air
+7G	Gulfstream Airlines
+7L	AB Airlines
+7P	Batavia Air
+7V	Austin Express
+7Y	West Isle Air
+8D	Volareweb
+8E	Bering Air
+8G	Angel Air
+8H	Harbour Air
+8M	MaxAir
+8O	West Coast Air
+8P	Pacific Coastal Airlines
+8U	Afriqiyah Airways
+8W	BAX Global (Burlington Air Express)
+9C	Wimbi Dira Airways
+9K	Cape Air
+9M	Central Mountain Air
+9N	Trans States Airlines
+9T	Transwest Air
+9W	Jet Airways
+9Y	Air Kazakstan
+A4	Southern Winds
+A6	Asia Pacific Airlines
+AA	American Airlines
+AB	Air Berlin
+AC	Air Canada
+AE	Mandarin Airlines
+AF	Air France
+AG	Provincial Airlines
+AH	Air Algerie
+AI	Air India
+AK	AirAsia
+AM	Aeromexico
+AM	Island Airlines
+AN	Ansett Australia
+AN	Skywest
+AP	Air One
+AQ	Aloha Airlines
+AR	Aerolíneas Argentinas
+AS	Alaska Airlines/Horizon Air
+AS	Horizon Air/Alaska Airlines
+AT	Royal Air Maroc
+AU	Austral Líneas Aéreas
+AV	Avianca
+AWC	Titan Airways
+AWS	Royal Wings
+AY	Finnair
+AZ	Alitalia
+B	airBaltic
+B2	Belavia Belarusian Airlines
+B3	Bellview Airlines
+B4	Bhoja Air
+B6	JetBlue
+BA	British Airways
+BA	GB Airways
+BC	Air Jet
+BD	British Midland
+BG	Biman Air
+BHA	Buddha Air
+BI	Royal Brunei Airlines
+BL	Pacific Airlines
+BO	Bouraq Airlines
+BQ	Aeromar
+BR	EVA Air
+BT	Air Baltic
+BT	Air Liberte Guadeloupe
+BTL	Baltia Air Lines
+BU	Braathens
+BU	Sun Air
+BW	BWIA British West Indian
+BX	Coast Air
+BY	Britannia Airways
+BZ	Keystone Air Service
+C6	CanJet
+C8	Chicago Express Airlines
+CA	Air China
+CB	Scot Airways
+CC	Air Atlanta Icelandic
+CC	Macair Airlines
+CD	Mindanao Express Airlines
+CE	Nationwide Airlines
+CG	MBA Milne Bay Airlines
+CI	China Airlines
+CJ	China Northern Airlines
+CJ	Colgan Air
+CL	Lufthansa CityLine
+CM	COPA
+CN	Tropic Air
+CO	Continental Airlines
+CU	Cubana
+CV	Cargolux
+CX	Cathay Pacific
+CY	Cyprus Airways
+CZ	China Southern Airlines
+D3	Daallo Airlines
+DA	Air Georgia
+DB	Brit Air
+DD	Nok Air
+DE	Condor
+DL	Delta
+DL	Delta Express
+DL	Song
+DM	Maersk Air
+DP	Air 2000
+DP	First Choice
+DS	Air Senegal
+DU	Hemus Air
+DV	Nantucket Airlines
+DW	Rottnest Air Taxi
+DWT	Darwin Airline
+DX	DanAir
+DZ	Transcaraibes Air International/Air Tropical
+E5	Samara Airlines
+E8	AlpiEagles
+ED	CCAir (US Airways Express)
+EI	Aer Lingus
+EJ	New England Airlines
+EK	Emirates
+EM	Western Airlines
+EN	Air Dolomiti
+EP	Europe Airpost
+EQ	TAME
+ET	Ethiopian Airlines
+EW	Eurowings
+EZ	Sun Air
+F3	Flying Enterpise
+F4	Eureca
+F9	Frontier Airlines
+FA	Safair
+FB	Fine Air
+FF	Tower Air
+FG	Ariana Afghan Airlines
+FI	Icelandair
+FJ	Air Pacific
+FL	AirTran Airways
+FL	Frontier Airlines
+FM	Shanghai Airlines
+FO	Expedition Airways
+FP	Par Avion Airlines
+FQ	Air Aruba
+FQ	Thomas Cook Airlines
+FR	Ryanair
+FS	Staf Cargo Airlines
+FT	Vancouver Island Air
+FU	Air Littoral
+G1	Gorkha Airlines
+G3	Emerald Airways
+G4	Allegiant Air
+G5	Island Air
+G7	Gandalf Airlines
+G9	Air Arabia
+GA	Citilink
+GA	Garuda Indonesia
+GF	Gulf Air
+GH	Ghana Airways
+GL	Air Greenland
+GM	Air Slovakia
+GQ	BigSky Airlines
+GS	AirFoyle
+GT	Air Mandalay
+GU	Riga Airlines
+GX	Air Ontario
+GY	Guyana Airways
+H2	City Bird
+HA	Hawaiian Airlines
+HF	Hapag
+HH	Islandsflug
+HK	Yangon Airways
+HM	Air Seychelles
+HP	America West Airlines
+HQ	HMY Airways
+HR	Hahn Air
+HSA	East African Safari Air
+HV	Transavia
+HY	Uzbekistan Airways
+IB	Iberia
+IC	Indian Airlines
+IE	Solomon Airlines
+IG	Meridiana
+IM	Spirit Airlines
+IR	Iran Air
+IV	WindJet
+IY	Yemenia Airways
+IZ	Arkia Israeli Airlines
+J4	Buffalo Airways
+JA	Air Bosna
+JB	Helijet Airways
+JD	Japan Air System
+JE	Manx Airlines
+JF	L.A.B. Flying Service
+JL	Japan Airlines
+JM	Air Jamaica
+JP	Adria Airways
+JU	JAT Yugoslav Airlines
+JV	Bearskin Airlines
+JX	SunJet
+JY	British European Airways
+K5	Wings of Alaska
+KA	Dragon Air
+KB	Druk Air (Royal Bhutan Airlines)
+KD	Kendell Airlines
+KE	Korean Air
+KF	Air Botnia
+KF	Blue1
+KK	TAM
+KL	KLM Royal Dutch Airlines
+KM	Air Malta
+KQ	Kenya Airways
+KS	Penair (Peninsula Airways)
+KU	Kuwait Airways
+KX	Cayman Airways
+L2	Lynden Air Cargo
+LA	LanChile Airlines
+LB	Albanian Airlines
+LB	Lloyd Aero Boliviano
+LC	Loganair
+LG	Luxair
+LH	Lufthansa
+LH	Lufthansa Cargo
+LI	LIAT
+LM	Air ALM (Antillean Airlines)
+LN	Libyan Arab Airlines
+LO	LOT Polish Airlines
+LP	LanPreu
+LT	LTU International Airways
+LW	Pacific Wings Hawaii
+LX	Swiss International Airlines
+LY	El Al
+LZ	Balkan Bulgarian Airlines
+M2	Southeast Air Freight
+M3	European Air Express
+M3	WestJet
+M4	Avioimpex
+M7	MAT Macedonian Airlines
+MA	Malev Hungarian
+MD	Air Madagascar
+ME	MEA Middle East Airlines
+MF	Xiamen Airlines
+MH	Malaysia Airlines
+MI	Silk Air
+MK	Air Mauritius
+ML	Midway Airlines
+MN	British Airways South Africa
+MO	Calm Air
+MP	Martinair
+MS	EgyptAir
+MU	China Eastern Air
+MW	Maya Airways
+MW	Maya Island Air
+MX	Mexicana
+MY	Euroscot
+N6	Aero Continente
+NB	National Airlines
+NB	Sterling
+NG	Lauda Air
+NH	All Nippon Airways
+NI	PGA Portugalia Airlines
+NI	Portugália Airlines
+NJ	Vanguard Airlines
+NL	Shaheen Air International
+NN	Cardinal Airlnes
+NO	Aus
+NP	Skytrans Airlines
+NR	Spanair
+NW	Northwest Airlines
+NW	Pacific Island Aviation
+NX	Air Macau
+NY	Air Iceland
+NZ	Air New Zealand
+OA	Olympic Airways
+OG	Go
+OH	Comair
+OK	Czech Airlines
+OL	OLT
+OM	MIAT Mongolian Airlines
+ON	Air Nauru
+OP	Chalk's Ocean Airways
+OS	Austrian Airlines
+OU	Croatia Airlines
+OV	Estonian Air
+OX	Orient Thai Airlines
+OZ	Asiana Airlines
+P8	Pantanal Linhas Aéreas
+PA	Pan Am
+PA	Pan American World Airways
+PC	Air Fiji
+PD	Trillium Air
+PF	Palestinian Airlines
+PG	Bangkok Airways
+PH	Polynesian Airlines
+PI	Piedmont Airlines
+PK	Pakistan International Airlines
+PR	Philippine Airlines
+PS	Ukraine International Airlines
+PW	Precision Air
+PX	Air Niugini
+PY	Surinam Airways
+Q2	Minerva Airlines
+Q3	Roan Air
+Q4	Mustique Airways
+Q7	Sobel Air
+QA	Aerocaribe
+QAH	Quick Airways
+QF	Qantas Airways
+QF	Southern Australia Airlines
+QK	Air Nova
+QP	Airkenya
+QQ	Reno Air
+QR	Qatar Airways
+R6	Air Srpska
+R7	Aserca Airlines
+RA	Royal Nepal
+RB	Syrianair
+RC	Atlantic Airways
+RE	Aer Arann Express
+RG	VARIG Airlines
+RI	Mandala Airlines
+RJ	Royal Jordanian
+RK	Air Afrique
+RO	TAROM
+RQ	Air Engiadina
+RT	Airlines of South Australia
+RYN	Ryan International Airlines
+RZ	Sansa
+S2	Sahara India Airlines
+S5	Shuttle America
+S7	Siberia Airlines
+SA	South African Airways
+SB	Aircalin
+SB	TIE
+SC	Shandong Airline
+SD	Sudan Airways
+SE	Seair
+SG	Sempati Air
+SJ	Polar Air Cargo
+SK	SAS
+SK	Skyline Airways
+SL	Rio
+SLI	Aerolitoral
+SN	Sabena
+SN	SN Brussels Airline
+SO	Swiss World
+SP	SATA
+SP	Sata Air Açores
+SQ	Singapore Airlines
+SS	Corsair
+SSV	Skyservice
+SU	Aeroflot
+SV	Saudi Arabian Airlines
+SW	Air Namibia
+SY	Sun Country Airlines
+SZ	China Southwest Airlines
+SZ	Pro Air
+T4	Transeast Airlines
+TA	TACA (Grupo Taca)
+TC	Air Tanzania
+TE	Lithuanian Airlines
+TG	Thai Airways International
+TK	Turkish Airlines
+TL	Airnorth
+TL	Trans Mediterranean Airways
+TM	LAM Linhas Aéreas de Mocambique
+TN	Air Tahiti Nui
+TP	TAP Air Portugal
+TPC	Air Caladonie
+TR	TransBrasil
+TS	Air Transat
+TT	Air Lithuania
+TU	Tunisair
+TV	Virgin Express
+TW	Trans World Airlines: TWA
+TX	Air Car?bes
+TZ	American Trans Air
+U2	easyJet
+U3	Travelair
+U6	Ural Airlines
+UA	United Airlines
+UB	Myanmar Airways International
+UK	KLM uk
+UL	SriLankan
+UM	Air Zimbabwe
+UN	Transaero
+UP	Bahamasair
+US	Chautauqua Airlines (US Airways Express)
+US	MetroJet
+US	US Airways
+UU	Air Austral
+UW	Perimeter
+UX	Air Europa
+UX	Air Luxor
+UY	Cameroon Airlines
+V3	Vanair
+VG	VLM Airlines
+VI	Volga
+VL	North Vancouver Air
+VM	Regional Airlines
+VN	Vietnam Airlines
+VO	Tyrolean Airways
+VP	VASP
+VQ	Impulse Airlines
+VQ	Jetstar
+VR	Cabo Verde Airlines
+VS	Virgin Atlantic
+VV	AeroSvit Airlines
+VV	Aerosweet
+VW	Skyways
+VX	Virgin America
+W3	Swiftair
+W5	Mahan Air
+W6	Wizz
+W9	Eastwind Airlines
+WC	Isle?a
+WF	Wider?e Airline
+WG	Wasaya Airways
+WJ	Air Labrador
+WL	Aeroperlas
+WN	Southwest Airlines
+WNA	WinAir
+WO	World Airways
+WR	Royal Tongan Airlines
+WS	WestJet
+WT	Nigeria Airlines
+WX	CityJet
+WY	Oman Air
+X5	Cronus Airlines
+XG	North American Airlines
+XJ	Mesaba Airlines
+XP	Casino Express Airlines
+XZ	Eastair
+YB	South African Express Airways
+YC	Flight West
+YI	Air Sunshine
+YK	Cyprus Turkish Airlines
+YN	Air Creebec
+YT	Skywest
+YV	Mesa Air Group
+YX	Midwest Express Airlines
+Z4	Zoom
+Z5	GMG Airlines
+ZA	AccessAir
+ZB	Monarch Airlines
+ZI	Aigle Azur
+ZK	Great Lakes Aviation
+ZK	United Express
+ZQ	Qantas New Zealand
+ZR	Muk Air
+ZU	Freedom Air International
+ZW	Air Wisconsin
