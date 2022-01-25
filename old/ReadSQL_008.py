@@ -66,10 +66,6 @@ profile_max_categorical = 100
 profile_show_categorical = 5
 rows_label = "(Row)"
 
-variables = {}
-variables["$all"] = 100
-variables["$a"] = 99
-
 command_options = {}
 command_options["quit"] = {}
 command_options["quit"]["name"] = []
@@ -204,7 +200,7 @@ command_options["print columns"]["altoption"] = []
 command_options["print"] = {}
 command_options["print"]["name"] = ["what", "from", "to", "step", "random", "list", "columns"]
 command_options["print"]["required"] = [False, False, False, False, False, False, False]
-command_options["print"]["type"] = [["data","columns","da","d","c"], "int", "int", "int", "int", "intlist", "strlist"]
+command_options["print"]["type"] = [["data all","data","columns","da","d","c"], "int", "int", "int", "int", "intlist", "strlist"]
 command_options["print"]["default"] = ["data", 0, 0, 1, 0, "[]", "[]"]
 command_options["print"]["help1"] = "Help for command 'folder'"
 command_options["print"]["help2"] = ["Bla1","Bla2","Bla3","Bla4","Bla5","Bla6","Bla7"]
@@ -637,23 +633,13 @@ def parseCommand(command_line):
                 #print(f"Parse option '{n}' as string:", options[n])
                 #command = "quit"
             elif t == "int":
-                #print(f"I am going to translate '{options[n]}' to 'int'")
-                # check variables first
-                result_message = f"Option '{n}' should be integer but is '{options[n]}'. Probably not doing what expected!"
-                vartest = str(options[n])
-                if vartest[0] not in ["0","1","2","3","5","6","7","8","9","-","+"," "]:
-                    if vartest[0] != "$": vartest = "$" + vartest #variable start with "$", user can omit like in print data all
-                    if vartest in variables:
-                        options[n] = variables[vartest]
-                    else:
-                        result_message = 1
-                        result_message = f"Option '{n}' should be integer but is '{options[n]}', which is not variable. Probably not doing what expected!"
                 try:
                     options[n] = int(options[n])
                 except Exception as e:
                     traceback.print_exc()
-                Assert(isinstance(options[n], int), result_message)
-                if not isinstance(options[n], int): options[n] = d
+                Assert(isinstance(options[n], int), f"Option '{n}' should be integer but is '{options[n]}'. Probably not doing what expected!")
+                if not isinstance(options[n], int):
+                    options[n] = d
                 #print(f"Parse option '{n}' as integer:", options[n])
             elif t == "intlist":
                 Assert(options[n][0] == "[" and options[n][-1] == "]", "Lists must be enclosed with []. Probably not doing what expected!")
@@ -1088,7 +1074,6 @@ def do_sql(sql):
             if command == "print data all": options["what"] = "data all"
             if options["what"] == "c": options["what"] = "columns"
             if options["what"] == "d": options["what"] = "data"
-            if options["what"] == "da": options["what"] = "data all"
 
             if options["what"] == "columns":
 
