@@ -67,8 +67,8 @@ profile_show_categorical = 5
 rows_label = "(Row)"
 
 variables = {}
-variables["$all"] = 100
-variables["$a"] = 99
+variables["$all"] = 0
+variables["$a"] = 0
 
 command_options = {}
 command_options["quit"] = {}
@@ -171,16 +171,6 @@ command_options["insert"]["help2"] = ["Blabla1"]
 command_options["insert"]["alternative"] = ["i"]
 command_options["insert"]["altoption"] = [["t"]]
 
-command_options["print data all"] = {}
-command_options["print data all"]["name"] = []
-command_options["print data all"]["required"] = []
-command_options["print data all"]["type"] = []
-command_options["print data all"]["default"] = []
-command_options["print data all"]["help1"] = "Help for command 'folder'"
-command_options["print data all"]["help2"] = []
-command_options["print data all"]["alternative"] = ["pda"]
-command_options["print data all"]["altoption"] = []
-
 command_options["print data"] = {}
 command_options["print data"]["name"] = ["from", "to", "step", "random", "list", "columns"]
 command_options["print data"]["required"] = [False, False, False, False, False, False]
@@ -204,7 +194,7 @@ command_options["print columns"]["altoption"] = []
 command_options["print"] = {}
 command_options["print"]["name"] = ["what", "from", "to", "step", "random", "list", "columns"]
 command_options["print"]["required"] = [False, False, False, False, False, False, False]
-command_options["print"]["type"] = [["data","columns","da","d","c"], "int", "int", "int", "int", "intlist", "strlist"]
+command_options["print"]["type"] = [["data","columns","d","c"], "int", "int", "int", "int", "intlist", "strlist"]
 command_options["print"]["default"] = ["data", 0, 0, 1, 0, "[]", "[]"]
 command_options["print"]["help1"] = "Help for command 'folder'"
 command_options["print"]["help2"] = ["Bla1","Bla2","Bla3","Bla4","Bla5","Bla6","Bla7"]
@@ -380,25 +370,28 @@ def print_data(rowsi, colsi, data, columns, rows, rows_label):
 
 
 def show_data():
-            nrows = len(data)
-            ncols = len(columns)
-            rows = range(1, nrows + 1)
-            colsi = range(1, ncols + 1)
-            if nrows <= show_cases*2:
-                printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing all cases with all columns.")
-                rowsi = range(1, nrows + 1)
-                print_data(rowsi, colsi, data, columns, rows, rows_label)
-            else:
-                printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing first / last {show_cases} cases with all columns.")
-                data_show = data[:show_cases]
-                data_show += [["" for c in columns]]
-                data_show += data[-show_cases:]
-                rows = list(range(1,show_cases+1))
-                rows += ["..."]
-                rows += list(range(nrows-show_cases+1, nrows +1))
-                #print("Rows:", rows)
-                rowsi = range(1, len(data_show) + 1)
-                print_data(rowsi, colsi, data_show, columns, rows, rows_label)
+    global variables
+    nrows = len(data)
+    variables["$all"] = nrows
+    variables["$a"] = nrows
+    ncols = len(columns)
+    rows = range(1, nrows + 1)
+    colsi = range(1, ncols + 1)
+    if nrows <= show_cases*2:
+        printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing all cases with all columns.")
+        rowsi = range(1, nrows + 1)
+        print_data(rowsi, colsi, data, columns, rows, rows_label)
+    else:
+        printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing first / last {show_cases} cases with all columns.")
+        data_show = data[:show_cases]
+        data_show += [["" for c in columns]]
+        data_show += data[-show_cases:]
+        rows = list(range(1,show_cases+1))
+        rows += ["..."]
+        rows += list(range(nrows-show_cases+1, nrows +1))
+        #print("Rows:", rows)
+        rowsi = range(1, len(data_show) + 1)
+        print_data(rowsi, colsi, data_show, columns, rows, rows_label)
 
 
 def data_select():
@@ -647,7 +640,7 @@ def parseCommand(command_line):
                         options[n] = variables[vartest]
                     else:
                         result_message = 1
-                        result_message = f"Option '{n}' should be integer but is '{options[n]}', which is not variable. Probably not doing what expected!"
+                        result_message = f"Option '{n}' should be integer but is '{options[n]}', which is not a variable. Probably not doing what expected!"
                 try:
                     options[n] = int(options[n])
                 except Exception as e:
@@ -746,7 +739,7 @@ def check_filename(filename):
 def do_sql(sql):
 
     global conn, data, columns, db_filename, folder_exists, folder_name, db_version, db_schema, \
-            fromm, too, stepp, randd, listt, colss
+            fromm, too, stepp, randd, listt, colss, variables
 
     #time.sleep(0.1)
 
@@ -1085,33 +1078,12 @@ def do_sql(sql):
         elif command == "print" or command == "print data" or command == "print columns" or command == "print data all":
             if command == "print columns": options["what"] = "columns"
             if command == "print data": options["what"] = "data"
-            if command == "print data all": options["what"] = "data all"
             if options["what"] == "c": options["what"] = "columns"
             if options["what"] == "d": options["what"] = "data"
-            if options["what"] == "da": options["what"] = "data all"
 
             if options["what"] == "columns":
 
                 print(", ".join([str(c) for c in columns]))
-
-            elif options["what"] == "data all":
-
-                nrows = len(data)
-                ncols = len(columns)
-                fromm = 1
-                too = nrows
-                stepp = 1
-                listt = []
-                randd = 0
-                colss = []
-
-                rowsi, colsi = data_select()
-                #print(rows_show)
-                columns_show = [columns[ci-1] for ci in colsi]
-                printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing all cases with all columns.")
-                rows = range(1, nrows + 1)
-                #print(rows)
-                print_data(rowsi, colsi, data, columns, rows, rows_label)
 
             elif options["what"] == "data":
 
