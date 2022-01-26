@@ -7,7 +7,7 @@ create table t1 (id integer primary key autoincrement, City text, Country text);
 \r "Udacity_4_worldcities_select_error1.csv", ",", text_qualifier = '"';
 \i t1;
 select * from t1;
-\pda;
+\print d a;
 
 \r "Udacity_4_worldcities_select_error1_test_blanks.csv", ",", text_qualifier = '"';
 

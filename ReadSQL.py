@@ -67,8 +67,16 @@ profile_show_categorical = 5
 rows_label = "(Row)"
 
 variables = {}
-variables["$all"] = 0
-variables["$a"] = 0
+variables["$all"] = {}
+variables["$all"]["shorts"] = ["$a","$al"]
+variables["$all"]["print data"] = {}
+variables["$all"]["print data"]["value"] = 0
+variables["$all"]["print data"]["print"] = {}
+variables["$all"]["print data"]["print"]["what"] = ["data","d"]
+variables["$all"]["print data"]["print data"] = {}
+
+
+#variables["$a"] = 0
 
 command_options = {}
 command_options["quit"] = {}
@@ -195,6 +203,13 @@ command_options["print"] = {}
 command_options["print"]["name"] = ["what", "from", "to", "step", "random", "list", "columns"]
 command_options["print"]["required"] = [False, False, False, False, False, False, False]
 command_options["print"]["type"] = [["data","columns","d","c"], "int", "int", "int", "int", "intlist", "strlist"]
+'''
+command_options["print"]["type"] = [["data","columns"], "int", "int", "int", "int", "intlist", "strlist"]
+command_options["print"]["shorts"] = {}
+command_options["print"]["shorts"]["what"] = {}
+command_options["print"]["shorts"]["what"]["data"] = ["d"]
+command_options["print"]["shorts"]["what"]["columns"] = ["c"]
+'''
 command_options["print"]["default"] = ["data", 0, 0, 1, 0, "[]", "[]"]
 command_options["print"]["help1"] = "Help for command 'folder'"
 command_options["print"]["help2"] = ["Bla1","Bla2","Bla3","Bla4","Bla5","Bla6","Bla7"]
@@ -372,8 +387,7 @@ def print_data(rowsi, colsi, data, columns, rows, rows_label):
 def show_data():
     global variables
     nrows = len(data)
-    variables["$all"] = nrows
-    variables["$a"] = nrows
+    variables["$all"]["print data"]["value"] = nrows
     ncols = len(columns)
     rows = range(1, nrows + 1)
     colsi = range(1, ncols + 1)
@@ -634,13 +648,44 @@ def parseCommand(command_line):
                 # check variables first
                 result_message = f"Option '{n}' should be integer but is '{options[n]}'. Probably not doing what expected!"
                 vartest = str(options[n])
+
                 if vartest[0] not in ["0","1","2","3","5","6","7","8","9","-","+"," "]:
                     if vartest[0] != "$": vartest = "$" + vartest #variable start with "$", user can omit like in print data all
+                    variable = None
                     if vartest in variables:
-                        options[n] = variables[vartest]
+                        variable = vartest
+                    else:
+                        for var in variables:
+                            if vartest in variables[var]["shorts"]:
+                                variable = var
+                                break
+                    if variable:
+                        #get context
+                        print(f"Getting context for variable '{variable}' in command '{command}' and option '{options[n]}':")
+                        for contexttest in variables[variable]:
+                            #print(variables[variable][contexttest])
+                            if command in variables[variable][contexttest]:
+                                context = contexttest
+                                break
+                        if context:
+                            print(f"Command '{command}' test passed with context '{context}'!")
+                            print(variables[variable][contexttest])
+                            print(options)
+                            opt = 1
+                            for optiontest in variables[variable][context][command]:
+                                if optiontest in options:
+                                    if options[optiontest] in variables[variable][context][command][optiontest]:
+                                        print(f"Option '{optiontest}' test passed with value '{options[optiontest]}'!")
+                                    else:
+                                        opt = 0
+                                else:
+                                    opt = 0
+                        if opt: options[n] = variables[variable][context]["value"]
+
                     else:
                         result_message = 1
                         result_message = f"Option '{n}' should be integer but is '{options[n]}', which is not a variable. Probably not doing what expected!"
+
                 try:
                     options[n] = int(options[n])
                 except Exception as e:
