@@ -79,6 +79,17 @@ variables["$all"]["print data"]["print data"] = {}
 #variables["$a"] = 0
 
 command_options = {}
+command_options["#"] = {}
+command_options["#"]["name"] = []
+command_options["#"]["required"] = []
+command_options["#"]["type"] = []
+command_options["#"]["default"] = []
+command_options["#"]["help1"] = "Help for command 'folder'"
+command_options["#"]["help2"] = []
+command_options["#"]["alternative"] = ["q"]
+command_options["#"]["altoption"] = []
+
+command_options = {}
 command_options["quit"] = {}
 command_options["quit"]["name"] = []
 command_options["quit"]["required"] = []
@@ -203,13 +214,6 @@ command_options["print"] = {}
 command_options["print"]["name"] = ["what", "from", "to", "step", "random", "list", "columns"]
 command_options["print"]["required"] = [False, False, False, False, False, False, False]
 command_options["print"]["type"] = [["data","columns","d","c"], "int", "int", "int", "int", "intlist", "strlist"]
-'''
-command_options["print"]["type"] = [["data","columns"], "int", "int", "int", "int", "intlist", "strlist"]
-command_options["print"]["shorts"] = {}
-command_options["print"]["shorts"]["what"] = {}
-command_options["print"]["shorts"]["what"]["data"] = ["d"]
-command_options["print"]["shorts"]["what"]["columns"] = ["c"]
-'''
 command_options["print"]["default"] = ["data", 0, 0, 1, 0, "[]", "[]"]
 command_options["print"]["help1"] = "Help for command 'folder'"
 command_options["print"]["help2"] = ["Bla1","Bla2","Bla3","Bla4","Bla5","Bla6","Bla7"]
