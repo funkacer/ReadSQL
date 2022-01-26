@@ -74,11 +74,11 @@ AN	Ansett Australia
 AN	Skywest
 AP	Air One
 AQ	Aloha Airlines
-AR	AerolÌneas Argentinas
+AR	Aerol√≠neas Argentinas
 AS	Alaska Airlines/Horizon Air
 AS	Horizon Air/Alaska Airlines
 AT	Royal Air Maroc
-AU	Austral LÌneas AÈreas
+AU	Austral L√≠neas A√©reas
 AV	Avianca
 AWC	Titan Airways
 AWS	Royal Wings
@@ -293,7 +293,7 @@ NB	Sterling
 NG	Lauda Air
 NH	All Nippon Airways
 NI	PGA Portugalia Airlines
-NI	Portug·lia Airlines
+NI	Portug√°lia Airlines
 NJ	Vanguard Airlines
 NL	Shaheen Air International
 NN	Cardinal Airlnes
@@ -318,7 +318,7 @@ OU	Croatia Airlines
 OV	Estonian Air
 OX	Orient Thai Airlines
 OZ	Asiana Airlines
-P8	Pantanal Linhas AÈreas
+P8	Pantanal Linhas A√©reas
 PA	Pan Am
 PA	Pan American World Airways
 PC	Air Fiji
@@ -379,7 +379,7 @@ SN	Sabena
 SN	SN Brussels Airline
 SO	Swiss World
 SP	SATA
-SP	Sata Air AÁores
+SP	Sata Air A√ßores
 SQ	Singapore Airlines
 SS	Corsair
 SSV	Skyservice
@@ -397,7 +397,7 @@ TG	Thai Airways International
 TK	Turkish Airlines
 TL	Airnorth
 TL	Trans Mediterranean Airways
-TM	LAM Linhas AÈreas de Mocambique
+TM	LAM Linhas A√©reas de Mocambique
 TN	Air Tahiti Nui
 TP	TAP Air Portugal
 TPC	Air Caladonie
@@ -407,7 +407,7 @@ TT	Air Lithuania
 TU	Tunisair
 TV	Virgin Express
 TW	Trans World Airlines: TWA
-TX	Air Car?bes
+TX	Air Car√Øbes
 TZ	American Trans Air
 U2	easyJet
 U3	Travelair
@@ -447,8 +447,8 @@ W3	Swiftair
 W5	Mahan Air
 W6	Wizz
 W9	Eastwind Airlines
-WC	Isle?a
-WF	Wider?e Airline
+WC	Isle√±a
+WF	Wider√∏e Airline
 WG	Wasaya Airways
 WJ	Air Labrador
 WL	Aeroperlas
