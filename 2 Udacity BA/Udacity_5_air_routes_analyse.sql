@@ -43,4 +43,20 @@ left join (select * from t1_airports group by code) as t3
 left join (select * from t1_airports group by code) as t4
     on t1.destination = t4.code) as t2
 on t1.AC = t2.AC
+where t1.Count = 17;
+\pda;
+
+select t2.id, t1.AC, t1.Count, t2."Airline Name", t2."SAirport Name", t2."SC", t2."DAirport Name", t2."DC" from
+(select Airline as "AC", count(*) as Count from t1_routes group by Airline) as t1
+inner join
+(select
+    t1.id, Airline as "AC", "Airline Name", Source as "SC", t3."Airport Name" as "SAirport Name", Destination as "DC", t4."Airport Name" as "DAirport Name"
+    from t1_routes as t1
+left join (select * from t1_airlines group by code) as t2
+    on t1.airline = t2.code
+left join (select * from t1_airports group by code) as t3
+    on t1.source = t3.code
+left join (select * from t1_airports group by code) as t4
+    on t1.destination = t4.code) as t2
+on t1.AC = t2.AC
 order by t1.Count DESC;

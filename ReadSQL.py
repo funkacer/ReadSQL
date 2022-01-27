@@ -931,46 +931,57 @@ def do_sql(sql):
                 read_text_qualifier = options["text_qualifier"]
             else:
                 read_text_qualifier = None
-
             file_exists, full_filename = check_filename(read_filename)
             #print("Read: '{}'".format(read_filename))
             try:
                 with open(full_filename, "r", encoding = "utf-8") as f:
                     data_new = []
                     columns_new = []
-                    i = 0
                     data_line = f.readline()
+                    # line with column names
+                    if data_line[-1] == "\n": data_line = data_line[:-1]
+                    if read_text_qualifier:
+                        parsed_line = parseText(data_line, read_delimiter, [read_text_qualifier], False)
+                    else:
+                        parsed_line = data_line.split(read_delimiter)
+                    for c in parsed_line:
+                        columns_new.append(c)
+                    len_columns = len(columns_new)
                     #print("."+data_line+".")
+                    row = 1
+                    error = 0
                     while data_line:
                         #print("."+data_line+".")
-                        if data_line[-1] == "\n": data_line = data_line[:-1]
                         row_new = []
+                        if data_line[-1] == "\n": data_line = data_line[:-1]
                         if read_text_qualifier:
-                            for c in parseText(data_line, read_delimiter, [read_text_qualifier], False):
-                                if i == 0:
-                                    columns_new.append(c)
-                                else:
-                                    if len(c) >= 2:
-                                        if c[0] == read_text_qualifier and c[-1] == read_text_qualifier: c = c[1:-1]
-                                        #print(c)
-                                    if c != "":
-                                        row_new.append(c)
-                                    else:
-                                        row_new.append(None)
+                            parsed_line = parseText(data_line, read_delimiter, [read_text_qualifier], False)
                         else:
-                            for c in data_line.split(read_delimiter):
-                                if i == 0:
-                                    columns_new.append(c)
-                                else:
-                                    if c != "":
-                                        row_new.append(c)
-                                    else:
-                                        row_new.append(None)
-                        if i > 0: data_new.append(row_new)
+                            parsed_line = data_line.split(read_delimiter)
+                        if len(parsed_line) < len_columns:
+                            if error >= 0 and error < 10:
+                                printRed(f"ERROR on row {row}. Check carefully!!!")
+                            elif error == 10:
+                                printRed(f"Further ERROR messages surpressed.")
+                            error += 1
+                            for i in range(len_columns - len(parsed_line)):
+                                parsed_line.append("")
+                        for c in parsed_line:
+                            if len(c) >= 2:
+                                if c[0] == read_text_qualifier and c[-1] == read_text_qualifier: c = c[1:-1]
+                                #print(c)
+                            if c != "":
+                                row_new.append(c)
+                            else:
+                                row_new.append(None)
+                        data_new.append(row_new)
                         #print(row_new)
-                        i += 1
+                        row += 1
                         data_line = f.readline()
                     #print(data_new)
+                    if error > 0:
+                        printInvRed(f"ERRORs in TOTAL {error}. Check carefully!!!")
+                        print()
                     if len(data_new) > 0 or len(columns_new) > 0:
                         data = data_new
                         columns = columns_new
