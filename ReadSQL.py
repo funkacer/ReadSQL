@@ -61,10 +61,11 @@ folder_exists = None
 folder_name = None
 db_version = "None: "
 show_cases = 5
-print_max_default = 100
+print_max_default = 10
 profile_max_categorical = 100
 profile_show_categorical = 5
 rows_label = "(Row)"
+command_history = []
 
 variables = {}
 variables["$all"] = {}
@@ -74,6 +75,11 @@ variables["$all"]["print data"]["value"] = 0
 variables["$all"]["print data"]["print"] = {}
 variables["$all"]["print data"]["print"]["what"] = ["data","d"]
 variables["$all"]["print data"]["print data"] = {}
+variables["$all"]["print history"] = {}
+variables["$all"]["print history"]["value"] = 0
+variables["$all"]["print history"]["print"] = {}
+variables["$all"]["print history"]["print"]["what"] = ["history","h"]
+variables["$all"]["print history"]["print history"] = {}
 
 
 #variables["$a"] = 0
@@ -210,15 +216,25 @@ command_options["print columns"]["help2"] = []
 command_options["print columns"]["alternative"] = ["pc"]
 command_options["print columns"]["altoption"] = []
 
+command_options["print history"] = {}
+command_options["print history"]["name"] = []
+command_options["print history"]["required"] = []
+command_options["print history"]["type"] = []
+command_options["print history"]["default"] = []
+command_options["print history"]["help1"] = "Help for command 'folder'"
+command_options["print history"]["help2"] = []
+command_options["print history"]["alternative"] = ["ph"]
+command_options["print history"]["altoption"] = []
+
 command_options["print"] = {}
-command_options["print"]["name"] = ["what", "from", "to", "step", "random", "list", "columns"]
-command_options["print"]["required"] = [False, False, False, False, False, False, False]
-command_options["print"]["type"] = [["data","columns","d","c"], "int", "int", "int", "int", "intlist", "strlist"]
-command_options["print"]["default"] = ["data", 0, 0, 1, 0, "[]", "[]"]
+command_options["print"]["name"] = ["what", "from", "to", "step", "random", "list", "columns", "title", "note"]
+command_options["print"]["required"] = [False, False, False, False, False, False, False, False, False]
+command_options["print"]["type"] = [["data","columns","history","d","c","h"], "int", "int", "int", "int", "intlist", "strlist", "str", "str"]
+command_options["print"]["default"] = ["data", 0, 0, 1, 0, "[]", "[]", None, None]
 command_options["print"]["help1"] = "Help for command 'folder'"
-command_options["print"]["help2"] = ["Bla1","Bla2","Bla3","Bla4","Bla5","Bla6","Bla7"]
+command_options["print"]["help2"] = ["Bla1","Bla2","Bla3","Bla4","Bla5","Bla6","Bla7","Bla8","Bla9"]
 command_options["print"]["alternative"] = ["p"]
-command_options["print"]["altoption"] = [["w"], ["f"], ["t"], ["s"], ["r"], ["l"], ["c"]]
+command_options["print"]["altoption"] = [["w"], ["f"], ["t"], ["s"], ["r"], ["l"], ["c"], ["tt"], ["nt"]]
 
 command_options["break"] = {}
 command_options["break"]["name"] = ["what", "from", "to", "step", "list", "columns"]
@@ -652,10 +668,10 @@ def parseCommand(command_line):
                 # check variables first
                 result_message = f"Option '{n}' should be integer but is '{options[n]}'. Probably not doing what expected!"
                 vartest = str(options[n])
-
                 if vartest[0] not in ["0","1","2","3","5","6","7","8","9","-","+"," "]:
                     if vartest[0] != "$": vartest = "$" + vartest #variable start with "$", user can omit like in print data all
                     variable = None
+                    contexts = []
                     if vartest in variables:
                         variable = vartest
                     else:
@@ -669,9 +685,8 @@ def parseCommand(command_line):
                         for contexttest in variables[variable]:
                             #print(variables[variable][contexttest])
                             if command in variables[variable][contexttest]:
-                                context = contexttest
-                                break
-                        if context:
+                                contexts.append(contexttest)
+                        for context in contexts:
                             print(f"Command '{command}' test passed with context '{context}'!")
                             print(variables[variable][contexttest])
                             print(options)
@@ -684,8 +699,7 @@ def parseCommand(command_line):
                                         opt = 0
                                 else:
                                     opt = 0
-                        if opt: options[n] = variables[variable][context]["value"]
-
+                            if opt: options[n] = variables[variable][context]["value"]
                     else:
                         result_message = 1
                         result_message = f"Option '{n}' should be integer but is '{options[n]}', which is not a variable. Probably not doing what expected!"
@@ -788,7 +802,7 @@ def check_filename(filename):
 def do_sql(sql):
 
     global conn, data, columns, db_filename, folder_exists, folder_name, db_version, db_schema, \
-            fromm, too, stepp, randd, listt, colss, variables
+            fromm, too, stepp, randd, listt, colss, variables, command_history
 
     #time.sleep(0.1)
 
@@ -1135,15 +1149,21 @@ def do_sql(sql):
                 printInvRed(str(e))
                 if OK: OK = 2
 
-        elif command == "print" or command == "print data" or command == "print columns" or command == "print data all":
+        elif command == "print" or command == "print data" or command == "print columns" or command == "print history":
             if command == "print columns": options["what"] = "columns"
             if command == "print data": options["what"] = "data"
+            if command == "print history": options["what"] = "history"
             if options["what"] == "c": options["what"] = "columns"
             if options["what"] == "d": options["what"] = "data"
+            if options["what"] == "h": options["what"] = "history"
 
             if options["what"] == "columns":
 
                 print(", ".join([str(c) for c in columns]))
+
+            elif options["what"] == "history":
+
+                print(", ".join([str(c) for c in command_history]))
 
             elif options["what"] == "data":
 
@@ -1153,6 +1173,9 @@ def do_sql(sql):
                 listt = options["list"]
                 randd = options["random"]
                 colss = options["columns"]
+                title = options.get("title")
+                note = options.get("note")
+                #print("Title:", title)
                 #print(fromm, too, stepp)
 
                 nrows = len(data)
@@ -1163,7 +1186,9 @@ def do_sql(sql):
 
                 columns_show = [columns[ci-1] for ci in colsi]
 
-                if len(listt) > 0 and randd == 0:
+                if title:
+                    printInvGreen(title)
+                elif len(listt) > 0 and randd == 0:
                     if len(colss) > 0:
                         printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} listed cases {listi} with selected columns {columns_show}.")
                     else:
@@ -1188,6 +1213,9 @@ def do_sql(sql):
                 #print(rows)
                 print_data(rowsi, colsi, data, columns, rows, rows_label)
 
+                if note:
+                    print()
+                    print(note)
 
 
         elif command == "data" or command == "data profile":
@@ -1411,6 +1439,8 @@ def do_sql(sql):
             conn = None
             traceback.print_exc()
     # SELECT current_database();
+    command_history.append(sql)
+    variables["$all"]["print history"]["value"] = len(command_history)
     sql = ""
     return OK
 
