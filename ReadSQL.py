@@ -34,7 +34,7 @@ UNDERLINE = '\033[4m'
 
 print('\x1b[6;30;42m' + 'Success!' + '\x1b[0m')
 
-'''
+
 print (u"\u001b[30m A \u001b[31m B \u001b[32m C \u001b[33m D \u001b[0m")
 print (u"\u001b[34m E \u001b[35m F \u001b[36m G \u001b[37m H \u001b[0m")
 print (u"\u001b[30;1m A \u001b[31;1m B \u001b[32;1m C \u001b[33;1m D \u001b[0m")
@@ -62,7 +62,6 @@ for i in range(0, 16):
 print (u"\u001b[1m BOLD \u001b[0m\u001b[4m Underline \u001b[0m\u001b[7m Reversed \u001b[0m")
 print (u"\u001b[1m\u001b[4m\u001b[7m BOLD Underline Reversed \u001b[0m")
 
-'''
 
 aa = ["", "\033[1m", "\033[4m", "\033[1m\033[4m"]
 for a in range(3):
@@ -94,17 +93,15 @@ while i != "":
         print(aa[a] + '\033[38;5;' + str(code1) + 'm' + " Ahoj " + '\033[0m')
 
 
-'''
-
 colors = {}
 cls = ['\033[1m', '\033[95m', '\033[91m', '\033[33m', '\033[92m', '\033[96m', '\033[4m', '\033[97m\033[42m', '\033[97m\033[101m']
 
 for i in range(9):
     colors[i] = (cls[i], '\033[0m')
 
-
 #printColor = lambda sTxt, color: print(colors[color][0] + sTxt + colors[color][1])
 
+'''
 
 #\033[34m too dark blue text
 os.system('color')
@@ -1296,22 +1293,19 @@ def do_sql(sql):
                         colorcode1 = 0
                         colorcode2 = 0
                         if note_color >= 10000:
-                            colorcode1 = int(note_color/1000)
-                            colorcode2 = note_color - colorcode1*1000
+                            colorcode2 = int(note_color/10000)
+                            colorcode1 = note_color - colorcode2*10000
                         else:
                             colorcode1 = note_color
-                        if colorcode1 >= 4000:
-                            colorcode1 -= 4000
-                            colorcode0 = 3
                         if colorcode1 >= 3000:
-                            colorcode1 -= 3000
-                            colorcode0 = 2
-                        if colorcode1 >= 2000:
+                            colorcode1 = colorcode1-int(colorcode1/1000)*1000
+                            colorcode0 = 3
+                        elif colorcode1 >= 2000:
                             colorcode1 -= 2000
-                            colorcode0 = 1
-                        if colorcode1 >= 1000:
+                            colorcode0 = 2
+                        elif colorcode1 >= 1000:
                             colorcode1 -= 1000
-                            colorcode0 = 0
+                            colorcode0 = 1
                         if note_color >= 10000:
                             cc = cc0[colorcode0] + '\033[38;5;' + str(colorcode1) + 'm' + '\033[48;5;' + str(colorcode2) + 'm'
                         else:
