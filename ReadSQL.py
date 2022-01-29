@@ -36,6 +36,13 @@ print('\x1b[6;30;42m' + 'Success!' + '\x1b[0m')
 
 '''
 
+colors = {}
+cls = ['\033[1m', '\033[95m', '\033[91m', '\033[33m', '\033[92m', '\033[96m', '\033[4m', '\033[97m\033[42m', '\033[97m\033[101m']
+for i in range(9):
+    colors[i] = (cls[i], '\033[0m')
+
+printColor = lambda sTxt, color: print(colors[color][0] + sTxt + colors[color][1])
+
 #\033[34m too dark blue text
 os.system('color')
 RED, YELLOW, GREEN, BLUE, COM, INVGREEN, INVRED, END = '\033[91m', '\033[33m', '\033[92m', '\033[96m', '\033[4m', '\033[97m\033[42m', '\033[97m\033[101m', '\033[0m'
@@ -227,14 +234,14 @@ command_options["print history"]["alternative"] = ["ph"]
 command_options["print history"]["altoption"] = []
 
 command_options["print"] = {}
-command_options["print"]["name"] = ["what", "from", "to", "step", "random", "list", "columns", "title", "note"]
-command_options["print"]["required"] = [False, False, False, False, False, False, False, False, False]
-command_options["print"]["type"] = [["data","columns","history","d","c","h"], "int", "int", "int", "int", "intlist", "strlist", "str", "str"]
-command_options["print"]["default"] = ["data", 0, 0, 1, 0, "[]", "[]", None, None]
+command_options["print"]["name"] = ["what", "from", "to", "step", "random", "list", "columns", "title", "note", "title_color", "note_color"]
+command_options["print"]["required"] = [False, False, False, False, False, False, False, False, False, False, False]
+command_options["print"]["type"] = [["data","columns","history","d","c","h"], "int", "int", "int", "int", "intlist", "strlist", "str", "str", "int", "int"]
+command_options["print"]["default"] = ["data", 0, 0, 1, 0, "[]", "[]", None, None, None, None]
 command_options["print"]["help1"] = "Help for command 'folder'"
-command_options["print"]["help2"] = ["Bla1","Bla2","Bla3","Bla4","Bla5","Bla6","Bla7","Bla8","Bla9"]
+command_options["print"]["help2"] = ["Bla1","Bla2","Bla3","Bla4","Bla5","Bla6","Bla7","Bla8","Bla9","Bla10","Bla11"]
 command_options["print"]["alternative"] = ["p"]
-command_options["print"]["altoption"] = [["w"], ["f"], ["t"], ["s"], ["r"], ["l"], ["c"], ["tt"], ["nt"]]
+command_options["print"]["altoption"] = [["w"], ["f"], ["t"], ["s"], ["r"], ["l"], ["c"], ["tt"], ["nt"], ["tc"], ["nc"]]
 
 command_options["break"] = {}
 command_options["break"]["name"] = ["what", "from", "to", "step", "list", "columns"]
@@ -1175,6 +1182,8 @@ def do_sql(sql):
                 colss = options["columns"]
                 title = options.get("title")
                 note = options.get("note")
+                title_color = options.get("title_color")
+                note_color = options.get("note_color")
                 #print("Title:", title)
                 #print(fromm, too, stepp)
 
@@ -1215,7 +1224,10 @@ def do_sql(sql):
 
                 if note:
                     print()
-                    print(note)
+                    if note_color:
+                        printColor(note, note_color)
+                    else:
+                        print(note)
 
 
         elif command == "data" or command == "data profile":

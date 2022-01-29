@@ -54,9 +54,38 @@ left join (select * from t1_airports group by code) as t3
 left join (select * from t1_airports group by code) as t4
     on t1.destination = t4.code) as t2
 on t1.AC = t2.AC
+inner join (select code, count(*) as count from t1_airports group by code having count > 1 order by count desc) as t5
+on t2.DC = t5.code
 order by t1.Count DESC;
 
+\p d a tt = "Check duplicated Airport Names for destination codes:",
+nt = "??? __It is questionable if HND is Henderson in case of Japan Airlines__ ???",
+nc = 2;
+
+select * from t1_routes  as t1
+inner join (select code, count(*) as count from t1_airports group by code having count > 1 order by count desc) as t2
+on t1.destination = t2.code;
+
+\p d a tt = "Check duplicated Airport Names for destination codes from t1_routes table:";
+
+select t2.id, t1.AC, t1.Count, t2."Airline Name", t2."SAirport Name", t2."SC", t2."DAirport Name", t2."DC" from
+(select Airline as "AC", count(*) as Count from t1_routes group by Airline) as t1
+inner join
+(select
+    t1.id, Airline as "AC", "Airline Name", Source as "SC", t3."Airport Name" as "SAirport Name", Destination as "DC", t4."Airport Name" as "DAirport Name"
+    from t1_routes as t1
+left join (select * from t1_airlines group by code) as t2
+    on t1.airline = t2.code
+left join (select * from t1_airports group by code) as t3
+    on t1.source = t3.code
+left join (select * from t1_airports group by code) as t4
+    on t1.destination = t4.code) as t2
+on t1.AC = t2.AC
+order by t1.Count DESC;
+
+\p d a tt = "Final table:";
 \dp;
+
 \p d tt = "Delta should have 17 flights, so let's check it!";
 
 select t2.id, t1.AC, t1.Count, t2."Airline Name", t2."SAirport Name", t2."SC", t2."DAirport Name", t2."DC" from
