@@ -1080,50 +1080,52 @@ def do_sql(sql):
                 with open(full_filename, "r", encoding = "utf-8") as f:
                     data_new = []
                     columns_new = []
+                    error = 0
                     data_line = f.readline()
                     # line with column names
-                    if data_line[-1] == "\n": data_line = data_line[:-1]
-                    if read_text_qualifier:
-                        parsed_line = parseText(data_line, read_delimiter, [read_text_qualifier], False)
-                    else:
-                        parsed_line = data_line.split(read_delimiter)
-                    for c in parsed_line:
-                        columns_new.append(c)
-                    len_columns = len(columns_new)
-                    #print("."+data_line+".")
-                    row = 1
-                    error = 0
-                    while data_line:
-                        #print("."+data_line+".")
-                        row_new = []
+                    if data_line:
                         if data_line[-1] == "\n": data_line = data_line[:-1]
                         if read_text_qualifier:
                             parsed_line = parseText(data_line, read_delimiter, [read_text_qualifier], False)
                         else:
                             parsed_line = data_line.split(read_delimiter)
-                        if len(parsed_line) < len_columns:
-                            if error >= 0 and error < 10:
-                                printRed(f"ERROR on row {row}. Check carefully!!!")
-                            elif error == 10:
-                                printRed(f"Further ERROR messages surpressed.")
-                            error += 1
-                            for i in range(len_columns - len(parsed_line)):
-                                parsed_line.append("")
                         for c in parsed_line:
-                            if len(c) >= 2:
-                                if c[0] == read_text_qualifier and c[-1] == read_text_qualifier: c = c[1:-1]
-                                #print(c)
-                            if c != "":
-                                row_new.append(c)
-                            else:
-                                row_new.append(None)
-                        data_new.append(row_new)
-                        #print(row_new)
-                        row += 1
-                        #time.sleep(1)
-                        sys.stdout.write(u"\u001b[1000D" +  "Lines read: " + str(row) + " ")
-                        sys.stdout.flush()
+                            columns_new.append(c)
+                        len_columns = len(columns_new)
+                        #print("."+data_line+".")
+                        row = 1
                         data_line = f.readline()
+                        while data_line:
+                            #print("."+data_line+".")
+                            row_new = []
+                            if data_line[-1] == "\n": data_line = data_line[:-1]
+                            if read_text_qualifier:
+                                parsed_line = parseText(data_line, read_delimiter, [read_text_qualifier], False)
+                            else:
+                                parsed_line = data_line.split(read_delimiter)
+                            if len(parsed_line) < len_columns:
+                                if error >= 0 and error < 10:
+                                    printRed(f"ERROR on row {row}. Check carefully!!!")
+                                elif error == 10:
+                                    printRed(f"Further ERROR messages surpressed.")
+                                error += 1
+                                for i in range(len_columns - len(parsed_line)):
+                                    parsed_line.append("")
+                            for c in parsed_line:
+                                if len(c) >= 2:
+                                    if c[0] == read_text_qualifier and c[-1] == read_text_qualifier: c = c[1:-1]
+                                    #print(c)
+                                if c != "":
+                                    row_new.append(c)
+                                else:
+                                    row_new.append(None)
+                            data_new.append(row_new)
+                            #print(row_new)
+                            row += 1
+                            #time.sleep(1)
+                            sys.stdout.write(u"\u001b[1000D" +  "Lines read: " + str(row) + " ")
+                            sys.stdout.flush()
+                            data_line = f.readline()
                     #print(data_new)
                     if error > 0:
                         print()
@@ -1387,9 +1389,9 @@ def do_sql(sql):
                 colsp = data_profile(rowsi, colsi, data, columns, rows, rows_label)
                 profile_data = []
                 profile_columns = columns
-                profile_rows = ["Type", "Valids", "Nulls", "Valid %", "Sum", "Min", "Max", "Mean", "Q1", "Median", "Q3", "Range", "IQR", "Variance", "STD", "Skew", "Unique"]
+                profile_rows = ["Type", "Valids", "Nulls", "Valid %", "Sum", "Min", "Max", "Mean", "Q1", "Median", "Q3", "Range", "IQR", "Variance", "STD", "Skew", "Unique", "FirstCat"]
                 profile_rows_label = '(Stat)'
-                stats = ["t", "v", "n", "v%", "sum", "min", "max", "mean", "q1", "q2", "q3", "ran", "iqr", "var", "std", "skw","uni"]
+                stats = ["t", "v", "n", "v%", "sum", "min", "max", "mean", "q1", "q2", "q3", "ran", "iqr", "var", "std", "skw","uni", "fnq"]
 
                 maxc = 0
                 for i, stat in enumerate(stats):

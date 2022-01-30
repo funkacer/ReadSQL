@@ -21,3 +21,6 @@ select * from t1;
 \p d all, tt = "Toto je nadpis", tc = 10015, nt = "Totálně zpackaná
 poznámka
 na konec.", nc = 2;
+
+\r "Udacity_4_worldcities_select_empty1.txt", ",", text_qualifier = '"';
+\r "Udacity_4_worldcities_select_empty2.txt", ",", text_qualifier = '"';
