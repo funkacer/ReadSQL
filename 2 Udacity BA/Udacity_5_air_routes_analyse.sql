@@ -60,7 +60,7 @@ order by t1.Count DESC;
 
 \p d a tt = "Check duplicated Airport Names for destination codes:",
 nt = "??? __It is questionable if HND is Henderson in case of Japan Airlines__ ???",
-nc = 2;
+nc = 1001;
 
 select * from t1_routes  as t1
 inner join (select code, count(*) as count from t1_airports group by code having count > 1 order by count desc) as t2

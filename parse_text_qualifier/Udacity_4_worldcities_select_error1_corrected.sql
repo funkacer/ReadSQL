@@ -18,6 +18,6 @@ select * from t1;
 
 \r "Udacity_4_worldcities_select_error1_test_not_corrected.csv", ",", text_qualifier = '"';
 
-\p d all, tt = "Toto je nadpis", nt = "Totálně zpackaná
+\p d all, tt = "Toto je nadpis", tc = 10015, nt = "Totálně zpackaná
 poznámka
-na konec.";
+na konec.", nc = 2;

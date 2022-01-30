@@ -22,6 +22,28 @@ from importlib.metadata import version
 #from okno import zobraz
 
 '''
+#import time, sys
+def loading():
+    print ("Loading...")
+    for i in range(0, 100):
+        #time.sleep(.1)
+        #sys.stdout.write(u"\u001b[1000D")
+        #sys.stdout.write("\033[1000D")
+        #sys.stdout.flush()
+        #time.sleep(.1)
+        #sys.stdout.write(str(i + 1) + "%")
+        #sys.stdout.flush()
+        time.sleep(0.1)
+        width = (i + 1) / 4
+        bar = "[" + "#" * int(width) + " " * int(25 - width) + "]"
+        #sys.stdout.write(u"\u001b[1000D" +  bar)
+        sys.stdout.write(u"\u001b[1000D" +  str(i + 1) + "%")
+        sys.stdout.flush()
+    print()
+
+loading()
+
+
 HEADER = '\033[95m'
 OKBLUE = '\033[94m'
 OKCYAN = '\033[96m'
@@ -148,6 +170,15 @@ variables["$all"]["print history"]["value"] = 0
 variables["$all"]["print history"]["print"] = {}
 variables["$all"]["print history"]["print"]["what"] = ["history","h"]
 variables["$all"]["print history"]["print history"] = {}
+variables["$red"] = {}
+variables["$red"]["user"] = {}
+variables["$red"]["user"]["value"] = 1
+variables["$green"] = {}
+variables["$green"]["user"] = {}
+variables["$green"]["user"]["value"] = 2
+variables["$invgreen"] = {}
+variables["$invgreen"]["user"] = {}
+variables["$invgreen"]["user"]["value"] = 20255
 
 
 #variables["$a"] = 0
@@ -323,6 +354,33 @@ command_options["data profile"]["help1"] = "Help for command 'folder'"
 command_options["data profile"]["help2"] = []
 command_options["data profile"]["alternative"] = ["dp"]
 command_options["data profile"]["altoption"] = []
+
+def colorCode(color):
+    cc = ""
+    cc0 = ["", "\033[1m", "\033[4m", "\033[1m\033[4m"]
+    colorcode0 = 0
+    colorcode1 = 0
+    colorcode2 = 0
+    if color >= 10000:
+        colorcode2 = int(color/10000)
+        colorcode1 = color - colorcode2*10000
+    else:
+        colorcode1 = color
+    if colorcode1 >= 3000:
+        colorcode1 = colorcode1-int(colorcode1/1000)*1000
+        colorcode0 = 3
+    elif colorcode1 >= 2000:
+        colorcode1 -= 2000
+        colorcode0 = 2
+    elif colorcode1 >= 1000:
+        colorcode1 -= 1000
+        colorcode0 = 1
+    #print(colorcode0, colorcode1, colorcode2)
+    if color >= 10000:
+        cc = cc0[colorcode0] + '\033[38;5;' + str(colorcode1) + 'm' + '\033[48;5;' + str(colorcode2) + 'm'
+    else:
+        cc = cc0[colorcode0] + '\033[38;5;' + str(colorcode1) + 'm'
+    return cc
 
 
 def terminal_resize(colsp):
@@ -752,21 +810,24 @@ def parseCommand(command_line):
                         print(f"Getting context for variable '{variable}' in command '{command}' and option '{options[n]}':")
                         for contexttest in variables[variable]:
                             #print(variables[variable][contexttest])
-                            if command in variables[variable][contexttest]:
+                            if command in variables[variable][contexttest] or contexttest == "user":
                                 contexts.append(contexttest)
                         for context in contexts:
                             print(f"Command '{command}' test passed with context '{context}'!")
                             print(variables[variable][contexttest])
                             print(options)
                             opt = 1
-                            for optiontest in variables[variable][context][command]:
-                                if optiontest in options:
-                                    if options[optiontest] in variables[variable][context][command][optiontest]:
-                                        print(f"Option '{optiontest}' test passed with value '{options[optiontest]}'!")
+                            if context != "user":
+                                for optiontest in variables[variable][context][command]:
+                                    if optiontest in options:
+                                        if options[optiontest] in variables[variable][context][command][optiontest]:
+                                            print(f"Option '{optiontest}' test passed with value '{options[optiontest]}'!")
+                                        else:
+                                            opt = 0
                                     else:
                                         opt = 0
-                                else:
-                                    opt = 0
+                            else:
+                                opt = 1
                             if opt: options[n] = variables[variable][context]["value"]
                     else:
                         result_message = 1
@@ -1059,9 +1120,13 @@ def do_sql(sql):
                         data_new.append(row_new)
                         #print(row_new)
                         row += 1
+                        #time.sleep(1)
+                        sys.stdout.write(u"\u001b[1000D" +  "Lines read: " + str(row) + " ")
+                        sys.stdout.flush()
                         data_line = f.readline()
                     #print(data_new)
                     if error > 0:
+                        print()
                         printInvRed(f"ERRORs in TOTAL {error}. Check carefully!!!")
                         print()
                     if len(data_new) > 0 or len(columns_new) > 0:
@@ -1256,28 +1321,46 @@ def do_sql(sql):
 
                 columns_show = [columns[ci-1] for ci in colsi]
 
+                title_text = ""
+
                 if title:
-                    printInvGreen(title)
+                    title_text = title
+                    #printInvGreen(title)
                 elif len(listt) > 0 and randd == 0:
                     if len(colss) > 0:
-                        printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} listed cases {listi} with selected columns {columns_show}.")
+                        title_text = f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} listed cases {listi} with selected columns {columns_show}."
+                        #printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} listed cases {listi} with selected columns {columns_show}.")
                     else:
-                        printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} listed cases {listi} with all columns.")
+                        title_text = f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} listed cases {listi} with all columns."
+                        #printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} listed cases {listi} with all columns.")
                 elif len(listt) > 0 and randd > 0:
                     if len(colss) > 0:
-                        printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} random cases from {listi} with selected columns {columns_show}.")
+                        title_text = f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} random cases from {listi} with selected columns {columns_show}."
+                        #printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} random cases from {listi} with selected columns {columns_show}.")
                     else:
-                        printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} random cases from {listi} with all columns.")
+                        title_text = f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} random cases from {listi} with all columns."
+                        #printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} random cases from {listi} with all columns.")
                 elif randd > 0:
                     if len(colss) > 0:
-                        printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} random cases from {fromm} to {too} step {stepp} with selected columns {columns_show}.")
+                        title_text = f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} random cases from {fromm} to {too} step {stepp} with selected columns {columns_show}."
+                        #printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} random cases from {fromm} to {too} step {stepp} with selected columns {columns_show}.")
                     else:
-                        printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} random cases from {fromm} to {too} step {stepp} with all columns.")
+                        title_text = f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} random cases from {fromm} to {too} step {stepp} with all columns."
+                        #printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} random cases from {fromm} to {too} step {stepp} with all columns.")
                 else:
                     if len(colss) > 0:
-                        printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} cases from {fromm} to {too} step {stepp} with selected columns {columns_show}.")
+                        title_text = f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} cases from {fromm} to {too} step {stepp} with selected columns {columns_show}."
+                        #printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} cases from {fromm} to {too} step {stepp} with selected columns {columns_show}.")
                     else:
-                        printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} cases from {fromm} to {too} step {stepp} with all columns.")
+                        title_text = f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} cases from {fromm} to {too} step {stepp} with all columns."
+                        #printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} cases from {fromm} to {too} step {stepp} with all columns.")
+
+                if title_color:
+                    cc = colorCode(title_color)
+                    printColor(title_text, cc)
+                else:
+                    cc = INVGREEN
+                    printColor(title_text, cc)
 
                 rows = range(1, nrows + 1)
                 #print(rows)
@@ -1286,30 +1369,7 @@ def do_sql(sql):
                 if note:
                     print()
                     if note_color:
-                        cc = ""
-                        cc0 = ["", "\033[1m", "\033[4m", "\033[1m\033[4m"]
-                        colorcode0 = 0
-                        colorcode1 = 0
-                        colorcode2 = 0
-                        if note_color >= 10000:
-                            colorcode2 = int(note_color/10000)
-                            colorcode1 = note_color - colorcode2*10000
-                        else:
-                            colorcode1 = note_color
-                        if colorcode1 >= 3000:
-                            colorcode1 = colorcode1-int(colorcode1/1000)*1000
-                            colorcode0 = 3
-                        elif colorcode1 >= 2000:
-                            colorcode1 -= 2000
-                            colorcode0 = 2
-                        elif colorcode1 >= 1000:
-                            colorcode1 -= 1000
-                            colorcode0 = 1
-                        if note_color >= 10000:
-                            cc = cc0[colorcode0] + '\033[38;5;' + str(colorcode1) + 'm' + '\033[48;5;' + str(colorcode2) + 'm'
-                        else:
-                            cc = cc0[colorcode0] + '\033[38;5;' + str(colorcode1) + 'm'
-                        print(colorcode0, colorcode1, colorcode2)
+                        cc = colorCode(note_color)
                         printColor(note, cc)
                     else:
                         print(note)
