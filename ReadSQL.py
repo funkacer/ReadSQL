@@ -402,7 +402,7 @@ def terminal_resize(colsp):
         #print(col, screen)
 
 
-def data_profile(rowsi, colsi, data, columns, rows, rows_label):
+def data_profile(rowsi, colsi, data, columns, rows, rows_label, progress_indicator = False):
     nrows = len(data)
     ncols = len(columns)
     colsp = {}
@@ -465,9 +465,10 @@ def data_profile(rowsi, colsi, data, columns, rows, rows_label):
             else:
                 #count None
                 colsp[ci]['n'] += 1
-        proc = int(ri/len(rowsi)*90)
-        sys.stdout.write(u"\u001b[1000D" +  "Processed: " + str(proc) + "% ")
-        sys.stdout.flush()
+        if progress_indicator:
+            proc = int(ri/len(rowsi)*90)
+            sys.stdout.write(u"\u001b[1000D" +  "Processed: " + str(proc) + "% ")
+            sys.stdout.flush()
 
     for ci in colsi:
         if colsp[ci]['v'] > 0 and colsp[ci]['t'] == "Quantitative":
@@ -505,9 +506,10 @@ def data_profile(rowsi, colsi, data, columns, rows, rows_label):
             colsp[ci]['q3'] = None
         if len(colsp[ci]['c']) > 0:
             colsp[ci]['c'] = {k:v for k, v in sorted(colsp[ci]['c'].items(), reverse = True, key = lambda x: x[1])[:profile_max_categorical]}
-        proc = int(90+ci/len(colsi)*10)
-        sys.stdout.write(u"\u001b[1000D" +  "Processed: " + str(proc) + "% ")
-        sys.stdout.flush()
+        if progress_indicator:
+            proc = int(90+ci/len(colsi)*10)
+            sys.stdout.write(u"\u001b[1000D" +  "Processed: " + str(proc) + "% ")
+            sys.stdout.flush()
     #print(colsp)
     return colsp
 
@@ -1396,7 +1398,7 @@ def do_sql(sql):
                 colsi = range(1, ncols + 1)
                 rowsi = range(1, nrows + 1)
                 rows = range(1, nrows + 1)
-                colsp = data_profile(rowsi, colsi, data, columns, rows, rows_label)
+                colsp = data_profile(rowsi, colsi, data, columns, rows, rows_label, progress_indicator = True)
                 profile_data = []
                 profile_columns = columns
                 profile_rows = ["Type", "Valids", "Nulls", "Valid %", "Sum", "Min", "Max", "Mean", "Q1", "Median", "Q3", "Range", "IQR", "Variance", "STD", "Skew", "Unique", "FirstCat"]
@@ -1441,6 +1443,11 @@ def do_sql(sql):
                                     if len(colsp[ci]["c"]) > maxc: maxc = len(colsp[ci]["c"])
                                 else:
                                     profile_data[i].append("-")
+                            elif stat == "fnq":
+                                if colsp[ci]["fnq"] is None:
+                                    profile_data[i].append("-")
+                                else:
+                                    profile_data[i].append(colsp[ci]["fnq"])
                             else:
                                 for c in colsp[ci]:
                                     #print(c, stat)
@@ -1497,6 +1504,8 @@ def do_sql(sql):
                 colsi = range(1, ncols + 1)
                 rowsi = range(1, nrows + 1)
 
+                print()
+                print()
                 #colsp = data_profile(rowsi, colsi, profile_data, profile_columns, profile_rows, profile_rows_label)
                 print_data(rowsi, colsi, profile_data, profile_columns, profile_rows, profile_rows_label)
 
