@@ -1097,6 +1097,7 @@ def do_sql(sql):
                 with open(full_filename, "r", encoding = "utf-8") as f:
                     data_new = []
                     columns_new = []
+                    is_error = False
                     error = 0
                     data_line = f.readline()
                     # line with column names
@@ -1117,7 +1118,7 @@ def do_sql(sql):
                             else:
                                 parsed_line = data_line.split(read_delimiter)
                             cc = 0
-                            rest = len(parsed_line) + 1
+                            rest = len(parsed_line)
                             while rest > 0:
                                 rest = int(rest/(10**cc))
                                 #print(rest)
@@ -1127,6 +1128,7 @@ def do_sql(sql):
                                 columns_new.append(c)
                         row = 1
                         len_columns = len(columns_new)
+                        max_columns = len(columns_new)
                         #print("."+data_line+".")
                         while data_line:
                             sys.stdout.write(u"\u001b[1000D" +  "Lines read: " + str(row) + " ")
@@ -1138,14 +1140,9 @@ def do_sql(sql):
                                 parsed_line = parseText(data_line, read_delimiter, [read_text_qualifier], False)
                             else:
                                 parsed_line = data_line.split(read_delimiter)
-                            if len(parsed_line) < len_columns:
-                                if error >= 0 and error < 10:
-                                    printRed(f"ERROR on row {row}. Check carefully!!!")
-                                elif error == 10:
-                                    printRed(f"Further ERROR messages surpressed.")
-                                error += 1
-                                for i in range(len_columns - len(parsed_line)):
-                                    parsed_line.append("")
+                            if len(parsed_line) != max_columns:
+                                is_error = True
+                                if len(parsed_line) > max_columns: max_columns = len(parsed_line)
                             for c in parsed_line:
                                 if len(c) >= 2:
                                     if c[0] == read_text_qualifier and c[-1] == read_text_qualifier: c = c[1:-1]
@@ -1161,8 +1158,42 @@ def do_sql(sql):
                             data_line = f.readline()
                     #print(data_new)
                     print()
+                    if is_error:
+                        if read_columns:
+                            # add new columns only
+                            for i in range(len_columns, max_columns):
+                                cc = 0
+                                rest = max_columns
+                                while rest > 0:
+                                    rest = int(rest/(10**cc))
+                                    #print(rest)
+                                    cc += 1
+                                c = default_columns_name + f"{(i+1):0{(cc-1)}}"
+                                columns_new.append(c)
+                        else:
+                            # compute all columns again
+                            columns_new = []
+                            for i in range(max_columns):
+                                cc = 0
+                                rest = max_columns
+                                while rest > 0:
+                                    rest = int(rest/(10**cc))
+                                    #print(rest)
+                                    cc += 1
+                                c = default_columns_name + f"{(i+1):0{(cc-1)}}"
+                                columns_new.append(c)
+                        for row, d in enumerate(data_new):
+                            if max_columns > len(d):
+                                error +=1
+                                if error >= 0 and error < 10:
+                                    printRed(f"ERROR on row {row+1}. Check carefully!!!")
+                                elif error == 10:
+                                    printRed(f"Further ERROR messages surpressed!!!")
+                                for i in range(max_columns - len(d)):
+                                    d.append(None)
                     if error > 0:
                         printInvRed(f"ERRORs in TOTAL {error}. Check carefully!!!")
+                        print(max_columns, len_columns)
                     if len(data_new) > 0 or len(columns_new) > 0:
                         data = data_new
                         columns = columns_new
