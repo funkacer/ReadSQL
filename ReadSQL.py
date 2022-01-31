@@ -156,6 +156,7 @@ profile_max_categorical = 100
 profile_show_categorical = 5
 rows_label = "(Row)"
 command_history = []
+default_columns_name = "Column_"
 
 variables = {}
 variables["$all"] = {}
@@ -259,14 +260,14 @@ command_options["mssql"]["alternative"] = ["ms"]
 command_options["mssql"]["altoption"] = [["d"],["u"],["p"],["h"],["po"]]
 
 command_options["read"] = {}
-command_options["read"]["name"] = ["filename", "delimiter", "text_qualifier"]
-command_options["read"]["required"] = [True, False, False]
-command_options["read"]["type"] = ["str", "str", "str"]
-command_options["read"]["default"] = [None, "	", None]
+command_options["read"]["name"] = ["filename", "delimiter", "text_qualifier", "read_columns"]
+command_options["read"]["required"] = [True, False, False, False]
+command_options["read"]["type"] = ["str", "str", "str", "bool"]
+command_options["read"]["default"] = [None, "	", None, True]
 command_options["read"]["help1"] = "Help for command 'folder'"
-command_options["read"]["help2"] = ["Blabla1", "Blablabla2", "Blablabla3"]
+command_options["read"]["help2"] = ["Blabla1", "Blablabla2", "Blablabla3", "Blablabla4"]
 command_options["read"]["alternative"] = ["r"]
-command_options["read"]["altoption"] = [["f"],["d"],["t","tq"]]
+command_options["read"]["altoption"] = [["f"],["d"],["t","tq"], ['c','rc']]
 
 command_options["export"] = {}
 command_options["export"]["name"] = ["filename", "delimiter"]
@@ -881,6 +882,9 @@ def parseCommand(command_line):
                     else:
                         lst_new.append(l_old)
                 options[n] = lst_new
+            elif t == "bool":
+                if options[n] == True or options[n] == "True" or options[n] == "1": options[n] = True
+                if options[n] == False or options[n] == "False" or options[n] == "0": options[n] = False
 
     if not execute:
         command = ""
@@ -1086,6 +1090,7 @@ def do_sql(sql):
                 read_text_qualifier = options["text_qualifier"]
             else:
                 read_text_qualifier = None
+            read_columns = options.get("read_columns")
             file_exists, full_filename = check_filename(read_filename)
             #print("Read: '{}'".format(read_filename))
             try:
@@ -1096,18 +1101,36 @@ def do_sql(sql):
                     data_line = f.readline()
                     # line with column names
                     if data_line:
-                        if data_line[-1] == "\n": data_line = data_line[:-1]
-                        if read_text_qualifier:
-                            parsed_line = parseText(data_line, read_delimiter, [read_text_qualifier], False)
+                        if read_columns:
+                            if data_line[-1] == "\n": data_line = data_line[:-1]
+                            if read_text_qualifier:
+                                parsed_line = parseText(data_line, read_delimiter, [read_text_qualifier], False)
+                            else:
+                                parsed_line = data_line.split(read_delimiter)
+                            for c in parsed_line:
+                                columns_new.append(c)
+                            data_line = f.readline()
                         else:
-                            parsed_line = data_line.split(read_delimiter)
-                        for c in parsed_line:
-                            columns_new.append(c)
+                            if data_line[-1] == "\n": data_line = data_line[:-1]
+                            if read_text_qualifier:
+                                parsed_line = parseText(data_line, read_delimiter, [read_text_qualifier], False)
+                            else:
+                                parsed_line = data_line.split(read_delimiter)
+                            cc = 0
+                            rest = len(parsed_line) + 1
+                            while rest > 0:
+                                rest = int(rest/(10**cc))
+                                #print(rest)
+                                cc += 1
+                            for i in range(len(parsed_line)):
+                                c = default_columns_name + f"{(i+1):0{(cc-1)}}"
+                                columns_new.append(c)
+                        row = 1
                         len_columns = len(columns_new)
                         #print("."+data_line+".")
-                        row = 1
-                        data_line = f.readline()
                         while data_line:
+                            sys.stdout.write(u"\u001b[1000D" +  "Lines read: " + str(row) + " ")
+                            sys.stdout.flush()
                             #print("."+data_line+".")
                             row_new = []
                             if data_line[-1] == "\n": data_line = data_line[:-1]
@@ -1135,17 +1158,15 @@ def do_sql(sql):
                             #print(row_new)
                             row += 1
                             #time.sleep(1)
-                            sys.stdout.write(u"\u001b[1000D" +  "Lines read: " + str(row) + " ")
-                            sys.stdout.flush()
                             data_line = f.readline()
                     #print(data_new)
+                    print()
                     if error > 0:
-                        print()
                         printInvRed(f"ERRORs in TOTAL {error}. Check carefully!!!")
-                        print()
                     if len(data_new) > 0 or len(columns_new) > 0:
                         data = data_new
                         columns = columns_new
+                        print()
                         show_data()
                     else:
                         printInvRed("! There are no data returned from this file !")
