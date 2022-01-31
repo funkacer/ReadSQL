@@ -171,12 +171,15 @@ variables["$all"]["print history"]["print"] = {}
 variables["$all"]["print history"]["print"]["what"] = ["history","h"]
 variables["$all"]["print history"]["print history"] = {}
 variables["$red"] = {}
+variables["$red"]["shorts"] = ["$r"]
 variables["$red"]["user"] = {}
 variables["$red"]["user"]["value"] = 1
 variables["$green"] = {}
+variables["$green"]["shorts"] = ["$g"]
 variables["$green"]["user"] = {}
 variables["$green"]["user"]["value"] = 2
 variables["$invgreen"] = {}
+variables["$green"]["shorts"] = ["$invg","$ig"]
 variables["$invgreen"]["user"] = {}
 variables["$invgreen"]["user"]["value"] = 20255
 
@@ -462,6 +465,10 @@ def data_profile(rowsi, colsi, data, columns, rows, rows_label):
             else:
                 #count None
                 colsp[ci]['n'] += 1
+        proc = int(ri/len(rowsi)*90)
+        sys.stdout.write(u"\u001b[1000D" +  "Processed: " + str(proc) + "% ")
+        sys.stdout.flush()
+
     for ci in colsi:
         if colsp[ci]['v'] > 0 and colsp[ci]['t'] == "Quantitative":
             colsp[ci]['mean'] = colsp[ci]['sum'] / colsp[ci]['v']
@@ -498,6 +505,9 @@ def data_profile(rowsi, colsi, data, columns, rows, rows_label):
             colsp[ci]['q3'] = None
         if len(colsp[ci]['c']) > 0:
             colsp[ci]['c'] = {k:v for k, v in sorted(colsp[ci]['c'].items(), reverse = True, key = lambda x: x[1])[:profile_max_categorical]}
+        proc = int(90+ci/len(colsi)*10)
+        sys.stdout.write(u"\u001b[1000D" +  "Processed: " + str(proc) + "% ")
+        sys.stdout.flush()
     #print(colsp)
     return colsp
 
