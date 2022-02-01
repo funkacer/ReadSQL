@@ -260,14 +260,14 @@ command_options["mssql"]["alternative"] = ["ms"]
 command_options["mssql"]["altoption"] = [["d"],["u"],["p"],["h"],["po"]]
 
 command_options["read"] = {}
-command_options["read"]["name"] = ["filename", "delimiter", "text_qualifier", "read_columns"]
-command_options["read"]["required"] = [True, False, False, False]
-command_options["read"]["type"] = ["str", "str", "str", "bool"]
-command_options["read"]["default"] = [None, "	", None, True]
+command_options["read"]["name"] = ["filename", "delimiter", "text_qualifier", "read_columns", "strip_columns"]
+command_options["read"]["required"] = [True, False, False, False, False]
+command_options["read"]["type"] = ["str", "str", "str", "bool", "bool"]
+command_options["read"]["default"] = [None, "	", None, True, True]
 command_options["read"]["help1"] = "Help for command 'folder'"
-command_options["read"]["help2"] = ["Blabla1", "Blablabla2", "Blablabla3", "Blablabla4"]
+command_options["read"]["help2"] = ["Blabla1", "Blabla2", "Blabla3", "Blabla4", "Blabla5"]
 command_options["read"]["alternative"] = ["r"]
-command_options["read"]["altoption"] = [["f"],["d"],["t","tq"], ['c','rc']]
+command_options["read"]["altoption"] = [["f"],["d"],["t","tq"], ['r','rc'], ['s','sc']]
 
 command_options["export"] = {}
 command_options["export"]["name"] = ["filename", "delimiter"]
@@ -815,9 +815,10 @@ def parseCommand(command_line):
                         variable = vartest
                     else:
                         for var in variables:
-                            if vartest in variables[var]["shorts"]:
-                                variable = var
-                                break
+                            if variables[var].get("shorts"):
+                                if vartest in variables[var]["shorts"]:
+                                    variable = var
+                                    break
                     if variable:
                         #get context
                         print(f"Getting context for variable '{variable}' in command '{command}' and option '{options[n]}':")
@@ -1091,6 +1092,7 @@ def do_sql(sql):
             else:
                 read_text_qualifier = None
             read_columns = options.get("read_columns")
+            strip_columns = options.get("strip_columns")
             file_exists, full_filename = check_filename(read_filename)
             #print("Read: '{}'".format(read_filename))
             try:
@@ -1105,13 +1107,23 @@ def do_sql(sql):
                         if read_columns:
                             if data_line[-1] == "\n": data_line = data_line[:-1]
                             if read_text_qualifier:
-                                parsed_line = parseText(data_line, read_delimiter, [read_text_qualifier], False)
+                                if strip_columns:
+                                    parsed_line = parseText(data_line, read_delimiter, [read_text_qualifier], True)
+                                else:
+                                    parsed_line = parseText(data_line, read_delimiter, [read_text_qualifier], False)
+                                for c in parsed_line:
+                                    columns_new.append(c)
                             else:
                                 parsed_line = data_line.split(read_delimiter)
-                            for c in parsed_line:
-                                columns_new.append(c)
+                                for c in parsed_line:
+                                    if strip_columns:
+                                        columns_new.append(c.strip())
+                                    else:
+                                        columns_new.append(c)
                             data_line = f.readline()
                         else:
+                            # just determine number of columns from the first row
+                            # column names are created at the end (in case more columns occure)
                             if data_line[-1] == "\n": data_line = data_line[:-1]
                             if read_text_qualifier:
                                 parsed_line = parseText(data_line, read_delimiter, [read_text_qualifier], False)
@@ -1160,7 +1172,7 @@ def do_sql(sql):
                     print()
                     if is_error:
                         if read_columns:
-                            # add new columns only
+                            # add new column names only
                             for i in range(len_columns, max_columns):
                                 cc = 0
                                 rest = max_columns
@@ -1171,7 +1183,7 @@ def do_sql(sql):
                                 c = default_columns_name + f"{(i+1):0{(cc-1)}}"
                                 columns_new.append(c)
                         else:
-                            # compute all columns again
+                            # create all column names again
                             columns_new = []
                             for i in range(max_columns):
                                 cc = 0

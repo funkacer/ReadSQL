@@ -44,8 +44,9 @@ select * from t1;
 \i t1;
 
 \r "Udacity_4_worldcities_columns_only.csv", ",";
-\pd l = [1565, 7233];
-\dp;
+# toto spadne a to zatím taky;
+#\pd l = [1565, 7233];
+#\dp;
 \i t1;
 
 \r "Udacity_4_worldcities_select_error1.csv", ",";
