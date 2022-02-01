@@ -404,6 +404,7 @@ def terminal_resize(colsp):
 
 
 def data_profile(rowsi, colsi, data, columns, rows, rows_label, progress_indicator = False):
+    #print("Len rowsi", len(rowsi))
     nrows = len(data)
     ncols = len(columns)
     colsp = {}
@@ -575,20 +576,30 @@ def data_select():
     if len(colss) > 0:
         colsi = []
         for cols in colss:
-            if cols in columns:
-                colsi.append(columns.index(cols) + 1)
-            else:
+            is_column = 0
+            for i, col in enumerate(columns):
+                if col == cols: colsi.append(i + 1)
+                is_column += 1
+            if is_column < 1:
                 printRed(f"Column '{cols}' not in columns!")
+                print()
+            elif is_column > 1:
+                printRed(f"Multiple columns '{cols}' are in columns!")
+                print()
     #columns_show = [columns[i] for i in colsi] # only existing
     rowsi = []
     listi = []
     if len(listt) > 0:
-        #assert list in range of cases
-        for l in listt:
-            if l < 0: l += nrows + 1
-            if l <= 0: l = 1    # if l was lower than -nrows
-            if l > nrows: l = nrows
-            if l not in listi: listi.append(l)
+        if nrows > 0:
+            #assert list in range of cases
+            for l in listt:
+                if l < 0: l += nrows + 1
+                if l <= 0: l = 1    # if l was lower than -nrows
+                if l > nrows: l = nrows
+                if l not in listi: listi.append(l)
+        else:
+            listi = []
+        #print("Listi", listi)
     if fromm < 0:
         fromm += nrows + 1
         if too == 0: too = nrows
@@ -609,6 +620,7 @@ def data_select():
             # cannot select 2 same cases in list when 0,1 or >nrows => make set
             #listi = list(set(listi))
             if randd > len(listi): randd = len(listi)
+            #print("Randd", randd)
             for i in range(randd):
                 r = random.choice(listi)
                 while r in rowsi:
@@ -1370,7 +1382,8 @@ def do_sql(sql):
 
             if options["what"] == "columns":
 
-                print(", ".join([str(c) for c in columns]))
+                #print(", ".join([str(c) for c in columns]))
+                print(columns)
 
             elif options["what"] == "history":
 
@@ -1475,7 +1488,10 @@ def do_sql(sql):
                     for ci in colsp:
                         if ci > 0:  # rows_label
                             if stat == "v%":
-                                profile_data[i].append(round(100 * colsp[ci]["v"] / (colsp[ci]["v"] + colsp[ci]["n"]), 2))
+                                if (colsp[ci]["v"] + colsp[ci]["n"]) > 0:
+                                    profile_data[i].append(round(100 * colsp[ci]["v"] / (colsp[ci]["v"] + colsp[ci]["n"]), 2))
+                                else:
+                                    profile_data[i].append("-")
                             elif stat == "ran":
                                 if colsp[ci]["max"] and colsp[ci]["max"]:
                                     profile_data[i].append(round(colsp[ci]["max"] - colsp[ci]["min"], 2))
