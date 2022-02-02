@@ -147,6 +147,8 @@ conn = None
 sqls = {}
 data = None
 columns = None
+data_old = None
+columns_old = None
 folder_exists = None
 folder_name = None
 db_version = "None: "
@@ -166,6 +168,8 @@ variables["$all"]["print data"]["value"] = 0
 variables["$all"]["print data"]["print"] = {}
 variables["$all"]["print data"]["print"]["what"] = ["data","d"]
 variables["$all"]["print data"]["print data"] = {}
+variables["$all"]["print data"]["data"] = {}
+variables["$all"]["print data"]["data"]["what"] = ["select","s"]
 variables["$all"]["print history"] = {}
 variables["$all"]["print history"]["value"] = 0
 variables["$all"]["print history"]["print"] = {}
@@ -209,55 +213,65 @@ command_options["quit"]["help2"] = []
 command_options["quit"]["alternative"] = ["q"]
 command_options["quit"]["altoption"] = []
 
-command_options["folder"] = {}
-command_options["folder"]["name"] = ["foldername"]
-command_options["folder"]["required"] = [True]
-command_options["folder"]["type"] = ["str"]
-command_options["folder"]["default"] = [None]
-command_options["folder"]["help1"] = "Help for command 'folder'"
-command_options["folder"]["help2"] = ["Blabla1"]
-command_options["folder"]["alternative"] = ["f"]
-command_options["folder"]["altoption"] = [["f","fn"]]
+command_options["set folder"] = {}
+command_options["set folder"]["name"] = ["foldername"]
+command_options["set folder"]["required"] = [True]
+command_options["set folder"]["type"] = ["str"]
+command_options["set folder"]["default"] = [None]
+command_options["set folder"]["help1"] = "Help for command 'folder'"
+command_options["set folder"]["help2"] = ["Blabla1"]
+command_options["set folder"]["alternative"] = ["sf", "f"]
+command_options["set folder"]["altoption"] = [["f","fn"]]
 
-command_options["sqlite3"] = {}
-command_options["sqlite3"]["name"] = ["filename"]
-command_options["sqlite3"]["required"] = [False]
-command_options["sqlite3"]["type"] = ["str"]
-command_options["sqlite3"]["default"] = [":memory:"]
-command_options["sqlite3"]["help1"] = "Help for command 'folder'"
-command_options["sqlite3"]["help2"] = ["Blabla1"]
-command_options["sqlite3"]["alternative"] = ["sqlite", "sql3", "sql", "sq", "s"]
-command_options["sqlite3"]["altoption"] = [["f"]]
+command_options["set"] = {}
+command_options["set"]["name"] = ["what", "foldername"]
+command_options["set"]["required"] = [True, False]
+command_options["set"]["type"] = [["folder", "f"], "str"]
+command_options["set"]["default"] = [None, None]
+command_options["set"]["help1"] = "Help for command 'folder'"
+command_options["set"]["help2"] = ["Blabla1", "Blabla2"]
+command_options["set"]["alternative"] = ["s"]
+command_options["set"]["altoption"] = [["w"], ["f","fn"]]
 
-command_options["mysql"] = {}
-command_options["mysql"]["name"] = ["database", "user", "password", "host", "port"]
-command_options["mysql"]["required"] = [False, False, False, False, False]
-command_options["mysql"]["type"] = ["str", "str", "str", "str", "int"]
-command_options["mysql"]["default"] = ["", "root", "admin", "localhost", 3306]
-command_options["mysql"]["help1"] = "Help for command 'folder'"
-command_options["mysql"]["help2"] = ["Bla1", "Bla2", "Bla3", "Bla4", "Bla5"]
-command_options["mysql"]["alternative"] = ["my"]
-command_options["mysql"]["altoption"] = [["d"],["u"],["p"],["h"],["po"]]
+command_options["connect sqlite3"] = {}
+command_options["connect sqlite3"]["name"] = ["filename"]
+command_options["connect sqlite3"]["required"] = [False]
+command_options["connect sqlite3"]["type"] = ["str"]
+command_options["connect sqlite3"]["default"] = [":memory:"]
+command_options["connect sqlite3"]["help1"] = "Help for command 'folder'"
+command_options["connect sqlite3"]["help2"] = ["Blabla1"]
+command_options["connect sqlite3"]["alternative"] = ["cs"]
+command_options["connect sqlite3"]["altoption"] = [["f"]]
 
-command_options["postgre"] = {}
-command_options["postgre"]["name"] = ["database", "user", "password", "host", "port"]
-command_options["postgre"]["required"] = [False, False, False, False, False]
-command_options["postgre"]["type"] = ["str", "str", "str", "str", "int"]
-command_options["postgre"]["default"] = ["", "postgres", "postgres1", "localhost", 5432]
-command_options["postgre"]["help1"] = "Help for command 'folder'"
-command_options["postgre"]["help2"] = ["Bla1", "Bla2", "Bla3", "Bla4", "Bla5"]
-command_options["postgre"]["alternative"] = ["pg"]
-command_options["postgre"]["altoption"] = [["d"],["u"],["p"],["h"],["po"]]
+command_options["connect mysql"] = {}
+command_options["connect mysql"]["name"] = ["database", "user", "password", "host", "port"]
+command_options["connect mysql"]["required"] = [False, False, False, False, False]
+command_options["connect mysql"]["type"] = ["str", "str", "str", "str", "int"]
+command_options["connect mysql"]["default"] = ["", "root", "admin", "localhost", 3306]
+command_options["connect mysql"]["help1"] = "Help for command 'folder'"
+command_options["connect mysql"]["help2"] = ["Bla1", "Bla2", "Bla3", "Bla4", "Bla5"]
+command_options["connect mysql"]["alternative"] = ["cmy"]
+command_options["connect mysql"]["altoption"] = [["d"],["u"],["p"],["h"],["po"]]
 
-command_options["mssql"] = {}
-command_options["mssql"]["name"] = ["database", "user", "password", "host", "port"]
-command_options["mssql"]["required"] = [False, False, False, False, False]
-command_options["mssql"]["type"] = ["str", "str", "str", "str", "int"]
-command_options["mssql"]["default"] = ["", "root", "admin", "localhost", 3306]
-command_options["mssql"]["help1"] = "Help for command 'folder'"
-command_options["mssql"]["help2"] = ["Bla1", "Bla2", "Bla3", "Bla4", "Bla5"]
-command_options["mssql"]["alternative"] = ["ms"]
-command_options["mssql"]["altoption"] = [["d"],["u"],["p"],["h"],["po"]]
+command_options["connect postgre"] = {}
+command_options["connect postgre"]["name"] = ["database", "user", "password", "host", "port"]
+command_options["connect postgre"]["required"] = [False, False, False, False, False]
+command_options["connect postgre"]["type"] = ["str", "str", "str", "str", "int"]
+command_options["connect postgre"]["default"] = ["", "postgres", "postgres1", "localhost", 5432]
+command_options["connect postgre"]["help1"] = "Help for command 'folder'"
+command_options["connect postgre"]["help2"] = ["Bla1", "Bla2", "Bla3", "Bla4", "Bla5"]
+command_options["connect postgre"]["alternative"] = ["cpg"]
+command_options["connect postgre"]["altoption"] = [["d"],["u"],["p"],["h"],["po"]]
+
+command_options["connect mssql"] = {}
+command_options["connect mssql"]["name"] = ["database", "user", "password", "host", "port"]
+command_options["connect mssql"]["required"] = [False, False, False, False, False]
+command_options["connect mssql"]["type"] = ["str", "str", "str", "str", "int"]
+command_options["connect mssql"]["default"] = ["", "root", "admin", "localhost", 3306]
+command_options["connect mssql"]["help1"] = "Help for command 'folder'"
+command_options["connect mssql"]["help2"] = ["Bla1", "Bla2", "Bla3", "Bla4", "Bla5"]
+command_options["connect mssql"]["alternative"] = ["cms"]
+command_options["connect mssql"]["altoption"] = [["d"],["u"],["p"],["h"],["po"]]
 
 command_options["read"] = {}
 command_options["read"]["name"] = ["filename", "delimiter", "text_qualifier", "read_columns", "strip_columns"]
@@ -358,6 +372,16 @@ command_options["data profile"]["help1"] = "Help for command 'folder'"
 command_options["data profile"]["help2"] = []
 command_options["data profile"]["alternative"] = ["dp"]
 command_options["data profile"]["altoption"] = []
+
+command_options["data"] = {}
+command_options["data"]["name"] = ["what", "from", "to", "step", "random", "list", "columns", "title", "note", "title_color", "note_color"]
+command_options["data"]["required"] = [False, False, False, False, False, False, False, False, False, False, False]
+command_options["data"]["type"] = [["profile","select","reset","p","s","rs"], "int", "int", "int", "int", "intlist", "strlist", "str", "str", "int", "int"]
+command_options["data"]["default"] = ["profile", 0, 0, 1, 0, "[]", "[]", None, None, None, None]
+command_options["data"]["help1"] = "Help for command 'folder'"
+command_options["data"]["help2"] = ["Bla1","Bla2","Bla3","Bla4","Bla5","Bla6","Bla7","Bla8","Bla9","Bla10","Bla11"]
+command_options["data"]["alternative"] = ["d"]
+command_options["data"]["altoption"] = [["w"], ["f"], ["t"], ["s"], ["r"], ["l"], ["c"], ["tt"], ["nt"], ["tc"], ["nc"]]
 
 def colorCode(color):
     cc = ""
@@ -544,7 +568,7 @@ def print_data(rowsi, colsi, data, columns, rows, rows_label):
         screen += 1
 
 
-def show_data():
+def show_data(data, columns, title = None):
     global variables
     nrows = len(data)
     variables["$all"]["print data"]["value"] = nrows
@@ -552,11 +576,11 @@ def show_data():
     rows = range(1, nrows + 1)
     colsi = range(1, ncols + 1)
     if nrows <= show_cases*2:
-        printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing all cases with all columns.")
+        if title == "": printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing all cases with all columns.")
         rowsi = range(1, nrows + 1)
         print_data(rowsi, colsi, data, columns, rows, rows_label)
     else:
-        printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing first / last {show_cases} cases with all columns.")
+        if title == "": printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing first / last {show_cases} cases with all columns.")
         data_show = data[:show_cases]
         data_show += [["" for c in columns]]
         data_show += data[-show_cases:]
@@ -959,7 +983,7 @@ def check_filename(filename):
 
 def do_sql(sql):
 
-    global conn, data, columns, db_filename, folder_exists, folder_name, db_version, db_schema, \
+    global conn, data, columns, data_old, columns_old, db_filename, folder_exists, folder_name, db_version, db_schema, \
             fromm, too, stepp, randd, listt, colss, variables, command_history
 
     #time.sleep(0.1)
@@ -1075,26 +1099,35 @@ def do_sql(sql):
                 print("No MsSQL support. Please run 'pip install pyodbc'.\n")
                 traceback.print_exc()
 
-        elif command == "folder":
-            folder_exists_old = folder_exists
-            folder_name_old = folder_name
-            #folder_name = sql[len("\folder:"):]
-            folder_name = options["foldername"]
-            #folder = os.path.isdir(folder_name)
-            folder_exists, full_foldername = check_foldername(folder_name, folder_name_old)
-            if folder_exists:
-                printInvGreen(f'''Using folder '{full_foldername}'.''')
-                folder_name = full_foldername
-            else:
-                if folder_exists_old:
-                    printInvRed(f'''Folder '{folder_name}' does not exist. Using current folder '{folder_name_old}'.''')
-                    folder_exists = folder_exists_old
-                    folder_name = folder_name_old
+        elif command == "set" or command == "set folder":
+
+            if options.get("what") == "folder" or options.get("what") == "f": set_what = "folder"
+
+            if command == "set folder": set_what = "folder"
+
+            if set_what == "folder":
+                folder_exists_old = folder_exists
+                folder_name_old = folder_name
+                #folder_name = sql[len("\folder:"):]
+                folder_name = options.get("foldername")
+                #folder = os.path.isdir(folder_name)
+                if folder_name:
+                    folder_exists, full_foldername = check_foldername(folder_name, folder_name_old)
                 else:
-                    # folder_name_old is None if sql imported file has wrong \folder command
-                    printInvRed("Folder '{}' does not exist. Using working directory '{}'.".format(folder_name, os.getcwd()))
-                    folder_name = os.getcwd()
-                OK = 2
+                    folder_exists = False
+                if folder_exists:
+                    printInvGreen(f'''Using folder '{full_foldername}'.''')
+                    folder_name = full_foldername
+                else:
+                    if folder_exists_old:
+                        printInvRed(f'''Folder '{folder_name}' does not exist. Using current folder '{folder_name_old}'.''')
+                        folder_exists = folder_exists_old
+                        folder_name = folder_name_old
+                    else:
+                        # folder_name_old is None if sql imported file has wrong \folder command
+                        printInvRed("Folder '{}' does not exist. Using working directory '{}'.".format(folder_name, os.getcwd()))
+                        folder_name = os.getcwd()
+                    OK = 2
 
         elif command == "read":
             read_filename = options["filename"]
@@ -1221,8 +1254,10 @@ def do_sql(sql):
                     if len(data_new) > 0 or len(columns_new) > 0:
                         data = data_new
                         columns = columns_new
+                        data_old = None
+                        columns_old = None
                         print()
-                        show_data()
+                        show_data(data, columns, "")
                     else:
                         printInvRed("! There are no data returned from this file !")
                         OK = 2
@@ -1469,6 +1504,100 @@ def do_sql(sql):
         elif command == "data" or command == "data profile":
             if command == "data profile": options["what"] = "profile"
             if options["what"] == "p": options["what"] = "profile"
+            if options["what"] == "s": options["what"] = "select"
+            if options["what"] == "rs": options["what"] = "reset"
+
+            if options["what"] == "reset":
+                if data_old and columns_old:
+                    data = data_old.copy()
+                    columns = columns_old.copy()
+                show_data(data, columns, "")
+
+            if options["what"] == "select":
+
+                if not data_old and not columns_old:
+                    data_old = data.copy()
+                    columns_old = columns.copy()
+
+                fromm = options["from"]
+                too = options["to"]
+                stepp = options["step"]
+                listt = options["list"]
+                randd = options["random"]
+                colss = options["columns"]
+                title = options.get("title")
+                note = options.get("note")
+                title_color = options.get("title_color")
+                note_color = options.get("note_color")
+                #print("Title:", title)
+                #print(fromm, too, stepp)
+
+                nrows = len(data)
+                ncols = len(columns)
+
+                rowsi, colsi = data_select()
+                #print(rows_show)
+
+                columns_selected = [columns[ci-1] for ci in colsi]
+                data_selected = [data[ri-1] for ri in rowsi]
+
+                title_text = ""
+
+                if title:
+                    title_text = title
+                    #printInvGreen(title)
+                elif len(listt) > 0 and randd == 0:
+                    if len(colss) > 0:
+                        title_text = f"There are {nrows} rows, {ncols} columns. Selected {len(rowsi)} listed cases {listi} with selected columns {columns_selected}."
+                        #printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} listed cases {listi} with selected columns {columns_show}.")
+                    else:
+                        title_text = f"There are {nrows} rows, {ncols} columns. Selected {len(rowsi)} listed cases {listi} with all columns."
+                        #printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} listed cases {listi} with all columns.")
+                elif len(listt) > 0 and randd > 0:
+                    if len(colss) > 0:
+                        title_text = f"There are {nrows} rows, {ncols} columns. Selected {len(rowsi)} random cases from {listi} with selected columns {columns_selected}."
+                        #printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} random cases from {listi} with selected columns {columns_show}.")
+                    else:
+                        title_text = f"There are {nrows} rows, {ncols} columns. Selected {len(rowsi)} random cases from {listi} with all columns."
+                        #printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} random cases from {listi} with all columns.")
+                elif randd > 0:
+                    if len(colss) > 0:
+                        title_text = f"There are {nrows} rows, {ncols} columns. Selected {len(rowsi)} random cases from {fromm} to {too} step {stepp} with selected columns {columns_selected}."
+                        #printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} random cases from {fromm} to {too} step {stepp} with selected columns {columns_show}.")
+                    else:
+                        title_text = f"There are {nrows} rows, {ncols} columns. Selected {len(rowsi)} random cases from {fromm} to {too} step {stepp} with all columns."
+                        #printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} random cases from {fromm} to {too} step {stepp} with all columns.")
+                else:
+                    if len(colss) > 0:
+                        title_text = f"There are {nrows} rows, {ncols} columns. Selected {len(rowsi)} cases from {fromm} to {too} step {stepp} with selected columns {columns_selected}."
+                        #printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} cases from {fromm} to {too} step {stepp} with selected columns {columns_show}.")
+                    else:
+                        title_text = f"There are {nrows} rows, {ncols} columns. Selected {len(rowsi)} cases from {fromm} to {too} step {stepp} with all columns."
+                        #printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} cases from {fromm} to {too} step {stepp} with all columns.")
+
+                if title_color:
+                    cc = colorCode(title_color)
+                    printColor(title_text, cc)
+                else:
+                    cc = INVGREEN
+                    printColor(title_text, cc)
+
+                #rows = range(1, nrows + 1)
+                #print(rows)
+                #print_data(rowsi, colsi, data, columns, rows, rows_label)
+                show_data(data_selected, columns_selected)
+
+                if note:
+                    print()
+                    if note_color:
+                        cc = colorCode(note_color)
+                        printColor(note, cc)
+                    else:
+                        print(note)
+
+                data = data_selected.copy()
+                columns = columns_selected.copy()
+
             if options["what"] == "profile":
                 nrows = len(data)
                 ncols = len(columns)
@@ -1655,7 +1784,9 @@ def do_sql(sql):
         if data_new or columns_new:
             data = data_new
             columns = columns_new
-            show_data()
+            data_old = None
+            columns_old = None
+            show_data(data, columns, "")
         elif not error:
             printInvGreen("! There are no data returned from this sql query !")
         else:
