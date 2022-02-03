@@ -159,21 +159,21 @@ profile_show_categorical = 5
 rows_label = "(Row)"
 command_history = []
 default_columns_name = "Column_"
-commands = {}
+
 variables = {}
-
-
 variables["$all"] = {}
 variables["$all"]["shorts"] = ["$a","$al"]
 variables["$all"]["print data"] = {}
 variables["$all"]["print data"]["value"] = 0
 variables["$all"]["print data"]["print"] = {}
+variables["$all"]["print data"]["print"]["what"] = ["data","d"]
 variables["$all"]["print data"]["print data"] = {}
-variables["$all"]["print data"]["print data easy"] = {}
-#variables["$all"]["print data"]["print data easy"]["what"] = []
-variables["$all"]["print data"]["data select easy"] = {}
+variables["$all"]["print data"]["data"] = {}
+variables["$all"]["print data"]["data"]["what"] = ["select","s"]
 variables["$all"]["print history"] = {}
 variables["$all"]["print history"]["value"] = 0
+variables["$all"]["print history"]["print"] = {}
+variables["$all"]["print history"]["print"]["what"] = ["history","h"]
 variables["$all"]["print history"]["print history"] = {}
 variables["$red"] = {}
 variables["$red"]["shorts"] = ["$r"]
@@ -213,34 +213,34 @@ command_options["quit"]["help2"] = []
 command_options["quit"]["alternative"] = ["q"]
 command_options["quit"]["altoption"] = []
 
-command_options["folder"] = {}
-command_options["folder"]["name"] = ["foldername"]
-command_options["folder"]["required"] = [True]
-command_options["folder"]["type"] = ["str"]
-command_options["folder"]["default"] = [None]
-command_options["folder"]["help1"] = "Help for command 'folder'"
-command_options["folder"]["help2"] = ["Blabla1"]
-command_options["folder"]["alternative"] = ["f"]
-command_options["folder"]["altoption"] = [["f","fn"]]
+command_options["set folder"] = {}
+command_options["set folder"]["name"] = ["foldername"]
+command_options["set folder"]["required"] = [True]
+command_options["set folder"]["type"] = ["str"]
+command_options["set folder"]["default"] = [None]
+command_options["set folder"]["help1"] = "Help for command 'folder'"
+command_options["set folder"]["help2"] = ["Blabla1"]
+command_options["set folder"]["alternative"] = ["sf", "f"]
+command_options["set folder"]["altoption"] = [["f","fn"]]
 
 command_options["set"] = {}
-command_options["set"]["name"] = ["what", "variable"]
+command_options["set"]["name"] = ["what", "foldername"]
 command_options["set"]["required"] = [True, False]
-command_options["set"]["type"] = [["user", "u"], "str"]
+command_options["set"]["type"] = [["folder", "f"], "str"]
 command_options["set"]["default"] = [None, None]
-command_options["set"]["help1"] = "Help for command 'set'"
+command_options["set"]["help1"] = "Help for command 'folder'"
 command_options["set"]["help2"] = ["Blabla1", "Blabla2"]
 command_options["set"]["alternative"] = ["s"]
-command_options["set"]["altoption"] = [["w"], ["v"]]
+command_options["set"]["altoption"] = [["w"], ["f","fn"]]
 
 command_options["connect sqlite3"] = {}
 command_options["connect sqlite3"]["name"] = ["filename"]
 command_options["connect sqlite3"]["required"] = [False]
 command_options["connect sqlite3"]["type"] = ["str"]
 command_options["connect sqlite3"]["default"] = [":memory:"]
-command_options["connect sqlite3"]["help1"] = "Help for command 'connect'"
+command_options["connect sqlite3"]["help1"] = "Help for command 'folder'"
 command_options["connect sqlite3"]["help2"] = ["Blabla1"]
-command_options["connect sqlite3"]["alternative"] = ["c sqlite3", "c sqlite", "c sql3", "c sql", "c s",  "csqlite3", "csqlite", "csql3", "csql", "cs"]
+command_options["connect sqlite3"]["alternative"] = ["cs"]
 command_options["connect sqlite3"]["altoption"] = [["f"]]
 
 command_options["connect mysql"] = {}
@@ -250,7 +250,7 @@ command_options["connect mysql"]["type"] = ["str", "str", "str", "str", "int"]
 command_options["connect mysql"]["default"] = ["", "root", "admin", "localhost", 3306]
 command_options["connect mysql"]["help1"] = "Help for command 'folder'"
 command_options["connect mysql"]["help2"] = ["Bla1", "Bla2", "Bla3", "Bla4", "Bla5"]
-command_options["connect mysql"]["alternative"] = ["c mysql", "c my", "cmysql", "cmy"]
+command_options["connect mysql"]["alternative"] = ["cmy"]
 command_options["connect mysql"]["altoption"] = [["d"],["u"],["p"],["h"],["po"]]
 
 command_options["connect postgre"] = {}
@@ -260,7 +260,7 @@ command_options["connect postgre"]["type"] = ["str", "str", "str", "str", "int"]
 command_options["connect postgre"]["default"] = ["", "postgres", "postgres1", "localhost", 5432]
 command_options["connect postgre"]["help1"] = "Help for command 'folder'"
 command_options["connect postgre"]["help2"] = ["Bla1", "Bla2", "Bla3", "Bla4", "Bla5"]
-command_options["connect postgre"]["alternative"] = ["c postgre", "c pg", "c p", "cpostgre", "cpg", "cp"]
+command_options["connect postgre"]["alternative"] = ["cpg"]
 command_options["connect postgre"]["altoption"] = [["d"],["u"],["p"],["h"],["po"]]
 
 command_options["connect mssql"] = {}
@@ -270,7 +270,7 @@ command_options["connect mssql"]["type"] = ["str", "str", "str", "str", "int"]
 command_options["connect mssql"]["default"] = ["", "root", "admin", "localhost", 3306]
 command_options["connect mssql"]["help1"] = "Help for command 'folder'"
 command_options["connect mssql"]["help2"] = ["Bla1", "Bla2", "Bla3", "Bla4", "Bla5"]
-command_options["connect mssql"]["alternative"] = ["c mssql", "c ms", "cmssql", "cms"]
+command_options["connect mssql"]["alternative"] = ["cms"]
 command_options["connect mssql"]["altoption"] = [["d"],["u"],["p"],["h"],["po"]]
 
 command_options["read"] = {}
@@ -280,7 +280,7 @@ command_options["read"]["type"] = ["str", "str", "str", "bool", "bool"]
 command_options["read"]["default"] = [None, "	", None, True, True]
 command_options["read"]["help1"] = "Help for command 'folder'"
 command_options["read"]["help2"] = ["Blabla1", "Blabla2", "Blabla3", "Blabla4", "Blabla5"]
-command_options["read"]["alternative"] = ["read", "r"]
+command_options["read"]["alternative"] = ["r"]
 command_options["read"]["altoption"] = [["f"],["d"],["t","tq"], ['r','rc'], ['s','sc']]
 
 command_options["export"] = {}
@@ -313,46 +313,25 @@ command_options["insert"]["help2"] = ["Blabla1"]
 command_options["insert"]["alternative"] = ["i"]
 command_options["insert"]["altoption"] = [["t"]]
 
-# print data via command print
-command_options["print"] = {}
-command_options["print"]["name"] = ["from", "to", "step", "random", "list", "columns"]
-command_options["print"]["required"] = [False, False, False, False, False, False]
-command_options["print"]["type"] = ["int", "int", "int", "int", "intlist", "strlist"]
-command_options["print"]["default"] = [0, 0, 1, 0, "[]", "[]"]
-command_options["print"]["help1"] = "Help for command 'folder'"
-command_options["print"]["help2"] = ["Bla1","Bla2","Bla3","Bla4","Bla5","Bla6"]
-command_options["print"]["alternative"] = ["print", "p"]
-command_options["print"]["altoption"] = [["f"], ["t"], ["s"], ["r"], ["l"], ["c"]]
-
-command_options["print data easy"] = {}
-command_options["print data easy"]["name"] = ["from", "to", "step", "random", "list", "columns"]
-command_options["print data easy"]["required"] = [False, False, False, False, False, False]
-command_options["print data easy"]["type"] = ["int", "int", "int", "int", "intlist", "strlist"]
-command_options["print data easy"]["default"] = [0, 0, 1, 0, "[]", "[]"]
-command_options["print data easy"]["help1"] = "Help for command 'folder'"
-command_options["print data easy"]["help2"] = ["Bla1","Bla2","Bla3","Bla4","Bla5","Bla6"]
-command_options["print data easy"]["alternative"] = ["print data", "pd",  "p"]
-command_options["print data easy"]["altoption"] = [["f"], ["t"], ["s"], ["r"], ["l"], ["c"]]
-
 command_options["print data"] = {}
-command_options["print data"]["name"] = ["what", "from", "to", "step", "random", "list", "columns"]
-command_options["print data"]["required"] = [True, False, False, False, False, False, False]
-command_options["print data"]["type"] = [["data", "d"], "int", "int", "int", "int", "intlist", "strlist"]
-command_options["print data"]["default"] = ["data", 0, 0, 1, 0, "[]", "[]"]
+command_options["print data"]["name"] = ["from", "to", "step", "random", "list", "columns"]
+command_options["print data"]["required"] = [False, False, False, False, False, False]
+command_options["print data"]["type"] = ["int", "int", "int", "int", "intlist", "strlist"]
+command_options["print data"]["default"] = [0, 0, 1, 0, "[]", "[]"]
 command_options["print data"]["help1"] = "Help for command 'folder'"
-command_options["print data"]["help2"] = ["Bla1","Bla2","Bla3","Bla4","Bla5","Bla6","Bla7"]
-command_options["print data"]["alternative"] = ["print", "p"]
-command_options["print data"]["altoption"] = [["w"], ["f"], ["t"], ["s"], ["r"], ["l"], ["c"]]
+command_options["print data"]["help2"] = ["Bla1","Bla2","Bla3","Bla4","Bla5","Bla6"]
+command_options["print data"]["alternative"] = ["pd"]
+command_options["print data"]["altoption"] = [["f"], ["t"], ["s"], ["r"], ["l"], ["c"]]
 
 command_options["print columns"] = {}
-command_options["print columns"]["name"] = ["what"]
-command_options["print columns"]["required"] = [True]
-command_options["print columns"]["type"] = [["columns", "c"]]
-command_options["print columns"]["default"] = ["columns"]
+command_options["print columns"]["name"] = []
+command_options["print columns"]["required"] = []
+command_options["print columns"]["type"] = []
+command_options["print columns"]["default"] = []
 command_options["print columns"]["help1"] = "Help for command 'folder'"
-command_options["print columns"]["help2"] = ["Bla1"]
-command_options["print columns"]["alternative"] = ["print", "p"]
-command_options["print columns"]["altoption"] = [["w"]]
+command_options["print columns"]["help2"] = []
+command_options["print columns"]["alternative"] = ["pc"]
+command_options["print columns"]["altoption"] = []
 
 command_options["print history"] = {}
 command_options["print history"]["name"] = []
@@ -361,10 +340,9 @@ command_options["print history"]["type"] = []
 command_options["print history"]["default"] = []
 command_options["print history"]["help1"] = "Help for command 'folder'"
 command_options["print history"]["help2"] = []
-command_options["print history"]["alternative"] = ["print h", "p h", "ph"]
+command_options["print history"]["alternative"] = ["ph"]
 command_options["print history"]["altoption"] = []
 
-'''
 command_options["print"] = {}
 command_options["print"]["name"] = ["what", "from", "to", "step", "random", "list", "columns", "title", "note", "title_color", "note_color"]
 command_options["print"]["required"] = [False, False, False, False, False, False, False, False, False, False, False]
@@ -374,7 +352,6 @@ command_options["print"]["help1"] = "Help for command 'folder'"
 command_options["print"]["help2"] = ["Bla1","Bla2","Bla3","Bla4","Bla5","Bla6","Bla7","Bla8","Bla9","Bla10","Bla11"]
 command_options["print"]["alternative"] = ["p"]
 command_options["print"]["altoption"] = [["w"], ["f"], ["t"], ["s"], ["r"], ["l"], ["c"], ["tt"], ["nt"], ["tc"], ["nc"]]
-'''
 
 command_options["break"] = {}
 command_options["break"]["name"] = ["what", "from", "to", "step", "list", "columns"]
@@ -386,58 +363,25 @@ command_options["break"]["help2"] = ["Bla1","Bla2","Bla3","Bla4","Bla5","Bla6"]
 command_options["break"]["alternative"] = ["b"]
 command_options["break"]["altoption"] = [["w"],["f"], ["t"], ["s"], ["l"], ["c"]]
 
-command_options["data select easy"] = {}
-command_options["data select easy"]["name"] = ["from", "to", "step", "random", "list", "columns", "title", "note", "title_color", "note_color"]
-command_options["data select easy"]["required"] = [False, False, False, False, False, False, False, False, False, False]
-command_options["data select easy"]["type"] = ["int", "int", "int", "int", "intlist", "strlist", "str", "str", "int", "int"]
-command_options["data select easy"]["default"] = [0, 0, 1, 0, "[]", "[]", None, None, None, None]
-command_options["data select easy"]["help1"] = "Help for command 'data select easy'"
-command_options["data select easy"]["help2"] = ["Bla1","Bla2","Bla3","Bla4","Bla5","Bla6","Bla7","Bla8","Bla9","Bla10"]
-command_options["data select easy"]["alternative"] = ["data s", "d s", "ds"]
-command_options["data select easy"]["altoption"] = [["f"], ["t"], ["s"], ["r"], ["l"], ["c"], ["tt"], ["nt"], ["tc"], ["nc"]]
-
-command_options["data select"] = {}
-command_options["data select"]["name"] = ["what", "from", "to", "step", "random", "list", "columns", "title", "note", "title_color", "note_color"]
-command_options["data select"]["required"] = [True, False, False, False, False, False, False, False, False, False, False]
-command_options["data select"]["type"] = [["select","se","s"], "int", "int", "int", "int", "intlist", "strlist", "str", "str", "int", "int"]
-command_options["data select"]["default"] = ["select", 0, 0, 1, 0, "[]", "[]", None, None, None, None]
-command_options["data select"]["help1"] = "Help for command 'folder'"
-command_options["data select"]["help2"] = ["Bla1","Bla2","Bla3","Bla4","Bla5","Bla6","Bla7","Bla8","Bla9","Bla10","Bla11"]
-command_options["data select"]["alternative"] = ["data", "d"]
-command_options["data select"]["altoption"] = [["w"], ["f"], ["t"], ["s"], ["r"], ["l"], ["c"], ["tt"], ["nt"], ["tc"], ["nc"]]
-
-command_options["data profile easy"] = {}
-command_options["data profile easy"]["name"] = ["from", "to", "step", "random", "list", "columns", "title", "note", "title_color", "note_color"]
-command_options["data profile easy"]["required"] = [False, False, False, False, False, False, False, False, False, False]
-command_options["data profile easy"]["type"] = ["int", "int", "int", "int", "intlist", "strlist", "str", "str", "int", "int"]
-command_options["data profile easy"]["default"] = [0, 0, 1, 0, "[]", "[]", None, None, None, None]
-command_options["data profile easy"]["help1"] = "Help for command 'folder'"
-command_options["data profile easy"]["help2"] = ["Bla1","Bla2","Bla3","Bla4","Bla5","Bla6","Bla7","Bla8","Bla9","Bla10"]
-command_options["data profile easy"]["alternative"] = ["data profile", "d profile", "d pr", "d p", "dpr", "dp"]
-command_options["data profile easy"]["altoption"] = [["f"], ["t"], ["s"], ["r"], ["l"], ["c"], ["tt"], ["nt"], ["tc"], ["nc"]]
-
 command_options["data profile"] = {}
-command_options["data profile"]["name"] = ["what", "from", "to", "step", "random", "list", "columns", "title", "note", "title_color", "note_color"]
-command_options["data profile"]["required"] = [False, False, False, False, False, False, False, False, False, False, False]
-command_options["data profile"]["type"] = [["profile","pr","p"], "int", "int", "int", "int", "intlist", "strlist", "str", "str", "int", "int"]
-command_options["data profile"]["default"] = ["profile", 0, 0, 1, 0, "[]", "[]", None, None, None, None]
+command_options["data profile"]["name"] = []
+command_options["data profile"]["required"] = []
+command_options["data profile"]["type"] = []
+command_options["data profile"]["default"] = []
 command_options["data profile"]["help1"] = "Help for command 'folder'"
-command_options["data profile"]["help2"] = ["Bla1","Bla2","Bla3","Bla4","Bla5","Bla6","Bla7","Bla8","Bla9","Bla10","Bla11"]
-command_options["data profile"]["alternative"] = ["data", "d"]
-command_options["data profile"]["altoption"] = [["w"], ["f"], ["t"], ["s"], ["r"], ["l"], ["c"], ["tt"], ["nt"], ["tc"], ["nc"]]
+command_options["data profile"]["help2"] = []
+command_options["data profile"]["alternative"] = ["dp"]
+command_options["data profile"]["altoption"] = []
 
-command_options["data reset"] = {}
-command_options["data reset"]["name"] = ["what"]
-command_options["data reset"]["required"] = [True]
-command_options["data reset"]["type"] = [["reset","rs","r"]]
-command_options["data reset"]["default"] = ["reset"]
-command_options["data reset"]["help1"] = "Help for command 'folder'"
-command_options["data reset"]["help2"] = ["Bla1"]
-command_options["data reset"]["alternative"] = ["data", "d"]
-command_options["data reset"]["altoption"] = [["w"]]
-
-
-
+command_options["data"] = {}
+command_options["data"]["name"] = ["what", "from", "to", "step", "random", "list", "columns", "title", "note", "title_color", "note_color"]
+command_options["data"]["required"] = [False, False, False, False, False, False, False, False, False, False, False]
+command_options["data"]["type"] = [["profile","select","reset","p","s","rs"], "int", "int", "int", "int", "intlist", "strlist", "str", "str", "int", "int"]
+command_options["data"]["default"] = ["profile", 0, 0, 1, 0, "[]", "[]", None, None, None, None]
+command_options["data"]["help1"] = "Help for command 'folder'"
+command_options["data"]["help2"] = ["Bla1","Bla2","Bla3","Bla4","Bla5","Bla6","Bla7","Bla8","Bla9","Bla10","Bla11"]
+command_options["data"]["alternative"] = ["d"]
+command_options["data"]["altoption"] = [["w"], ["f"], ["t"], ["s"], ["r"], ["l"], ["c"], ["tt"], ["nt"], ["tc"], ["nc"]]
 
 def colorCode(color):
     cc = ""
@@ -790,221 +734,194 @@ def parseText(myText, delimiter, text_qualifiers = ['"', "'", "["], do_strip = T
 
 
 def parseCommand(command_line):
-    commands = []
     command = ""
-    #options = {}
+    options = {}
     #error = 0
-    execute = False
+    execute = True
     #command_line = command_line.replace(" ", "")
     command_line = command_line[1:].strip() #no slash
     #print (command_line)
     for c in command_options:
         #print(c)
-        '''
         if command_line[:len(c)].lower() == c:
-            commands.append((c,c))
-            #command_line = command_line[len(c):]
-            #command_line = "=".join(parseText(command_line, "="))
-            #command_line = ",".join(parseText(command_line, " "))
+            command = c
+            command_line = command_line[len(c):]
+            command_line = "=".join(parseText(command_line, "="))
+            command_line = ",".join(parseText(command_line, " "))
             #print(command_line)
-            #command_line_list = parseText(command_line, ",")
+            command_line_list = parseText(command_line, ",")
             #print(f"Parse command {command} with ',':", command_line_list)
         else:
-        '''
-        for a in command_options[c]["alternative"]:
-            if command_line[:len(a)].lower() == a:
-                commands.append((c,a))
-                #command_line = command_line[len(a):]
-                #command_line = "=".join(parseText(command_line, "="))
-                #command_line = ",".join(parseText(command_line, " "))
-                #print(command_line)
-                #command_line_list = parseText(command_line, ",")
-            #if command != "": break
-            #print(a)
-        #if command != "": break
+            for a in command_options[c]["alternative"]:
+                if command_line[:len(a)].lower() == a:
+                    command = c
+                    command_line = command_line[len(a):]
+                    command_line = "=".join(parseText(command_line, "="))
+                    command_line = ",".join(parseText(command_line, " "))
+                    #print(command_line)
+                    command_line_list = parseText(command_line, ",")
+                if command != "": break
+                #print(a)
+        if command != "": break
         #print(c)
 
-    command_line_original = command_line
-
-    for c in commands:
-        print(c[0], c[1])
-        command = c[0]
-        command_line = command_line_original[len(c[1]):]
-        command_line = "=".join(parseText(command_line, "="))
-        command_line = ",".join(parseText(command_line, " "))
-        print("Command line:", command_line)
-        command_line_list = parseText(command_line, ",")
-        print("Command line list:", command_line_list)
-
-        execute = True
-        options = {}
-
-        # this should give key=option together
-        #print(f"Parse command {command} with ',':", command_line_list)
-        cll_final = []
-        i = 0
-        while i < len(command_line_list):
-            if i < len(command_line_list)-2:
-                if command_line_list[i+1] == "=":
-                    cll_final.append("".join([command_line_list[i],"=",command_line_list[i+2]]))
-                    i += 3
-                else:
-                    cll_final.append(command_line_list[i])
-                    i += 1
+    # this should give key=option together
+    #print(f"Parse command {command} with ',':", command_line_list)
+    cll_final = []
+    i = 0
+    while i < len(command_line_list):
+        if i < len(command_line_list)-2:
+            if command_line_list[i+1] == "=":
+                cll_final.append("".join([command_line_list[i],"=",command_line_list[i+2]]))
+                i += 3
             else:
                 cll_final.append(command_line_list[i])
                 i += 1
-        #print(cll_final)
+        else:
+            cll_final.append(command_line_list[i])
+            i += 1
+    #print(cll_final)
 
-        #print(command)
-        for i, cl in enumerate(cll_final):
-            cl = cl.strip()
-            if "=" in cl:
-                cll = cl.split("=")
-                does_exist = 0
-                for j, o in enumerate(command_options[command]["name"]):
-                    if cll[0].strip() == o:
-                        options[o] = cll[1].strip()
-                        does_exist = 1
-                    else:
-                        for a in command_options[command]["altoption"][j]:
-                            if cll[0].strip().lower() == a:
-                                options[o] = cll[1].strip()
-                                does_exist = 1
-                            if does_exist: break
-                            #print(a)
-                if not does_exist:
-                    printRed(f'''Unknown option '{cll[0]}'. I will not use your '{cll[1]}' value in any way.''')
-                    execute = False
-            elif cl != "":
-                if i < len (command_options[command]["name"]):
-                    #print(f'''I will use '{cl}' for option '{command_options[c]["name"][i]}'.''')
-                    options[command_options[command]["name"][i]] = cl
+    #print(command)
+    for i, cl in enumerate(cll_final):
+        cl = cl.strip()
+        if "=" in cl:
+            cll = cl.split("=")
+            does_exist = 0
+            for j, o in enumerate(command_options[command]["name"]):
+                if cll[0].strip() == o:
+                    options[o] = cll[1].strip()
+                    does_exist = 1
                 else:
-                    printRed(f'''Too many options given. I will not use your '{cl}' value in any way.''')
+                    for a in command_options[command]["altoption"][j]:
+                        if cll[0].strip().lower() == a:
+                            options[o] = cll[1].strip()
+                            does_exist = 1
+                        if does_exist: break
+                        #print(a)
+            if not does_exist:
+                printRed(f'''Unknown option '{cll[0]}'. I will not use your '{cll[1]}' value in any way.''')
+        elif cl != "":
+            if i < len (command_options[command]["name"]):
+                #print(f'''I will use '{cl}' for option '{command_options[c]["name"][i]}'.''')
+                options[command_options[command]["name"][i]] = cl
+            else:
+                printRed(f'''Too many options given. I will not use your '{cl}' value in any way.''')
 
-        for i, z in enumerate(zip(command_options[command]["name"], command_options[command]["required"], command_options[command]["default"], command_options[command]["type"])):
-            n, r, d, t = z[0], z[1], z[2], z[3]
-            #print(f'''i:{i}, name:{n}, required:{r}, default:{d}, type:{t}''')
-            if r:
-                #assert command_options[command]["name"][i] in options
-                if n not in options:
-                    printRed(f'''Missing required argument '{n}'. Command not executed.''')
+    for i, z in enumerate(zip(command_options[command]["name"], command_options[command]["required"], command_options[command]["default"], command_options[command]["type"])):
+        n, r, d, t = z[0], z[1], z[2], z[3]
+        #print(f'''i:{i}, name:{n}, required:{r}, default:{d}, type:{t}''')
+        if r:
+            #assert command_options[command]["name"][i] in options
+            if n not in options:
+                printRed(f'''Missing required argument '{n}'. Command not executed.''')
+                execute = False
+                break
+        if n not in options and d is not None:
+            #print(f'''Default argument '{n}' set to '{d}'.''')
+            options[n] = d
+        if n in options:
+            if isinstance(t, list):
+                bCond = options[n] in t
+                #print(options[n], t, bCond)
+                sTxt = f"Value '{options[n]}' is not valid for option '{n}'. Use one of these options: {t}."
+                Assert(bCond, sTxt)
+                if not bCond:
                     execute = False
                     break
-            if n not in options and d is not None:
-                #print(f'''Default argument '{n}' set to '{d}'.''')
-                options[n] = d
-            if n in options:
-                if isinstance(t, list):
-                    bCond = options[n] in t
-                    #print(options[n], t, bCond)
-                    sTxt = f"Value '{options[n]}' is not valid for option '{n}'. Use one of these options: {t}."
-                    Assert(bCond, sTxt)
-                    if not bCond:
-                        execute = False
-                        break
-                elif t == "str":
-                    #options[n] = options[n].strip('"')
-                    if len(options[n]) > 0:
-                        if options[n][0] == '"' and options[n][-1] == '"':
-                            options[n] = options[n].strip('"')
-                        elif options[n][0] == "'" and options[n][-1] == "'":
-                            options[n] = options[n].strip("'")
-                    #print(f"Parse option '{n}' as string:", options[n])
-                    #command = "quit"
-                elif t == "int":
-                    #print(f"I am going to translate '{options[n]}' to 'int'")
-                    # check variables first
-                    result_message = f"Option '{n}' should be integer but is '{options[n]}'. Probably not doing what expected!"
-                    vartest = str(options[n])
-                    if vartest[0] not in ["0","1","2","3","5","6","7","8","9","-","+"," "]:
-                        if vartest[0] != "$": vartest = "$" + vartest #variable start with "$", user can omit like in print data all
-                        variable = None
-                        contexts = []
-                        if vartest in variables:
-                            variable = vartest
-                        else:
-                            for var in variables:
-                                if variables[var].get("shorts"):
-                                    if vartest in variables[var]["shorts"]:
-                                        variable = var
-                                        break
-                        if variable:
-                            #get context
-                            print(f"Getting context for variable '{variable}' in command '{command}' and option '{options[n]}':")
-                            for contexttest in variables[variable]:
-                                #print(variables[variable][contexttest])
-                                if command in variables[variable][contexttest] or contexttest == "user":
-                                    contexts.append(contexttest)
-                            for context in contexts:
-                                print(f"Command '{command}' test passed with context '{context}'!")
-                                print(variables[variable][contexttest])
-                                print(options)
-                                opt = 1
-                                if context != "user":
-                                    for optiontest in variables[variable][context][command]:
-                                        if optiontest in options:
-                                            if options[optiontest] in variables[variable][context][command][optiontest]:
-                                                print(f"Option '{optiontest}' test passed with value '{options[optiontest]}'!")
-                                            else:
-                                                opt = 0
+            elif t == "str":
+                #options[n] = options[n].strip('"')
+                if len(options[n]) > 0:
+                    if options[n][0] == '"' and options[n][-1] == '"':
+                        options[n] = options[n].strip('"')
+                    elif options[n][0] == "'" and options[n][-1] == "'":
+                        options[n] = options[n].strip("'")
+                #print(f"Parse option '{n}' as string:", options[n])
+                #command = "quit"
+            elif t == "int":
+                #print(f"I am going to translate '{options[n]}' to 'int'")
+                # check variables first
+                result_message = f"Option '{n}' should be integer but is '{options[n]}'. Probably not doing what expected!"
+                vartest = str(options[n])
+                if vartest[0] not in ["0","1","2","3","5","6","7","8","9","-","+"," "]:
+                    if vartest[0] != "$": vartest = "$" + vartest #variable start with "$", user can omit like in print data all
+                    variable = None
+                    contexts = []
+                    if vartest in variables:
+                        variable = vartest
+                    else:
+                        for var in variables:
+                            if variables[var].get("shorts"):
+                                if vartest in variables[var]["shorts"]:
+                                    variable = var
+                                    break
+                    if variable:
+                        #get context
+                        print(f"Getting context for variable '{variable}' in command '{command}' and option '{options[n]}':")
+                        for contexttest in variables[variable]:
+                            #print(variables[variable][contexttest])
+                            if command in variables[variable][contexttest] or contexttest == "user":
+                                contexts.append(contexttest)
+                        for context in contexts:
+                            print(f"Command '{command}' test passed with context '{context}'!")
+                            print(variables[variable][contexttest])
+                            print(options)
+                            opt = 1
+                            if context != "user":
+                                for optiontest in variables[variable][context][command]:
+                                    if optiontest in options:
+                                        if options[optiontest] in variables[variable][context][command][optiontest]:
+                                            print(f"Option '{optiontest}' test passed with value '{options[optiontest]}'!")
                                         else:
                                             opt = 0
-                                else:
-                                    opt = 1
-                                if opt: options[n] = variables[variable][context]["value"]
-                        else:
-                            result_message = 1
-                            result_message = f"Option '{n}' should be integer but is '{options[n]}', which is not a variable. Probably not doing what expected!"
+                                    else:
+                                        opt = 0
+                            else:
+                                opt = 1
+                            if opt: options[n] = variables[variable][context]["value"]
+                    else:
+                        result_message = 1
+                        result_message = f"Option '{n}' should be integer but is '{options[n]}', which is not a variable. Probably not doing what expected!"
 
+                try:
+                    options[n] = int(options[n])
+                except Exception as e:
+                    traceback.print_exc()
+                Assert(isinstance(options[n], int), result_message)
+                if not isinstance(options[n], int): options[n] = d
+                #print(f"Parse option '{n}' as integer:", options[n])
+            elif t == "intlist":
+                Assert(options[n][0] == "[" and options[n][-1] == "]", "Lists must be enclosed with []. Probably not doing what expected!")
+                options_list_line = options[n][1:-1]
+                options_list_line = ",".join(parseText(options_list_line, " "))
+                lst_old = parseText(options_list_line, ",")
+                lst_new = []
+                for l_old in lst_old:
+                    l_new = None
                     try:
-                        options[n] = int(options[n])
+                        l_new = int(l_old)
                     except Exception as e:
                         traceback.print_exc()
-                    Assert(isinstance(options[n], int), result_message)
-                    if not isinstance(options[n], int):
-                        #options[n] = d
-                        execute = False
-                    #print(f"Parse option '{n}' as integer:", options[n])
-                elif t == "intlist":
-                    Assert(options[n][0] == "[" and options[n][-1] == "]", "Lists must be enclosed with []. Probably not doing what expected!")
-                    options_list_line = options[n][1:-1]
-                    options_list_line = ",".join(parseText(options_list_line, " "))
-                    lst_old = parseText(options_list_line, ",")
-                    lst_new = []
-                    for l_old in lst_old:
-                        l_new = None
-                        try:
-                            l_new = int(l_old)
-                        except Exception as e:
-                            traceback.print_exc()
-                        assert isinstance(l_new, int)
-                        if l_new not in lst_new: lst_new.append(l_new)
-                    options[n] = lst_new
-                elif t == "strlist":
-                    Assert(options[n][0] == "[" and options[n][-1] == "]", "Lists must be enclosed with []. Probably not doing what expected!")
-                    options_list_line = options[n][1:-1]
-                    options_list_line = ",".join(parseText(options_list_line, " "))
-                    lst_old = parseText(options_list_line, ",")
-                    lst_new = []
-                    for l_old in lst_old:
-                        if l_old[0] == '"' and l_old[-1] == '"':
-                            lst_new.append(l_old.strip('"'))
-                        elif l_old[0] == "'" and l_old[-1] == "'":
-                            lst_new.append(l_old.strip("'"))
-                        else:
-                            lst_new.append(l_old)
-                    options[n] = lst_new
-                elif t == "bool":
-                    if options[n] == True or options[n] == "True" or options[n] == "1": options[n] = True
-                    if options[n] == False or options[n] == "False" or options[n] == "0": options[n] = False
-
-        print("Command:", command)
-        print("Options:", options)
-        print("Execute:", execute)
-
-        if execute: break
+                    assert isinstance(l_new, int)
+                    if l_new not in lst_new: lst_new.append(l_new)
+                options[n] = lst_new
+            elif t == "strlist":
+                Assert(options[n][0] == "[" and options[n][-1] == "]", "Lists must be enclosed with []. Probably not doing what expected!")
+                options_list_line = options[n][1:-1]
+                options_list_line = ",".join(parseText(options_list_line, " "))
+                lst_old = parseText(options_list_line, ",")
+                lst_new = []
+                for l_old in lst_old:
+                    if l_old[0] == '"' and l_old[-1] == '"':
+                        lst_new.append(l_old.strip('"'))
+                    elif l_old[0] == "'" and l_old[-1] == "'":
+                        lst_new.append(l_old.strip("'"))
+                    else:
+                        lst_new.append(l_old)
+                options[n] = lst_new
+            elif t == "bool":
+                if options[n] == True or options[n] == "True" or options[n] == "1": options[n] = True
+                if options[n] == False or options[n] == "False" or options[n] == "0": options[n] = False
 
     if not execute:
         command = ""
@@ -1077,7 +994,7 @@ def do_sql(sql):
         if command == "quit" or command == "q":
             OK = 0
 
-        elif command == "connect sqlite3":
+        elif command == "sqlite3":
             # , isolation_level=None == autocommit
             if options["filename"] == ":memory:":
                 print("\n" + "Using database in memory. Save or loose!")
@@ -1100,7 +1017,7 @@ def do_sql(sql):
                 except Exception as e:
                     traceback.print_exc()
 
-        elif command == "connect mysql":
+        elif command == "mysql":
             #"database", "user", "password", "host", "port"
             database = options["database"]
             user = options["user"]
@@ -1134,7 +1051,7 @@ def do_sql(sql):
                 print("No MySQL support. Please run 'pip install mysqlclient'.\n")
                 traceback.print_exc()
 
-        elif command == "connect postgre":
+        elif command == "postgre":
             #"database", "user", "password", "host", "port"
             database = options["database"]
             user = options["user"]
@@ -1157,7 +1074,7 @@ def do_sql(sql):
                 print("No MySQL support. Please run 'pip install mysqlclient'.\n")
                 traceback.print_exc()
 
-        elif command == "connect mssql":
+        elif command == "mssql":
             #"database", "user", "password", "host", "port"
             database = options["database"]
             user = options["user"]
@@ -1182,26 +1099,35 @@ def do_sql(sql):
                 print("No MsSQL support. Please run 'pip install pyodbc'.\n")
                 traceback.print_exc()
 
-        elif command == "folder":
-            folder_exists_old = folder_exists
-            folder_name_old = folder_name
-            #folder_name = sql[len("\folder:"):]
-            folder_name = options["foldername"]
-            #folder = os.path.isdir(folder_name)
-            folder_exists, full_foldername = check_foldername(folder_name, folder_name_old)
-            if folder_exists:
-                printInvGreen(f'''Using folder '{full_foldername}'.''')
-                folder_name = full_foldername
-            else:
-                if folder_exists_old:
-                    printInvRed(f'''Folder '{folder_name}' does not exist. Using current folder '{folder_name_old}'.''')
-                    folder_exists = folder_exists_old
-                    folder_name = folder_name_old
+        elif command == "set" or command == "set folder":
+
+            if options.get("what") == "folder" or options.get("what") == "f": set_what = "folder"
+
+            if command == "set folder": set_what = "folder"
+
+            if set_what == "folder":
+                folder_exists_old = folder_exists
+                folder_name_old = folder_name
+                #folder_name = sql[len("\folder:"):]
+                folder_name = options.get("foldername")
+                #folder = os.path.isdir(folder_name)
+                if folder_name:
+                    folder_exists, full_foldername = check_foldername(folder_name, folder_name_old)
                 else:
-                    # folder_name_old is None if sql imported file has wrong \folder command
-                    printInvRed("Folder '{}' does not exist. Using working directory '{}'.".format(folder_name, os.getcwd()))
-                    folder_name = os.getcwd()
-                OK = 2
+                    folder_exists = False
+                if folder_exists:
+                    printInvGreen(f'''Using folder '{full_foldername}'.''')
+                    folder_name = full_foldername
+                else:
+                    if folder_exists_old:
+                        printInvRed(f'''Folder '{folder_name}' does not exist. Using current folder '{folder_name_old}'.''')
+                        folder_exists = folder_exists_old
+                        folder_name = folder_name_old
+                    else:
+                        # folder_name_old is None if sql imported file has wrong \folder command
+                        printInvRed("Folder '{}' does not exist. Using working directory '{}'.".format(folder_name, os.getcwd()))
+                        folder_name = os.getcwd()
+                    OK = 2
 
         elif command == "read":
             read_filename = options["filename"]
@@ -1481,9 +1407,9 @@ def do_sql(sql):
                 printInvRed(str(e))
                 if OK: OK = 2
 
-        elif command == "print" or command == "print data" or command == "print data easy" or command == "print columns" or command == "print history":
+        elif command == "print" or command == "print data" or command == "print columns" or command == "print history":
             if command == "print columns": options["what"] = "columns"
-            if command == "print" or command == "print data" or command == "print data easy": options["what"] = "data"
+            if command == "print data": options["what"] = "data"
             if command == "print history": options["what"] = "history"
             if options["what"] == "c": options["what"] = "columns"
             if options["what"] == "d": options["what"] = "data"
@@ -1574,217 +1500,223 @@ def do_sql(sql):
                     else:
                         print(note)
 
-        elif command == "data reset":
-            if data_old and columns_old:
-                data = data_old.copy()
-                columns = columns_old.copy()
-            show_data(data, columns, "")
 
-        elif command == "data select easy" or command == "data select":
+        elif command == "data" or command == "data profile":
+            if command == "data profile": options["what"] = "profile"
+            if options["what"] == "p": options["what"] = "profile"
+            if options["what"] == "s": options["what"] = "select"
+            if options["what"] == "rs": options["what"] = "reset"
 
-            if not data_old and not columns_old:
-                data_old = data.copy()
-                columns_old = columns.copy()
+            if options["what"] == "reset":
+                if data_old and columns_old:
+                    data = data_old.copy()
+                    columns = columns_old.copy()
+                show_data(data, columns, "")
 
-            fromm = options["from"]
-            too = options["to"]
-            stepp = options["step"]
-            listt = options["list"]
-            randd = options["random"]
-            colss = options["columns"]
-            title = options.get("title")
-            note = options.get("note")
-            title_color = options.get("title_color")
-            note_color = options.get("note_color")
-            #print("Title:", title)
-            #print(fromm, too, stepp)
+            if options["what"] == "select":
 
-            nrows = len(data)
-            ncols = len(columns)
+                if not data_old and not columns_old:
+                    data_old = data.copy()
+                    columns_old = columns.copy()
 
-            rowsi, colsi = data_select()
-            #print(rows_show)
+                fromm = options["from"]
+                too = options["to"]
+                stepp = options["step"]
+                listt = options["list"]
+                randd = options["random"]
+                colss = options["columns"]
+                title = options.get("title")
+                note = options.get("note")
+                title_color = options.get("title_color")
+                note_color = options.get("note_color")
+                #print("Title:", title)
+                #print(fromm, too, stepp)
 
-            columns_selected = [columns[ci-1] for ci in colsi]
-            data_selected = [data[ri-1] for ri in rowsi]
+                nrows = len(data)
+                ncols = len(columns)
 
-            title_text = ""
+                rowsi, colsi = data_select()
+                #print(rows_show)
 
-            if title:
-                title_text = title
-                #printInvGreen(title)
-            elif len(listt) > 0 and randd == 0:
-                if len(colss) > 0:
-                    title_text = f"There are {nrows} rows, {ncols} columns. Selected {len(rowsi)} listed cases {listi} with selected columns {columns_selected}."
-                    #printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} listed cases {listi} with selected columns {columns_show}.")
+                columns_selected = [columns[ci-1] for ci in colsi]
+                data_selected = [data[ri-1] for ri in rowsi]
+
+                title_text = ""
+
+                if title:
+                    title_text = title
+                    #printInvGreen(title)
+                elif len(listt) > 0 and randd == 0:
+                    if len(colss) > 0:
+                        title_text = f"There are {nrows} rows, {ncols} columns. Selected {len(rowsi)} listed cases {listi} with selected columns {columns_selected}."
+                        #printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} listed cases {listi} with selected columns {columns_show}.")
+                    else:
+                        title_text = f"There are {nrows} rows, {ncols} columns. Selected {len(rowsi)} listed cases {listi} with all columns."
+                        #printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} listed cases {listi} with all columns.")
+                elif len(listt) > 0 and randd > 0:
+                    if len(colss) > 0:
+                        title_text = f"There are {nrows} rows, {ncols} columns. Selected {len(rowsi)} random cases from {listi} with selected columns {columns_selected}."
+                        #printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} random cases from {listi} with selected columns {columns_show}.")
+                    else:
+                        title_text = f"There are {nrows} rows, {ncols} columns. Selected {len(rowsi)} random cases from {listi} with all columns."
+                        #printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} random cases from {listi} with all columns.")
+                elif randd > 0:
+                    if len(colss) > 0:
+                        title_text = f"There are {nrows} rows, {ncols} columns. Selected {len(rowsi)} random cases from {fromm} to {too} step {stepp} with selected columns {columns_selected}."
+                        #printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} random cases from {fromm} to {too} step {stepp} with selected columns {columns_show}.")
+                    else:
+                        title_text = f"There are {nrows} rows, {ncols} columns. Selected {len(rowsi)} random cases from {fromm} to {too} step {stepp} with all columns."
+                        #printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} random cases from {fromm} to {too} step {stepp} with all columns.")
                 else:
-                    title_text = f"There are {nrows} rows, {ncols} columns. Selected {len(rowsi)} listed cases {listi} with all columns."
-                    #printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} listed cases {listi} with all columns.")
-            elif len(listt) > 0 and randd > 0:
-                if len(colss) > 0:
-                    title_text = f"There are {nrows} rows, {ncols} columns. Selected {len(rowsi)} random cases from {listi} with selected columns {columns_selected}."
-                    #printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} random cases from {listi} with selected columns {columns_show}.")
-                else:
-                    title_text = f"There are {nrows} rows, {ncols} columns. Selected {len(rowsi)} random cases from {listi} with all columns."
-                    #printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} random cases from {listi} with all columns.")
-            elif randd > 0:
-                if len(colss) > 0:
-                    title_text = f"There are {nrows} rows, {ncols} columns. Selected {len(rowsi)} random cases from {fromm} to {too} step {stepp} with selected columns {columns_selected}."
-                    #printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} random cases from {fromm} to {too} step {stepp} with selected columns {columns_show}.")
-                else:
-                    title_text = f"There are {nrows} rows, {ncols} columns. Selected {len(rowsi)} random cases from {fromm} to {too} step {stepp} with all columns."
-                    #printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} random cases from {fromm} to {too} step {stepp} with all columns.")
-            else:
-                if len(colss) > 0:
-                    title_text = f"There are {nrows} rows, {ncols} columns. Selected {len(rowsi)} cases from {fromm} to {too} step {stepp} with selected columns {columns_selected}."
-                    #printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} cases from {fromm} to {too} step {stepp} with selected columns {columns_show}.")
-                else:
-                    title_text = f"There are {nrows} rows, {ncols} columns. Selected {len(rowsi)} cases from {fromm} to {too} step {stepp} with all columns."
-                    #printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} cases from {fromm} to {too} step {stepp} with all columns.")
+                    if len(colss) > 0:
+                        title_text = f"There are {nrows} rows, {ncols} columns. Selected {len(rowsi)} cases from {fromm} to {too} step {stepp} with selected columns {columns_selected}."
+                        #printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} cases from {fromm} to {too} step {stepp} with selected columns {columns_show}.")
+                    else:
+                        title_text = f"There are {nrows} rows, {ncols} columns. Selected {len(rowsi)} cases from {fromm} to {too} step {stepp} with all columns."
+                        #printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} cases from {fromm} to {too} step {stepp} with all columns.")
 
-            if title_color:
-                cc = colorCode(title_color)
-                printColor(title_text, cc)
-            else:
-                cc = INVGREEN
-                printColor(title_text, cc)
+                if title_color:
+                    cc = colorCode(title_color)
+                    printColor(title_text, cc)
+                else:
+                    cc = INVGREEN
+                    printColor(title_text, cc)
 
-            #rows = range(1, nrows + 1)
-            #print(rows)
-            #print_data(rowsi, colsi, data, columns, rows, rows_label)
-            show_data(data_selected, columns_selected)
+                #rows = range(1, nrows + 1)
+                #print(rows)
+                #print_data(rowsi, colsi, data, columns, rows, rows_label)
+                show_data(data_selected, columns_selected)
 
-            if note:
+                if note:
+                    print()
+                    if note_color:
+                        cc = colorCode(note_color)
+                        printColor(note, cc)
+                    else:
+                        print(note)
+
+                data = data_selected.copy()
+                columns = columns_selected.copy()
+
+            if options["what"] == "profile":
+                nrows = len(data)
+                ncols = len(columns)
+                colsi = range(1, ncols + 1)
+                rowsi = range(1, nrows + 1)
+                rows = range(1, nrows + 1)
+                colsp = data_profile(rowsi, colsi, data, columns, rows, rows_label, progress_indicator = True)
+                profile_data = []
+                profile_columns = columns
+                profile_rows = ["Type", "Valids", "Nulls", "Valid %", "Sum", "Min", "Max", "Mean", "Q1", "Median", "Q3", "Range", "IQR", "Variance", "STD", "Skew", "Unique", "FirstCat"]
+                profile_rows_label = '(Stat)'
+                stats = ["t", "v", "n", "v%", "sum", "min", "max", "mean", "q1", "q2", "q3", "ran", "iqr", "var", "std", "skw","uni", "fnq"]
+
+                maxc = 0
+                for i, stat in enumerate(stats):
+                    profile_data.append([])
+                    for ci in colsp:
+                        if ci > 0:  # rows_label
+                            if stat == "v%":
+                                if (colsp[ci]["v"] + colsp[ci]["n"]) > 0:
+                                    profile_data[i].append(round(100 * colsp[ci]["v"] / (colsp[ci]["v"] + colsp[ci]["n"]), 2))
+                                else:
+                                    profile_data[i].append("-")
+                            elif stat == "ran":
+                                if colsp[ci]["max"] and colsp[ci]["max"]:
+                                    profile_data[i].append(round(colsp[ci]["max"] - colsp[ci]["min"], 2))
+                                else:
+                                    profile_data[i].append("-")
+                            elif stat == "iqr":
+                                if colsp[ci]["q3"] and colsp[ci]["q1"]:
+                                    profile_data[i].append(round(colsp[ci]["q3"] - colsp[ci]["q1"], 2))
+                                else:
+                                    profile_data[i].append("-")
+                            elif stat == "var":
+                                if colsp[ci]["smd2"] and colsp[ci]["v"]:
+                                    profile_data[i].append(round(colsp[ci]["smd2"] / colsp[ci]["v"], 2))
+                                else:
+                                    profile_data[i].append("-")
+                            elif stat == "std":
+                                if colsp[ci]["smd2"] and colsp[ci]["v"]:
+                                    profile_data[i].append(round((colsp[ci]["smd2"] / colsp[ci]["v"])**0.5, 2))
+                                else:
+                                    profile_data[i].append("-")
+                            elif stat == "skw":
+                                if colsp[ci]["smd3"] and colsp[ci]["smd2"] and colsp[ci]["v"]:
+                                    profile_data[i].append(round(colsp[ci]["smd3"] / (colsp[ci]["v"] * (colsp[ci]["smd2"] / colsp[ci]["v"])**1.5), 2))
+                                else:
+                                    profile_data[i].append("-")
+                            elif stat == "uni":
+                                if len(colsp[ci]["c"]) < profile_max_categorical:
+                                    profile_data[i].append(len(colsp[ci]["c"]))
+                                    if len(colsp[ci]["c"]) > maxc: maxc = len(colsp[ci]["c"])
+                                else:
+                                    profile_data[i].append("-")
+                            elif stat == "fnq":
+                                if colsp[ci]["fnq"] is None:
+                                    profile_data[i].append("-")
+                                else:
+                                    profile_data[i].append(colsp[ci]["fnq"])
+                            else:
+                                for c in colsp[ci]:
+                                    #print(c, stat)
+                                    if c == stat:
+                                        if isinstance(colsp[ci][c], float):
+                                            profile_data[i].append(round(colsp[ci][c],2))
+                                        elif isinstance(colsp[ci][c], str):
+                                            profile_data[i].append(colsp[ci][c][:5])    # Quant, Categ
+                                        elif colsp[ci][c] is None:
+                                            profile_data[i].append("-")
+                                        else:
+                                            profile_data[i].append(colsp[ci][c])
+
+                if maxc > profile_show_categorical:
+                    maxc = profile_show_categorical
+
+                minc = len(profile_data)
+
+                for i in range(maxc):
+                    profile_rows.append("Cat " + str(i + 1) + "_1")
+                    profile_data.append([])
+                    for ci in colsp:
+                        if ci > 0:  # rows_label
+                            if i < len(colsp[ci]["c"]):
+                                #profile_data[i + minc].append(str(list(colsp[ci]["c"].keys())[i]) + "(" + str(colsp[ci]["c"][list(colsp[ci]["c"].keys())[i]]) + ")")
+                                profile_data[i*3 + minc].append(str(list(colsp[ci]["c"].keys())[i]))
+                            else:
+                                profile_data[i*3 + minc].append("-")
+                    profile_rows.append("Cat " + str(i + 1) + "_2")
+                    profile_data.append([])
+                    for ci in colsp:
+                        if ci > 0:  # rows_label
+                            if i < len(colsp[ci]["c"]):
+                                #profile_data[i + minc].append(str(list(colsp[ci]["c"].keys())[i]) + "(" + str(colsp[ci]["c"][list(colsp[ci]["c"].keys())[i]]) + ")")
+                                profile_data[i*3 + minc + 1].append(str(colsp[ci]["c"][list(colsp[ci]["c"].keys())[i]]))
+                            else:
+                                profile_data[i*3 + minc + 1].append("-")
+                    profile_rows.append("Cat " + str(i + 1) + "_3")
+                    profile_data.append([])
+                    for ci in colsp:
+                        if ci > 0: # rows_label
+                            if i < len(colsp[ci]["c"]):
+                                #profile_data[i + minc].append(str(list(colsp[ci]["c"].keys())[i]) + "(" + str(colsp[ci]["c"][list(colsp[ci]["c"].keys())[i]]) + ")")
+                                profile_data[i*3 + minc + 2].append(str(round(100*colsp[ci]["c"][list(colsp[ci]["c"].keys())[i]]/colsp[ci]["v"],2)) + "%")
+                            else:
+                                profile_data[i*3 + minc + 2].append("-")
+
+
+                #print(profile_data)
+
+                nrows = len(profile_data)
+                ncols = len(profile_columns)
+
+                colsi = range(1, ncols + 1)
+                rowsi = range(1, nrows + 1)
+
                 print()
-                if note_color:
-                    cc = colorCode(note_color)
-                    printColor(note, cc)
-                else:
-                    print(note)
-
-            data = data_selected.copy()
-            columns = columns_selected.copy()
-
-        elif command == "data profile easy" or command == "data profile":
-
-            nrows = len(data)
-            ncols = len(columns)
-            colsi = range(1, ncols + 1)
-            rowsi = range(1, nrows + 1)
-            rows = range(1, nrows + 1)
-            colsp = data_profile(rowsi, colsi, data, columns, rows, rows_label, progress_indicator = True)
-            profile_data = []
-            profile_columns = columns
-            profile_rows = ["Type", "Valids", "Nulls", "Valid %", "Sum", "Min", "Max", "Mean", "Q1", "Median", "Q3", "Range", "IQR", "Variance", "STD", "Skew", "Unique", "FirstCat"]
-            profile_rows_label = '(Stat)'
-            stats = ["t", "v", "n", "v%", "sum", "min", "max", "mean", "q1", "q2", "q3", "ran", "iqr", "var", "std", "skw","uni", "fnq"]
-
-            maxc = 0
-            for i, stat in enumerate(stats):
-                profile_data.append([])
-                for ci in colsp:
-                    if ci > 0:  # rows_label
-                        if stat == "v%":
-                            if (colsp[ci]["v"] + colsp[ci]["n"]) > 0:
-                                profile_data[i].append(round(100 * colsp[ci]["v"] / (colsp[ci]["v"] + colsp[ci]["n"]), 2))
-                            else:
-                                profile_data[i].append("-")
-                        elif stat == "ran":
-                            if colsp[ci]["max"] and colsp[ci]["max"]:
-                                profile_data[i].append(round(colsp[ci]["max"] - colsp[ci]["min"], 2))
-                            else:
-                                profile_data[i].append("-")
-                        elif stat == "iqr":
-                            if colsp[ci]["q3"] and colsp[ci]["q1"]:
-                                profile_data[i].append(round(colsp[ci]["q3"] - colsp[ci]["q1"], 2))
-                            else:
-                                profile_data[i].append("-")
-                        elif stat == "var":
-                            if colsp[ci]["smd2"] and colsp[ci]["v"]:
-                                profile_data[i].append(round(colsp[ci]["smd2"] / colsp[ci]["v"], 2))
-                            else:
-                                profile_data[i].append("-")
-                        elif stat == "std":
-                            if colsp[ci]["smd2"] and colsp[ci]["v"]:
-                                profile_data[i].append(round((colsp[ci]["smd2"] / colsp[ci]["v"])**0.5, 2))
-                            else:
-                                profile_data[i].append("-")
-                        elif stat == "skw":
-                            if colsp[ci]["smd3"] and colsp[ci]["smd2"] and colsp[ci]["v"]:
-                                profile_data[i].append(round(colsp[ci]["smd3"] / (colsp[ci]["v"] * (colsp[ci]["smd2"] / colsp[ci]["v"])**1.5), 2))
-                            else:
-                                profile_data[i].append("-")
-                        elif stat == "uni":
-                            if len(colsp[ci]["c"]) < profile_max_categorical:
-                                profile_data[i].append(len(colsp[ci]["c"]))
-                                if len(colsp[ci]["c"]) > maxc: maxc = len(colsp[ci]["c"])
-                            else:
-                                profile_data[i].append("-")
-                        elif stat == "fnq":
-                            if colsp[ci]["fnq"] is None:
-                                profile_data[i].append("-")
-                            else:
-                                profile_data[i].append(colsp[ci]["fnq"])
-                        else:
-                            for c in colsp[ci]:
-                                #print(c, stat)
-                                if c == stat:
-                                    if isinstance(colsp[ci][c], float):
-                                        profile_data[i].append(round(colsp[ci][c],2))
-                                    elif isinstance(colsp[ci][c], str):
-                                        profile_data[i].append(colsp[ci][c][:5])    # Quant, Categ
-                                    elif colsp[ci][c] is None:
-                                        profile_data[i].append("-")
-                                    else:
-                                        profile_data[i].append(colsp[ci][c])
-
-            if maxc > profile_show_categorical:
-                maxc = profile_show_categorical
-
-            minc = len(profile_data)
-
-            for i in range(maxc):
-                profile_rows.append("Cat " + str(i + 1) + "_1")
-                profile_data.append([])
-                for ci in colsp:
-                    if ci > 0:  # rows_label
-                        if i < len(colsp[ci]["c"]):
-                            #profile_data[i + minc].append(str(list(colsp[ci]["c"].keys())[i]) + "(" + str(colsp[ci]["c"][list(colsp[ci]["c"].keys())[i]]) + ")")
-                            profile_data[i*3 + minc].append(str(list(colsp[ci]["c"].keys())[i]))
-                        else:
-                            profile_data[i*3 + minc].append("-")
-                profile_rows.append("Cat " + str(i + 1) + "_2")
-                profile_data.append([])
-                for ci in colsp:
-                    if ci > 0:  # rows_label
-                        if i < len(colsp[ci]["c"]):
-                            #profile_data[i + minc].append(str(list(colsp[ci]["c"].keys())[i]) + "(" + str(colsp[ci]["c"][list(colsp[ci]["c"].keys())[i]]) + ")")
-                            profile_data[i*3 + minc + 1].append(str(colsp[ci]["c"][list(colsp[ci]["c"].keys())[i]]))
-                        else:
-                            profile_data[i*3 + minc + 1].append("-")
-                profile_rows.append("Cat " + str(i + 1) + "_3")
-                profile_data.append([])
-                for ci in colsp:
-                    if ci > 0: # rows_label
-                        if i < len(colsp[ci]["c"]):
-                            #profile_data[i + minc].append(str(list(colsp[ci]["c"].keys())[i]) + "(" + str(colsp[ci]["c"][list(colsp[ci]["c"].keys())[i]]) + ")")
-                            profile_data[i*3 + minc + 2].append(str(round(100*colsp[ci]["c"][list(colsp[ci]["c"].keys())[i]]/colsp[ci]["v"],2)) + "%")
-                        else:
-                            profile_data[i*3 + minc + 2].append("-")
-
-
-            #print(profile_data)
-
-            nrows = len(profile_data)
-            ncols = len(profile_columns)
-
-            colsi = range(1, ncols + 1)
-            rowsi = range(1, nrows + 1)
-
-            print()
-            print()
-            #colsp = data_profile(rowsi, colsi, profile_data, profile_columns, profile_rows, profile_rows_label)
-            print_data(rowsi, colsi, profile_data, profile_columns, profile_rows, profile_rows_label)
+                print()
+                #colsp = data_profile(rowsi, colsi, profile_data, profile_columns, profile_rows, profile_rows_label)
+                print_data(rowsi, colsi, profile_data, profile_columns, profile_rows, profile_rows_label)
 
 
         elif sql.startswith("\pause:"):
@@ -1919,8 +1851,7 @@ but {len(command_options[key1][key2])} '{key2}'.'''
             if key1 != key2:
                 for a1 in command_options[key1]["alternative"]:
                     for a2 in command_options[key2]["alternative"]:
-                        #assert a1 != a2, f"Command '{key1}' has the same alternative as command '{key2}': '{a1}'."
-                        pass
+                        assert a1 != a2, f"Command '{key1}' has the same alternative as command '{key2}': '{a1}'."
 
     namespace = parseArgv(argv)
     """
