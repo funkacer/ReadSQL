@@ -165,15 +165,10 @@ variables["$all"] = {}
 variables["$all"]["shorts"] = ["$a","$al"]
 variables["$all"]["print data"] = {}
 variables["$all"]["print data"]["value"] = 0
-variables["$all"]["print data"]["print"] = {}
-variables["$all"]["print data"]["print"]["what"] = ["data","d"]
 variables["$all"]["print data"]["print data"] = {}
-variables["$all"]["print data"]["data"] = {}
-variables["$all"]["print data"]["data"]["what"] = ["select","s"]
+variables["$all"]["print data"]["data select"] = {}
 variables["$all"]["print history"] = {}
 variables["$all"]["print history"]["value"] = 0
-variables["$all"]["print history"]["print"] = {}
-variables["$all"]["print history"]["print"]["what"] = ["history","h"]
 variables["$all"]["print history"]["print history"] = {}
 variables["$red"] = {}
 variables["$red"]["shorts"] = ["$r"]
@@ -213,34 +208,34 @@ command_options["quit"]["help2"] = []
 command_options["quit"]["alternative"] = ["q"]
 command_options["quit"]["altoption"] = []
 
-command_options["set folder"] = {}
-command_options["set folder"]["name"] = ["foldername"]
-command_options["set folder"]["required"] = [True]
-command_options["set folder"]["type"] = ["str"]
-command_options["set folder"]["default"] = [None]
-command_options["set folder"]["help1"] = "Help for command 'folder'"
-command_options["set folder"]["help2"] = ["Blabla1"]
-command_options["set folder"]["alternative"] = ["sf", "f"]
-command_options["set folder"]["altoption"] = [["f","fn"]]
+command_options["folder"] = {}
+command_options["folder"]["name"] = ["foldername"]
+command_options["folder"]["required"] = [True]
+command_options["folder"]["type"] = ["str"]
+command_options["folder"]["default"] = [None]
+command_options["folder"]["help1"] = "Help for command 'folder'"
+command_options["folder"]["help2"] = ["Blabla1"]
+command_options["folder"]["alternative"] = ["f"]
+command_options["folder"]["altoption"] = [["f","fn"]]
 
 command_options["set"] = {}
-command_options["set"]["name"] = ["what", "foldername"]
+command_options["set"]["name"] = ["what", "variable"]
 command_options["set"]["required"] = [True, False]
-command_options["set"]["type"] = [["folder", "f"], "str"]
+command_options["set"]["type"] = [["user", "u"], "str"]
 command_options["set"]["default"] = [None, None]
-command_options["set"]["help1"] = "Help for command 'folder'"
+command_options["set"]["help1"] = "Help for command 'set'"
 command_options["set"]["help2"] = ["Blabla1", "Blabla2"]
 command_options["set"]["alternative"] = ["s"]
-command_options["set"]["altoption"] = [["w"], ["f","fn"]]
+command_options["set"]["altoption"] = [["w"], ["v"]]
 
 command_options["connect sqlite3"] = {}
 command_options["connect sqlite3"]["name"] = ["filename"]
 command_options["connect sqlite3"]["required"] = [False]
 command_options["connect sqlite3"]["type"] = ["str"]
 command_options["connect sqlite3"]["default"] = [":memory:"]
-command_options["connect sqlite3"]["help1"] = "Help for command 'folder'"
+command_options["connect sqlite3"]["help1"] = "Help for command 'connect'"
 command_options["connect sqlite3"]["help2"] = ["Blabla1"]
-command_options["connect sqlite3"]["alternative"] = ["cs"]
+command_options["connect sqlite3"]["alternative"] = ["c sqlite3", "c sqlite", "c sql3", "c sql", "c s",  "csqlite3", "csqlite", "csql3", "csql", "cs"]
 command_options["connect sqlite3"]["altoption"] = [["f"]]
 
 command_options["connect mysql"] = {}
@@ -250,7 +245,7 @@ command_options["connect mysql"]["type"] = ["str", "str", "str", "str", "int"]
 command_options["connect mysql"]["default"] = ["", "root", "admin", "localhost", 3306]
 command_options["connect mysql"]["help1"] = "Help for command 'folder'"
 command_options["connect mysql"]["help2"] = ["Bla1", "Bla2", "Bla3", "Bla4", "Bla5"]
-command_options["connect mysql"]["alternative"] = ["cmy"]
+command_options["connect mysql"]["alternative"] = ["c mysql", "c my", "cmysql", "cmy"]
 command_options["connect mysql"]["altoption"] = [["d"],["u"],["p"],["h"],["po"]]
 
 command_options["connect postgre"] = {}
@@ -260,7 +255,7 @@ command_options["connect postgre"]["type"] = ["str", "str", "str", "str", "int"]
 command_options["connect postgre"]["default"] = ["", "postgres", "postgres1", "localhost", 5432]
 command_options["connect postgre"]["help1"] = "Help for command 'folder'"
 command_options["connect postgre"]["help2"] = ["Bla1", "Bla2", "Bla3", "Bla4", "Bla5"]
-command_options["connect postgre"]["alternative"] = ["cpg"]
+command_options["connect postgre"]["alternative"] = ["c postgre", "c pg", "c p", "cpostgre", "cpg", "cp"]
 command_options["connect postgre"]["altoption"] = [["d"],["u"],["p"],["h"],["po"]]
 
 command_options["connect mssql"] = {}
@@ -270,7 +265,7 @@ command_options["connect mssql"]["type"] = ["str", "str", "str", "str", "int"]
 command_options["connect mssql"]["default"] = ["", "root", "admin", "localhost", 3306]
 command_options["connect mssql"]["help1"] = "Help for command 'folder'"
 command_options["connect mssql"]["help2"] = ["Bla1", "Bla2", "Bla3", "Bla4", "Bla5"]
-command_options["connect mssql"]["alternative"] = ["cms"]
+command_options["connect mssql"]["alternative"] = ["c mssql", "c ms", "cmssql", "cms"]
 command_options["connect mssql"]["altoption"] = [["d"],["u"],["p"],["h"],["po"]]
 
 command_options["read"] = {}
@@ -320,7 +315,7 @@ command_options["print data"]["type"] = ["int", "int", "int", "int", "intlist", 
 command_options["print data"]["default"] = [0, 0, 1, 0, "[]", "[]"]
 command_options["print data"]["help1"] = "Help for command 'folder'"
 command_options["print data"]["help2"] = ["Bla1","Bla2","Bla3","Bla4","Bla5","Bla6"]
-command_options["print data"]["alternative"] = ["pd"]
+command_options["print data"]["alternative"] = ["print d", "p d", "pd"]
 command_options["print data"]["altoption"] = [["f"], ["t"], ["s"], ["r"], ["l"], ["c"]]
 
 command_options["print columns"] = {}
@@ -330,7 +325,7 @@ command_options["print columns"]["type"] = []
 command_options["print columns"]["default"] = []
 command_options["print columns"]["help1"] = "Help for command 'folder'"
 command_options["print columns"]["help2"] = []
-command_options["print columns"]["alternative"] = ["pc"]
+command_options["print columns"]["alternative"] = ["print c", "p c", "pc"]
 command_options["print columns"]["altoption"] = []
 
 command_options["print history"] = {}
@@ -340,9 +335,10 @@ command_options["print history"]["type"] = []
 command_options["print history"]["default"] = []
 command_options["print history"]["help1"] = "Help for command 'folder'"
 command_options["print history"]["help2"] = []
-command_options["print history"]["alternative"] = ["ph"]
+command_options["print history"]["alternative"] = ["print h", "p h", "ph"]
 command_options["print history"]["altoption"] = []
 
+'''
 command_options["print"] = {}
 command_options["print"]["name"] = ["what", "from", "to", "step", "random", "list", "columns", "title", "note", "title_color", "note_color"]
 command_options["print"]["required"] = [False, False, False, False, False, False, False, False, False, False, False]
@@ -352,6 +348,7 @@ command_options["print"]["help1"] = "Help for command 'folder'"
 command_options["print"]["help2"] = ["Bla1","Bla2","Bla3","Bla4","Bla5","Bla6","Bla7","Bla8","Bla9","Bla10","Bla11"]
 command_options["print"]["alternative"] = ["p"]
 command_options["print"]["altoption"] = [["w"], ["f"], ["t"], ["s"], ["r"], ["l"], ["c"], ["tt"], ["nt"], ["tc"], ["nc"]]
+'''
 
 command_options["break"] = {}
 command_options["break"]["name"] = ["what", "from", "to", "step", "list", "columns"]
@@ -370,9 +367,20 @@ command_options["data profile"]["type"] = []
 command_options["data profile"]["default"] = []
 command_options["data profile"]["help1"] = "Help for command 'folder'"
 command_options["data profile"]["help2"] = []
-command_options["data profile"]["alternative"] = ["dp"]
+command_options["data profile"]["alternative"] = ["data p", "d p", "dp"]
 command_options["data profile"]["altoption"] = []
 
+command_options["data select"] = {}
+command_options["data select"]["name"] = ["from", "to", "step", "random", "list", "columns", "title", "note", "title_color", "note_color"]
+command_options["data select"]["required"] = [False, False, False, False, False, False, False, False, False, False]
+command_options["data select"]["type"] = ["int", "int", "int", "int", "intlist", "strlist", "str", "str", "int", "int"]
+command_options["data select"]["default"] = [0, 0, 1, 0, "[]", "[]", None, None, None, None]
+command_options["data select"]["help1"] = "Help for command 'data select'"
+command_options["data select"]["help2"] = ["Bla1","Bla2","Bla3","Bla4","Bla5","Bla6","Bla7","Bla8","Bla9","Bla10"]
+command_options["data select"]["alternative"] = ["data s", "d s", "ds"]
+command_options["data select"]["altoption"] = [["f"], ["t"], ["s"], ["r"], ["l"], ["c"], ["tt"], ["nt"], ["tc"], ["nc"]]
+
+'''
 command_options["data"] = {}
 command_options["data"]["name"] = ["what", "from", "to", "step", "random", "list", "columns", "title", "note", "title_color", "note_color"]
 command_options["data"]["required"] = [False, False, False, False, False, False, False, False, False, False, False]
@@ -382,6 +390,7 @@ command_options["data"]["help1"] = "Help for command 'folder'"
 command_options["data"]["help2"] = ["Bla1","Bla2","Bla3","Bla4","Bla5","Bla6","Bla7","Bla8","Bla9","Bla10","Bla11"]
 command_options["data"]["alternative"] = ["d"]
 command_options["data"]["altoption"] = [["w"], ["f"], ["t"], ["s"], ["r"], ["l"], ["c"], ["tt"], ["nt"], ["tc"], ["nc"]]
+'''
 
 def colorCode(color):
     cc = ""
@@ -994,7 +1003,7 @@ def do_sql(sql):
         if command == "quit" or command == "q":
             OK = 0
 
-        elif command == "sqlite3":
+        elif command == "connect sqlite3":
             # , isolation_level=None == autocommit
             if options["filename"] == ":memory:":
                 print("\n" + "Using database in memory. Save or loose!")
@@ -1017,7 +1026,7 @@ def do_sql(sql):
                 except Exception as e:
                     traceback.print_exc()
 
-        elif command == "mysql":
+        elif command == "connect mysql":
             #"database", "user", "password", "host", "port"
             database = options["database"]
             user = options["user"]
@@ -1051,7 +1060,7 @@ def do_sql(sql):
                 print("No MySQL support. Please run 'pip install mysqlclient'.\n")
                 traceback.print_exc()
 
-        elif command == "postgre":
+        elif command == "connect postgre":
             #"database", "user", "password", "host", "port"
             database = options["database"]
             user = options["user"]
@@ -1074,7 +1083,7 @@ def do_sql(sql):
                 print("No MySQL support. Please run 'pip install mysqlclient'.\n")
                 traceback.print_exc()
 
-        elif command == "mssql":
+        elif command == "connect mssql":
             #"database", "user", "password", "host", "port"
             database = options["database"]
             user = options["user"]
@@ -1099,35 +1108,26 @@ def do_sql(sql):
                 print("No MsSQL support. Please run 'pip install pyodbc'.\n")
                 traceback.print_exc()
 
-        elif command == "set" or command == "set folder":
-
-            if options.get("what") == "folder" or options.get("what") == "f": set_what = "folder"
-
-            if command == "set folder": set_what = "folder"
-
-            if set_what == "folder":
-                folder_exists_old = folder_exists
-                folder_name_old = folder_name
-                #folder_name = sql[len("\folder:"):]
-                folder_name = options.get("foldername")
-                #folder = os.path.isdir(folder_name)
-                if folder_name:
-                    folder_exists, full_foldername = check_foldername(folder_name, folder_name_old)
+        elif command == "folder":
+            folder_exists_old = folder_exists
+            folder_name_old = folder_name
+            #folder_name = sql[len("\folder:"):]
+            folder_name = options["foldername"]
+            #folder = os.path.isdir(folder_name)
+            folder_exists, full_foldername = check_foldername(folder_name, folder_name_old)
+            if folder_exists:
+                printInvGreen(f'''Using folder '{full_foldername}'.''')
+                folder_name = full_foldername
+            else:
+                if folder_exists_old:
+                    printInvRed(f'''Folder '{folder_name}' does not exist. Using current folder '{folder_name_old}'.''')
+                    folder_exists = folder_exists_old
+                    folder_name = folder_name_old
                 else:
-                    folder_exists = False
-                if folder_exists:
-                    printInvGreen(f'''Using folder '{full_foldername}'.''')
-                    folder_name = full_foldername
-                else:
-                    if folder_exists_old:
-                        printInvRed(f'''Folder '{folder_name}' does not exist. Using current folder '{folder_name_old}'.''')
-                        folder_exists = folder_exists_old
-                        folder_name = folder_name_old
-                    else:
-                        # folder_name_old is None if sql imported file has wrong \folder command
-                        printInvRed("Folder '{}' does not exist. Using working directory '{}'.".format(folder_name, os.getcwd()))
-                        folder_name = os.getcwd()
-                    OK = 2
+                    # folder_name_old is None if sql imported file has wrong \folder command
+                    printInvRed("Folder '{}' does not exist. Using working directory '{}'.".format(folder_name, os.getcwd()))
+                    folder_name = os.getcwd()
+                OK = 2
 
         elif command == "read":
             read_filename = options["filename"]
@@ -1500,223 +1500,217 @@ def do_sql(sql):
                     else:
                         print(note)
 
+        elif command == "data reset":
+            if data_old and columns_old:
+                data = data_old.copy()
+                columns = columns_old.copy()
+            show_data(data, columns, "")
 
-        elif command == "data" or command == "data profile":
-            if command == "data profile": options["what"] = "profile"
-            if options["what"] == "p": options["what"] = "profile"
-            if options["what"] == "s": options["what"] = "select"
-            if options["what"] == "rs": options["what"] = "reset"
+        elif command == "data select":
 
-            if options["what"] == "reset":
-                if data_old and columns_old:
-                    data = data_old.copy()
-                    columns = columns_old.copy()
-                show_data(data, columns, "")
+            if not data_old and not columns_old:
+                data_old = data.copy()
+                columns_old = columns.copy()
 
-            if options["what"] == "select":
+            fromm = options["from"]
+            too = options["to"]
+            stepp = options["step"]
+            listt = options["list"]
+            randd = options["random"]
+            colss = options["columns"]
+            title = options.get("title")
+            note = options.get("note")
+            title_color = options.get("title_color")
+            note_color = options.get("note_color")
+            #print("Title:", title)
+            #print(fromm, too, stepp)
 
-                if not data_old and not columns_old:
-                    data_old = data.copy()
-                    columns_old = columns.copy()
+            nrows = len(data)
+            ncols = len(columns)
 
-                fromm = options["from"]
-                too = options["to"]
-                stepp = options["step"]
-                listt = options["list"]
-                randd = options["random"]
-                colss = options["columns"]
-                title = options.get("title")
-                note = options.get("note")
-                title_color = options.get("title_color")
-                note_color = options.get("note_color")
-                #print("Title:", title)
-                #print(fromm, too, stepp)
+            rowsi, colsi = data_select()
+            #print(rows_show)
 
-                nrows = len(data)
-                ncols = len(columns)
+            columns_selected = [columns[ci-1] for ci in colsi]
+            data_selected = [data[ri-1] for ri in rowsi]
 
-                rowsi, colsi = data_select()
-                #print(rows_show)
+            title_text = ""
 
-                columns_selected = [columns[ci-1] for ci in colsi]
-                data_selected = [data[ri-1] for ri in rowsi]
-
-                title_text = ""
-
-                if title:
-                    title_text = title
-                    #printInvGreen(title)
-                elif len(listt) > 0 and randd == 0:
-                    if len(colss) > 0:
-                        title_text = f"There are {nrows} rows, {ncols} columns. Selected {len(rowsi)} listed cases {listi} with selected columns {columns_selected}."
-                        #printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} listed cases {listi} with selected columns {columns_show}.")
-                    else:
-                        title_text = f"There are {nrows} rows, {ncols} columns. Selected {len(rowsi)} listed cases {listi} with all columns."
-                        #printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} listed cases {listi} with all columns.")
-                elif len(listt) > 0 and randd > 0:
-                    if len(colss) > 0:
-                        title_text = f"There are {nrows} rows, {ncols} columns. Selected {len(rowsi)} random cases from {listi} with selected columns {columns_selected}."
-                        #printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} random cases from {listi} with selected columns {columns_show}.")
-                    else:
-                        title_text = f"There are {nrows} rows, {ncols} columns. Selected {len(rowsi)} random cases from {listi} with all columns."
-                        #printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} random cases from {listi} with all columns.")
-                elif randd > 0:
-                    if len(colss) > 0:
-                        title_text = f"There are {nrows} rows, {ncols} columns. Selected {len(rowsi)} random cases from {fromm} to {too} step {stepp} with selected columns {columns_selected}."
-                        #printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} random cases from {fromm} to {too} step {stepp} with selected columns {columns_show}.")
-                    else:
-                        title_text = f"There are {nrows} rows, {ncols} columns. Selected {len(rowsi)} random cases from {fromm} to {too} step {stepp} with all columns."
-                        #printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} random cases from {fromm} to {too} step {stepp} with all columns.")
+            if title:
+                title_text = title
+                #printInvGreen(title)
+            elif len(listt) > 0 and randd == 0:
+                if len(colss) > 0:
+                    title_text = f"There are {nrows} rows, {ncols} columns. Selected {len(rowsi)} listed cases {listi} with selected columns {columns_selected}."
+                    #printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} listed cases {listi} with selected columns {columns_show}.")
                 else:
-                    if len(colss) > 0:
-                        title_text = f"There are {nrows} rows, {ncols} columns. Selected {len(rowsi)} cases from {fromm} to {too} step {stepp} with selected columns {columns_selected}."
-                        #printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} cases from {fromm} to {too} step {stepp} with selected columns {columns_show}.")
-                    else:
-                        title_text = f"There are {nrows} rows, {ncols} columns. Selected {len(rowsi)} cases from {fromm} to {too} step {stepp} with all columns."
-                        #printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} cases from {fromm} to {too} step {stepp} with all columns.")
-
-                if title_color:
-                    cc = colorCode(title_color)
-                    printColor(title_text, cc)
+                    title_text = f"There are {nrows} rows, {ncols} columns. Selected {len(rowsi)} listed cases {listi} with all columns."
+                    #printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} listed cases {listi} with all columns.")
+            elif len(listt) > 0 and randd > 0:
+                if len(colss) > 0:
+                    title_text = f"There are {nrows} rows, {ncols} columns. Selected {len(rowsi)} random cases from {listi} with selected columns {columns_selected}."
+                    #printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} random cases from {listi} with selected columns {columns_show}.")
                 else:
-                    cc = INVGREEN
-                    printColor(title_text, cc)
+                    title_text = f"There are {nrows} rows, {ncols} columns. Selected {len(rowsi)} random cases from {listi} with all columns."
+                    #printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} random cases from {listi} with all columns.")
+            elif randd > 0:
+                if len(colss) > 0:
+                    title_text = f"There are {nrows} rows, {ncols} columns. Selected {len(rowsi)} random cases from {fromm} to {too} step {stepp} with selected columns {columns_selected}."
+                    #printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} random cases from {fromm} to {too} step {stepp} with selected columns {columns_show}.")
+                else:
+                    title_text = f"There are {nrows} rows, {ncols} columns. Selected {len(rowsi)} random cases from {fromm} to {too} step {stepp} with all columns."
+                    #printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} random cases from {fromm} to {too} step {stepp} with all columns.")
+            else:
+                if len(colss) > 0:
+                    title_text = f"There are {nrows} rows, {ncols} columns. Selected {len(rowsi)} cases from {fromm} to {too} step {stepp} with selected columns {columns_selected}."
+                    #printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} cases from {fromm} to {too} step {stepp} with selected columns {columns_show}.")
+                else:
+                    title_text = f"There are {nrows} rows, {ncols} columns. Selected {len(rowsi)} cases from {fromm} to {too} step {stepp} with all columns."
+                    #printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} cases from {fromm} to {too} step {stepp} with all columns.")
 
-                #rows = range(1, nrows + 1)
-                #print(rows)
-                #print_data(rowsi, colsi, data, columns, rows, rows_label)
-                show_data(data_selected, columns_selected)
+            if title_color:
+                cc = colorCode(title_color)
+                printColor(title_text, cc)
+            else:
+                cc = INVGREEN
+                printColor(title_text, cc)
 
-                if note:
-                    print()
-                    if note_color:
-                        cc = colorCode(note_color)
-                        printColor(note, cc)
-                    else:
-                        print(note)
+            #rows = range(1, nrows + 1)
+            #print(rows)
+            #print_data(rowsi, colsi, data, columns, rows, rows_label)
+            show_data(data_selected, columns_selected)
 
-                data = data_selected.copy()
-                columns = columns_selected.copy()
-
-            if options["what"] == "profile":
-                nrows = len(data)
-                ncols = len(columns)
-                colsi = range(1, ncols + 1)
-                rowsi = range(1, nrows + 1)
-                rows = range(1, nrows + 1)
-                colsp = data_profile(rowsi, colsi, data, columns, rows, rows_label, progress_indicator = True)
-                profile_data = []
-                profile_columns = columns
-                profile_rows = ["Type", "Valids", "Nulls", "Valid %", "Sum", "Min", "Max", "Mean", "Q1", "Median", "Q3", "Range", "IQR", "Variance", "STD", "Skew", "Unique", "FirstCat"]
-                profile_rows_label = '(Stat)'
-                stats = ["t", "v", "n", "v%", "sum", "min", "max", "mean", "q1", "q2", "q3", "ran", "iqr", "var", "std", "skw","uni", "fnq"]
-
-                maxc = 0
-                for i, stat in enumerate(stats):
-                    profile_data.append([])
-                    for ci in colsp:
-                        if ci > 0:  # rows_label
-                            if stat == "v%":
-                                if (colsp[ci]["v"] + colsp[ci]["n"]) > 0:
-                                    profile_data[i].append(round(100 * colsp[ci]["v"] / (colsp[ci]["v"] + colsp[ci]["n"]), 2))
-                                else:
-                                    profile_data[i].append("-")
-                            elif stat == "ran":
-                                if colsp[ci]["max"] and colsp[ci]["max"]:
-                                    profile_data[i].append(round(colsp[ci]["max"] - colsp[ci]["min"], 2))
-                                else:
-                                    profile_data[i].append("-")
-                            elif stat == "iqr":
-                                if colsp[ci]["q3"] and colsp[ci]["q1"]:
-                                    profile_data[i].append(round(colsp[ci]["q3"] - colsp[ci]["q1"], 2))
-                                else:
-                                    profile_data[i].append("-")
-                            elif stat == "var":
-                                if colsp[ci]["smd2"] and colsp[ci]["v"]:
-                                    profile_data[i].append(round(colsp[ci]["smd2"] / colsp[ci]["v"], 2))
-                                else:
-                                    profile_data[i].append("-")
-                            elif stat == "std":
-                                if colsp[ci]["smd2"] and colsp[ci]["v"]:
-                                    profile_data[i].append(round((colsp[ci]["smd2"] / colsp[ci]["v"])**0.5, 2))
-                                else:
-                                    profile_data[i].append("-")
-                            elif stat == "skw":
-                                if colsp[ci]["smd3"] and colsp[ci]["smd2"] and colsp[ci]["v"]:
-                                    profile_data[i].append(round(colsp[ci]["smd3"] / (colsp[ci]["v"] * (colsp[ci]["smd2"] / colsp[ci]["v"])**1.5), 2))
-                                else:
-                                    profile_data[i].append("-")
-                            elif stat == "uni":
-                                if len(colsp[ci]["c"]) < profile_max_categorical:
-                                    profile_data[i].append(len(colsp[ci]["c"]))
-                                    if len(colsp[ci]["c"]) > maxc: maxc = len(colsp[ci]["c"])
-                                else:
-                                    profile_data[i].append("-")
-                            elif stat == "fnq":
-                                if colsp[ci]["fnq"] is None:
-                                    profile_data[i].append("-")
-                                else:
-                                    profile_data[i].append(colsp[ci]["fnq"])
-                            else:
-                                for c in colsp[ci]:
-                                    #print(c, stat)
-                                    if c == stat:
-                                        if isinstance(colsp[ci][c], float):
-                                            profile_data[i].append(round(colsp[ci][c],2))
-                                        elif isinstance(colsp[ci][c], str):
-                                            profile_data[i].append(colsp[ci][c][:5])    # Quant, Categ
-                                        elif colsp[ci][c] is None:
-                                            profile_data[i].append("-")
-                                        else:
-                                            profile_data[i].append(colsp[ci][c])
-
-                if maxc > profile_show_categorical:
-                    maxc = profile_show_categorical
-
-                minc = len(profile_data)
-
-                for i in range(maxc):
-                    profile_rows.append("Cat " + str(i + 1) + "_1")
-                    profile_data.append([])
-                    for ci in colsp:
-                        if ci > 0:  # rows_label
-                            if i < len(colsp[ci]["c"]):
-                                #profile_data[i + minc].append(str(list(colsp[ci]["c"].keys())[i]) + "(" + str(colsp[ci]["c"][list(colsp[ci]["c"].keys())[i]]) + ")")
-                                profile_data[i*3 + minc].append(str(list(colsp[ci]["c"].keys())[i]))
-                            else:
-                                profile_data[i*3 + minc].append("-")
-                    profile_rows.append("Cat " + str(i + 1) + "_2")
-                    profile_data.append([])
-                    for ci in colsp:
-                        if ci > 0:  # rows_label
-                            if i < len(colsp[ci]["c"]):
-                                #profile_data[i + minc].append(str(list(colsp[ci]["c"].keys())[i]) + "(" + str(colsp[ci]["c"][list(colsp[ci]["c"].keys())[i]]) + ")")
-                                profile_data[i*3 + minc + 1].append(str(colsp[ci]["c"][list(colsp[ci]["c"].keys())[i]]))
-                            else:
-                                profile_data[i*3 + minc + 1].append("-")
-                    profile_rows.append("Cat " + str(i + 1) + "_3")
-                    profile_data.append([])
-                    for ci in colsp:
-                        if ci > 0: # rows_label
-                            if i < len(colsp[ci]["c"]):
-                                #profile_data[i + minc].append(str(list(colsp[ci]["c"].keys())[i]) + "(" + str(colsp[ci]["c"][list(colsp[ci]["c"].keys())[i]]) + ")")
-                                profile_data[i*3 + minc + 2].append(str(round(100*colsp[ci]["c"][list(colsp[ci]["c"].keys())[i]]/colsp[ci]["v"],2)) + "%")
-                            else:
-                                profile_data[i*3 + minc + 2].append("-")
-
-
-                #print(profile_data)
-
-                nrows = len(profile_data)
-                ncols = len(profile_columns)
-
-                colsi = range(1, ncols + 1)
-                rowsi = range(1, nrows + 1)
-
+            if note:
                 print()
-                print()
-                #colsp = data_profile(rowsi, colsi, profile_data, profile_columns, profile_rows, profile_rows_label)
-                print_data(rowsi, colsi, profile_data, profile_columns, profile_rows, profile_rows_label)
+                if note_color:
+                    cc = colorCode(note_color)
+                    printColor(note, cc)
+                else:
+                    print(note)
+
+            data = data_selected.copy()
+            columns = columns_selected.copy()
+
+        elif command == "data profile":
+
+            nrows = len(data)
+            ncols = len(columns)
+            colsi = range(1, ncols + 1)
+            rowsi = range(1, nrows + 1)
+            rows = range(1, nrows + 1)
+            colsp = data_profile(rowsi, colsi, data, columns, rows, rows_label, progress_indicator = True)
+            profile_data = []
+            profile_columns = columns
+            profile_rows = ["Type", "Valids", "Nulls", "Valid %", "Sum", "Min", "Max", "Mean", "Q1", "Median", "Q3", "Range", "IQR", "Variance", "STD", "Skew", "Unique", "FirstCat"]
+            profile_rows_label = '(Stat)'
+            stats = ["t", "v", "n", "v%", "sum", "min", "max", "mean", "q1", "q2", "q3", "ran", "iqr", "var", "std", "skw","uni", "fnq"]
+
+            maxc = 0
+            for i, stat in enumerate(stats):
+                profile_data.append([])
+                for ci in colsp:
+                    if ci > 0:  # rows_label
+                        if stat == "v%":
+                            if (colsp[ci]["v"] + colsp[ci]["n"]) > 0:
+                                profile_data[i].append(round(100 * colsp[ci]["v"] / (colsp[ci]["v"] + colsp[ci]["n"]), 2))
+                            else:
+                                profile_data[i].append("-")
+                        elif stat == "ran":
+                            if colsp[ci]["max"] and colsp[ci]["max"]:
+                                profile_data[i].append(round(colsp[ci]["max"] - colsp[ci]["min"], 2))
+                            else:
+                                profile_data[i].append("-")
+                        elif stat == "iqr":
+                            if colsp[ci]["q3"] and colsp[ci]["q1"]:
+                                profile_data[i].append(round(colsp[ci]["q3"] - colsp[ci]["q1"], 2))
+                            else:
+                                profile_data[i].append("-")
+                        elif stat == "var":
+                            if colsp[ci]["smd2"] and colsp[ci]["v"]:
+                                profile_data[i].append(round(colsp[ci]["smd2"] / colsp[ci]["v"], 2))
+                            else:
+                                profile_data[i].append("-")
+                        elif stat == "std":
+                            if colsp[ci]["smd2"] and colsp[ci]["v"]:
+                                profile_data[i].append(round((colsp[ci]["smd2"] / colsp[ci]["v"])**0.5, 2))
+                            else:
+                                profile_data[i].append("-")
+                        elif stat == "skw":
+                            if colsp[ci]["smd3"] and colsp[ci]["smd2"] and colsp[ci]["v"]:
+                                profile_data[i].append(round(colsp[ci]["smd3"] / (colsp[ci]["v"] * (colsp[ci]["smd2"] / colsp[ci]["v"])**1.5), 2))
+                            else:
+                                profile_data[i].append("-")
+                        elif stat == "uni":
+                            if len(colsp[ci]["c"]) < profile_max_categorical:
+                                profile_data[i].append(len(colsp[ci]["c"]))
+                                if len(colsp[ci]["c"]) > maxc: maxc = len(colsp[ci]["c"])
+                            else:
+                                profile_data[i].append("-")
+                        elif stat == "fnq":
+                            if colsp[ci]["fnq"] is None:
+                                profile_data[i].append("-")
+                            else:
+                                profile_data[i].append(colsp[ci]["fnq"])
+                        else:
+                            for c in colsp[ci]:
+                                #print(c, stat)
+                                if c == stat:
+                                    if isinstance(colsp[ci][c], float):
+                                        profile_data[i].append(round(colsp[ci][c],2))
+                                    elif isinstance(colsp[ci][c], str):
+                                        profile_data[i].append(colsp[ci][c][:5])    # Quant, Categ
+                                    elif colsp[ci][c] is None:
+                                        profile_data[i].append("-")
+                                    else:
+                                        profile_data[i].append(colsp[ci][c])
+
+            if maxc > profile_show_categorical:
+                maxc = profile_show_categorical
+
+            minc = len(profile_data)
+
+            for i in range(maxc):
+                profile_rows.append("Cat " + str(i + 1) + "_1")
+                profile_data.append([])
+                for ci in colsp:
+                    if ci > 0:  # rows_label
+                        if i < len(colsp[ci]["c"]):
+                            #profile_data[i + minc].append(str(list(colsp[ci]["c"].keys())[i]) + "(" + str(colsp[ci]["c"][list(colsp[ci]["c"].keys())[i]]) + ")")
+                            profile_data[i*3 + minc].append(str(list(colsp[ci]["c"].keys())[i]))
+                        else:
+                            profile_data[i*3 + minc].append("-")
+                profile_rows.append("Cat " + str(i + 1) + "_2")
+                profile_data.append([])
+                for ci in colsp:
+                    if ci > 0:  # rows_label
+                        if i < len(colsp[ci]["c"]):
+                            #profile_data[i + minc].append(str(list(colsp[ci]["c"].keys())[i]) + "(" + str(colsp[ci]["c"][list(colsp[ci]["c"].keys())[i]]) + ")")
+                            profile_data[i*3 + minc + 1].append(str(colsp[ci]["c"][list(colsp[ci]["c"].keys())[i]]))
+                        else:
+                            profile_data[i*3 + minc + 1].append("-")
+                profile_rows.append("Cat " + str(i + 1) + "_3")
+                profile_data.append([])
+                for ci in colsp:
+                    if ci > 0: # rows_label
+                        if i < len(colsp[ci]["c"]):
+                            #profile_data[i + minc].append(str(list(colsp[ci]["c"].keys())[i]) + "(" + str(colsp[ci]["c"][list(colsp[ci]["c"].keys())[i]]) + ")")
+                            profile_data[i*3 + minc + 2].append(str(round(100*colsp[ci]["c"][list(colsp[ci]["c"].keys())[i]]/colsp[ci]["v"],2)) + "%")
+                        else:
+                            profile_data[i*3 + minc + 2].append("-")
+
+
+            #print(profile_data)
+
+            nrows = len(profile_data)
+            ncols = len(profile_columns)
+
+            colsi = range(1, ncols + 1)
+            rowsi = range(1, nrows + 1)
+
+            print()
+            print()
+            #colsp = data_profile(rowsi, colsi, profile_data, profile_columns, profile_rows, profile_rows_label)
+            print_data(rowsi, colsi, profile_data, profile_columns, profile_rows, profile_rows_label)
 
 
         elif sql.startswith("\pause:"):
