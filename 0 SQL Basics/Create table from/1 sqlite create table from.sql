@@ -1,5 +1,5 @@
 \f "0 SQL Basics\Create table from";
-\s "1 sqlite create table from.db";
+\cs "1 sqlite create table from.db";
 drop table if exists table1;
 create table table1 (id INTEGER PRIMARY KEY AUTOINCREMENT, value REAL, code INTEGER, label TEXT);
 select * from table1;
@@ -18,5 +18,6 @@ insert into table1 values (Null, 10.10, 10, "Ten");
 
 create table aaa as select * from table1;
 select * from aaa;
+\pda tt = "Create table aaa as select * from table1;" tc = 51010;
 drop table aaa;
 select * from sqlite_master where type = "table";

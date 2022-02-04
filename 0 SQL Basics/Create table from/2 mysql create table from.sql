@@ -1,5 +1,6 @@
 \f "0 SQL Basics\Create table from";
-\my test;
+\cmysql test;
+
 drop table if exists table1;
 create table table1 (id INTEGER PRIMARY KEY AUTO_INCREMENT, value REAL, code INTEGER, label TEXT);
 select * from table1;
@@ -18,6 +19,7 @@ insert into table1 values (Null, 10.10,10,"Ten");
 
 create table aaa as select * from table1;
 select * from aaa;
+\pda tt = "Create table aaa as select * from table1;" tc = 51010;
 drop table aaa;
 
 SELECT database();

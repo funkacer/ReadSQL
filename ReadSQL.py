@@ -220,7 +220,7 @@ command_options["folder"]["type"] = ["str"]
 command_options["folder"]["default"] = [None]
 command_options["folder"]["help1"] = "Help for command 'folder'"
 command_options["folder"]["help2"] = ["Blabla1"]
-command_options["folder"]["alternative"] = ["f"]
+command_options["folder"]["alternative"] = ["folder", "f"]
 command_options["folder"]["altoption"] = [["f","fn"]]
 
 command_options["set"] = {}
@@ -240,7 +240,7 @@ command_options["connect sqlite3"]["type"] = ["str"]
 command_options["connect sqlite3"]["default"] = [":memory:"]
 command_options["connect sqlite3"]["help1"] = "Help for command 'connect'"
 command_options["connect sqlite3"]["help2"] = ["Blabla1"]
-command_options["connect sqlite3"]["alternative"] = ["c sqlite3", "c sqlite", "c sql3", "c sql", "c s",  "csqlite3", "csqlite", "csql3", "csql", "cs"]
+command_options["connect sqlite3"]["alternative"] = ["connect sqlite3", "connect sqlite", "connect sql3", "connect sql", "connect s", "c sqlite3", "c sqlite", "c sql3", "c sql", "c s",  "csqlite3", "csqlite", "csql3", "csql", "cs"]
 command_options["connect sqlite3"]["altoption"] = [["f"]]
 
 command_options["connect mysql"] = {}
@@ -310,7 +310,7 @@ command_options["insert"]["type"] = ["str"]
 command_options["insert"]["default"] = [None]
 command_options["insert"]["help1"] = "Help for command 'folder'"
 command_options["insert"]["help2"] = ["Blabla1"]
-command_options["insert"]["alternative"] = ["i"]
+command_options["insert"]["alternative"] = ["insert","i"]
 command_options["insert"]["altoption"] = [["t"]]
 
 # print data via command print
@@ -325,24 +325,24 @@ command_options["print"]["alternative"] = ["print", "p"]
 command_options["print"]["altoption"] = [["f"], ["t"], ["s"], ["r"], ["l"], ["c"]]
 
 command_options["print data easy"] = {}
-command_options["print data easy"]["name"] = ["from", "to", "step", "random", "list", "columns"]
-command_options["print data easy"]["required"] = [False, False, False, False, False, False]
-command_options["print data easy"]["type"] = ["int", "int", "int", "int", "intlist", "strlist"]
-command_options["print data easy"]["default"] = [0, 0, 1, 0, "[]", "[]"]
+command_options["print data easy"]["name"] = ["from", "to", "step", "random", "list", "columns", "title", "note", "title_color", "note_color"]
+command_options["print data easy"]["required"] = [False, False, False, False, False, False, False, False, False, False]
+command_options["print data easy"]["type"] = ["int", "int", "int", "int", "intlist", "strlist", "str", "str", "int", "int"]
+command_options["print data easy"]["default"] = [0, 0, 1, 0, "[]", "[]", None, None, None, None]
 command_options["print data easy"]["help1"] = "Help for command 'folder'"
-command_options["print data easy"]["help2"] = ["Bla1","Bla2","Bla3","Bla4","Bla5","Bla6"]
+command_options["print data easy"]["help2"] = ["Bla1","Bla2","Bla3","Bla4","Bla5","Bla6","Bla7","Bla8","Bla9","Bla10"]
 command_options["print data easy"]["alternative"] = ["print data", "pd",  "p"]
-command_options["print data easy"]["altoption"] = [["f"], ["t"], ["s"], ["r"], ["l"], ["c"]]
+command_options["print data easy"]["altoption"] = [["f"], ["t"], ["s"], ["r"], ["l"], ["c"], ["tt"], ["nt"], ["tc"], ["nc"]]
 
 command_options["print data"] = {}
-command_options["print data"]["name"] = ["what", "from", "to", "step", "random", "list", "columns"]
-command_options["print data"]["required"] = [True, False, False, False, False, False, False]
-command_options["print data"]["type"] = [["data", "d"], "int", "int", "int", "int", "intlist", "strlist"]
-command_options["print data"]["default"] = ["data", 0, 0, 1, 0, "[]", "[]"]
+command_options["print data"]["name"] = ["what", "from", "to", "step", "random", "list", "columns", "title", "note", "title_color", "note_color"]
+command_options["print data"]["required"] = [False, False, False, False, False, False, False, False, False, False, False]
+command_options["print data"]["type"] = [["data","d"], "int", "int", "int", "int", "intlist", "strlist", "str", "str", "int", "int"]
+command_options["print data"]["default"] = ["data", 0, 0, 1, 0, "[]", "[]", None, None, None, None]
 command_options["print data"]["help1"] = "Help for command 'folder'"
-command_options["print data"]["help2"] = ["Bla1","Bla2","Bla3","Bla4","Bla5","Bla6","Bla7"]
+command_options["print data"]["help2"] = ["Bla1","Bla2","Bla3","Bla4","Bla5","Bla6","Bla7","Bla8","Bla9","Bla10","Bla11"]
 command_options["print data"]["alternative"] = ["print", "p"]
-command_options["print data"]["altoption"] = [["w"], ["f"], ["t"], ["s"], ["r"], ["l"], ["c"]]
+command_options["print data"]["altoption"] = [["w"], ["f"], ["t"], ["s"], ["r"], ["l"], ["c"], ["tt"], ["nt"], ["tc"], ["nc"]]
 
 command_options["print columns"] = {}
 command_options["print columns"]["name"] = ["what"]
@@ -637,9 +637,11 @@ def show_data(data, columns, title = None):
         print_data(rowsi, colsi, data, columns, rows, rows_label)
     else:
         if title == "": printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing first / last {show_cases} cases with all columns.")
-        data_show = data[:show_cases]
+        data_show = list(data[:show_cases])
+        #print("Data show",data_show)
         data_show += [["" for c in columns]]
         data_show += data[-show_cases:]
+        #print("Data show",data_show)
         rows = list(range(1,show_cases+1))
         rows += ["..."]
         rows += list(range(nrows-show_cases+1, nrows +1))
@@ -1854,6 +1856,11 @@ def do_sql(sql):
             columns = columns_new
             data_old = None
             columns_old = None
+            # mysql returns data as tuples, not lists as sqlite3
+            # this causes problems in show_data if nrows > show_cases*2
+            # (cannoct add anzthing to tuple, probably)
+            #if len(data) > 0: print("Data class", data[0].__class__)
+            #print("Columns class", columns.__class__)
             show_data(data, columns, "")
         elif not error:
             printInvGreen("! There are no data returned from this sql query !")
