@@ -19,7 +19,7 @@ insert into table1 (value, code, label) values (10.10,10,'Ten');
 
 select * into aaa from table1;
 select * from aaa;
-\pda tt = "Create table aaa as select * from table1;" tc = 51010;
+\pda tt = "select * into aaa from table1;" tc = 51010;
 select id, FORMAT(value, '##.##') as value, code, label from aaa;
 select id, Cast(CONVERT(DECIMAL(10,1),value) as nvarchar) AS value, code, label from aaa;
 drop table aaa;
