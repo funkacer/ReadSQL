@@ -11,3 +11,5 @@ create table t1 (id INTEGER PRIMARY KEY AUTOINCREMENT, Region TEXT, "Sale Leads"
 \insert t1;
 
 select * from t1;
+
+\dp;

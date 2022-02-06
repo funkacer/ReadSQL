@@ -310,7 +310,7 @@ command_options["insert"]["type"] = ["str"]
 command_options["insert"]["default"] = [None]
 command_options["insert"]["help1"] = "Help for command 'folder'"
 command_options["insert"]["help2"] = ["Blabla1"]
-command_options["insert"]["alternative"] = ["insert","i"]
+command_options["insert"]["alternative"] = ["insert", "i"]
 command_options["insert"]["altoption"] = [["t"]]
 
 # print data via command print
@@ -435,8 +435,6 @@ command_options["data reset"]["help1"] = "Help for command 'folder'"
 command_options["data reset"]["help2"] = ["Bla1"]
 command_options["data reset"]["alternative"] = ["data", "d"]
 command_options["data reset"]["altoption"] = [["w"]]
-
-
 
 
 def colorCode(color):
@@ -1612,7 +1610,7 @@ def do_sql(sql):
             #print(rows_show)
 
             columns_selected = [columns[ci-1] for ci in colsi]
-            data_selected = [data[ri-1] for ri in rowsi]
+            data_selected = [[data[ri-1][ci-1] for ci in colsi] for ri in rowsi]
 
             title_text = ""
 
@@ -1671,6 +1669,8 @@ def do_sql(sql):
 
             data = data_selected.copy()
             columns = columns_selected.copy()
+
+            #print(columns, data)
 
         elif command == "data profile easy" or command == "data profile":
 
