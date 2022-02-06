@@ -786,7 +786,7 @@ def parseText(myText, delimiter, text_qualifiers = ['"', "'", "["], do_strip = T
     else:
         if maxs < len(myText): lst_new.append(myText[maxs+1:])
 
-    #print(lst_new)
+    #print("lst_new:", lst_new)
 
     return lst_new
 
@@ -860,18 +860,21 @@ def parseCommand(command_line):
 
         #print(command)
         for i, cl in enumerate(cll_final):
-            cl = cl.strip()
-            if "=" in cl:
-                cll = cl.split("=")
+            #cl = cl.strip()
+            #if "=" in cl:
+                #cll = cl.split("=")
+            cll = parseText(cl, "=", do_strip = False)
+            #print("cll:", cll)
+            if len(cll) > 1:
                 does_exist = 0
                 for j, o in enumerate(command_options[command]["name"]):
-                    if cll[0].strip() == o:
-                        options[o] = cll[1].strip()
+                    if cll[0].strip().lower() == o:
+                        options[o] = cll[1]
                         does_exist = 1
                     else:
                         for a in command_options[command]["altoption"][j]:
                             if cll[0].strip().lower() == a:
-                                options[o] = cll[1].strip()
+                                options[o] = cll[1]
                                 does_exist = 1
                             if does_exist: break
                             #print(a)
