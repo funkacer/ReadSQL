@@ -624,7 +624,7 @@ def print_data(rowsi, colsi, data, columns, rows, rows_label):
         screen += 1
 
 
-def show_data(data, columns, title = None):
+def show_data(data, columns, show_title = True):
     global variables
     nrows = len(data)
     variables["$all"]["print data"]["value"] = nrows
@@ -632,11 +632,11 @@ def show_data(data, columns, title = None):
     rows = range(1, nrows + 1)
     colsi = range(1, ncols + 1)
     if nrows <= show_cases*2:
-        if title == "": printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing all cases with all columns.")
+        if show_title: printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing all cases with all columns.")
         rowsi = range(1, nrows + 1)
         print_data(rowsi, colsi, data, columns, rows, rows_label)
     else:
-        if title == "": printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing first / last {show_cases} cases with all columns.")
+        if show_title: printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing first / last {show_cases} cases with all columns.")
         data_show = list(data[:show_cases])
         #print("Data show",data_show)
         data_show += [["" for c in columns]]
@@ -1336,7 +1336,7 @@ def do_sql(sql):
                         data_old = None
                         columns_old = None
                         print()
-                        show_data(data, columns, "")
+                        show_data(data, columns)
                     else:
                         printInvRed("! There are no data returned from this file !")
                         OK = 2
@@ -1528,7 +1528,7 @@ def do_sql(sql):
 
                 title_text = ""
 
-                if title:
+                if title is not None:   # include empty string to show no title
                     title_text = title
                     #printInvGreen(title)
                 elif len(listt) > 0 and randd == 0:
@@ -1560,12 +1560,13 @@ def do_sql(sql):
                         title_text = f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} cases from {fromm} to {too} step {stepp} with all columns."
                         #printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} cases from {fromm} to {too} step {stepp} with all columns.")
 
-                if title_color:
-                    cc = colorCode(title_color)
-                    printColor(title_text, cc)
-                else:
-                    cc = INVGREEN
-                    printColor(title_text, cc)
+                if title_text: # excluse empty string to show title
+                    if title_color:
+                        cc = colorCode(title_color)
+                        printColor(title_text, cc)
+                    else:
+                        cc = INVGREEN
+                        printColor(title_text, cc)
 
                 rows = range(1, nrows + 1)
                 #print(rows)
@@ -1583,7 +1584,7 @@ def do_sql(sql):
             if data_old and columns_old:
                 data = data_old.copy()
                 columns = columns_old.copy()
-            show_data(data, columns, "")
+            show_data(data, columns)
 
         elif command == "data select easy" or command == "data select":
 
@@ -1615,7 +1616,7 @@ def do_sql(sql):
 
             title_text = ""
 
-            if title:
+            if title is not None:   # include empty string to show no title
                 title_text = title
                 #printInvGreen(title)
             elif len(listt) > 0 and randd == 0:
@@ -1647,17 +1648,18 @@ def do_sql(sql):
                     title_text = f"There are {nrows} rows, {ncols} columns. Selected {len(rowsi)} cases from {fromm} to {too} step {stepp} with all columns."
                     #printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} cases from {fromm} to {too} step {stepp} with all columns.")
 
-            if title_color:
-                cc = colorCode(title_color)
-                printColor(title_text, cc)
-            else:
-                cc = INVGREEN
-                printColor(title_text, cc)
+            if title_text: # excluse empty string to show title
+                if title_color:
+                    cc = colorCode(title_color)
+                    printColor(title_text, cc)
+                else:
+                    cc = INVGREEN
+                    printColor(title_text, cc)
 
             #rows = range(1, nrows + 1)
             #print(rows)
             #print_data(rowsi, colsi, data, columns, rows, rows_label)
-            show_data(data_selected, columns_selected)
+            show_data(data_selected, columns_selected, False)
 
             if note:
                 print()
@@ -1864,7 +1866,7 @@ def do_sql(sql):
             # (cannoct add anzthing to tuple, probably)
             #if len(data) > 0: print("Data class", data[0].__class__)
             #print("Columns class", columns.__class__)
-            show_data(data, columns, "")
+            show_data(data, columns)
         elif not error:
             printInvGreen("! There are no data returned from this sql query !")
         else:
