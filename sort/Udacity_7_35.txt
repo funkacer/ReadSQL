@@ -1,0 +1,11 @@
+Region	Sale Leads		Average	Median	Skew
+Region 1	100		437,9	366	1,996996141
+Region 2	152				
+Region 3	233				
+Region 4	278				
+Region 5	345				
+Region 6	387				
+Region 7	422				
+Region 8	484				
+Region 9	543				
+Region 10	1435				
