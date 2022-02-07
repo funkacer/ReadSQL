@@ -386,6 +386,16 @@ command_options["break"]["help2"] = ["Bla1","Bla2","Bla3","Bla4","Bla5","Bla6"]
 command_options["break"]["alternative"] = ["b"]
 command_options["break"]["altoption"] = [["w"],["f"], ["t"], ["s"], ["l"], ["c"]]
 
+command_options["data fill easy"] = {}
+command_options["data fill easy"]["name"] = ["format", "title", "note", "title_color", "note_color"]
+command_options["data fill easy"]["required"] = [True, False, False, False, False]
+command_options["data fill easy"]["type"] = ["dictlist", "str", "str", "int", "int"]
+command_options["data fill easy"]["default"] = [None, None, None, None, None]
+command_options["data fill easy"]["help1"] = "Help for command 'data fill easy'"
+command_options["data fill easy"]["help2"] = ["Bla1","Bla2","Bla3","Bla4","Bla5"]
+command_options["data fill easy"]["alternative"] = ["data fill", "data f", "d f ", "df"]
+command_options["data fill easy"]["altoption"] = [["f"], ["tt"], ["nt"], ["tc"], ["nc"]]
+
 command_options["data select easy"] = {}
 command_options["data select easy"]["name"] = ["from", "to", "step", "random", "list", "columns", "title", "note", "title_color", "note_color"]
 command_options["data select easy"]["required"] = [False, False, False, False, False, False, False, False, False, False]
@@ -393,7 +403,7 @@ command_options["data select easy"]["type"] = ["int", "int", "int", "int", "intl
 command_options["data select easy"]["default"] = [0, 0, 1, 0, "[]", "[]", None, None, None, None]
 command_options["data select easy"]["help1"] = "Help for command 'data select easy'"
 command_options["data select easy"]["help2"] = ["Bla1","Bla2","Bla3","Bla4","Bla5","Bla6","Bla7","Bla8","Bla9","Bla10"]
-command_options["data select easy"]["alternative"] = ["data s", "d s", "ds"]
+command_options["data select easy"]["alternative"] = ["data select", "data s", "d s", "ds"]
 command_options["data select easy"]["altoption"] = [["f"], ["t"], ["s"], ["r"], ["l"], ["c"], ["tt"], ["nt"], ["tc"], ["nc"]]
 
 command_options["data select"] = {}
@@ -1002,6 +1012,35 @@ def parseCommand(command_line):
                 elif t == "bool":
                     if options[n] == True or options[n] == "True" or options[n] == "1": options[n] = True
                     if options[n] == False or options[n] == "False" or options[n] == "0": options[n] = False
+                elif t == "dictlist":
+                    Assert(options[n][0] == "[" and options[n][-1] == "]", "Lists must be enclosed with []. Probably not doing what expected!")
+                    options_list_line = options[n][1:-1]
+                    options_list_line = ":".join(parseText(options_list_line, ":"))
+                    options_list_line = ",".join(parseText(options_list_line, " "))
+                    lst_old = parseText(options_list_line, ",")
+                    lst_new = {}
+                    print(lst_old)
+                    for l_old in lst_old:
+                        lst = parseText(l_old, ":", do_strip = False)
+                        if len(lst) > 1:
+                            lst[0] = lst[0].strip()
+                            lst[1] = lst[1].strip()
+                            if lst[0][0] == '"' and lst[0][-1] == '"':
+                                l = lst[0].strip('"')
+                            elif lst[0][0] == "'" and lst[0][-1] == "'":
+                                l = lst[0].strip("'")
+                            else:
+                                l = lst[0]
+                            if lst[1][0] == '"' and lst[1][-1] == '"':
+                                r = lst[1].strip('"')
+                            elif lst[1][0] == "'" and lst[1][-1] == "'":
+                                r = lst[1].strip("'")
+                            else:
+                                r = lst[1]
+                            lst_new[l] = r
+                        else:
+                            print("Chyba!!!")
+                    options[n] = lst_new
 
         print("Command:", command)
         print("Options:", options)
@@ -1577,6 +1616,64 @@ def do_sql(sql):
                         printColor(note, cc)
                     else:
                         print(note)
+
+
+            elif command == "data fill easy" or command == "data fill":
+
+                if not data_old and not columns_old:
+                    data_old = data.copy()
+                    columns_old = columns.copy()
+
+                fill_format = options["format"]
+                title = options.get("title")
+                note = options.get("note")
+                title_color = options.get("title_color")
+                note_color = options.get("note_color")
+                #print("Title:", title)
+                #print(fromm, too, stepp)
+
+                nrows = len(data)
+                ncols = len(columns)
+
+                rowsi, colsi = data_select()
+                #print(rows_show)
+
+                columns_selected = [columns[ci-1] for ci in colsi]
+                data_selected = [[data[ri-1][ci-1] for ci in colsi] for ri in rowsi]
+
+                title_text = ""
+
+                if title is not None:   # include empty string to show no title
+                    title_text = title
+                    #printInvGreen(title)
+                else:
+                    title_text = "Format data"
+
+                if title_text: # excluse empty string to show title
+                    if title_color:
+                        cc = colorCode(title_color)
+                        printColor(title_text, cc)
+                    else:
+                        cc = INVGREEN
+                        printColor(title_text, cc)
+
+                #rows = range(1, nrows + 1)
+                #print(rows)
+                #print_data(rowsi, colsi, data, columns, rows, rows_label)
+                show_data(data_selected, columns_selected, False)
+
+                if note:
+                    print()
+                    if note_color:
+                        cc = colorCode(note_color)
+                        printColor(note, cc)
+                    else:
+                        print(note)
+
+                data = data_selected.copy()
+                columns = columns_selected.copy()
+
+                #print(columns, data)
 
         elif command == "data reset":
             if data_old and columns_old:

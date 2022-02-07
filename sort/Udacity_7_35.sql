@@ -1,4 +1,4 @@
-\f "2 Udacity BA";
+\f "sort";
 \cs Udacity_7_35.db;
 
 drop table if exists t1;
