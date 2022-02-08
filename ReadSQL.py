@@ -658,24 +658,82 @@ def show_data(data, columns, show_title = True):
         print_data(rowsi, colsi, data_show, columns, rows, rows_label)
 
 
+def find_columns(colss):
+    colsi = []
+    for cols in colss:
+        is_column = 0
+        for i, col in enumerate(columns):
+            if col == cols:
+                colsi.append(i + 1)
+                is_column += 1
+        if is_column < 1:
+            printRed(f"Column '{cols}' not in columns!")
+            print()
+        elif is_column > 1:
+            printRed(f"Multiple columns '{cols}' are in columns!")
+            print()
+    return colsi
+
+
+def data_fill_format(fill_format = {}):
+    global data
+
+    if len(fill_format) > 0:
+        for colss in fill_format:
+            colsi = find_columns([colss])
+            if len(colsi) > 0:
+                #print(colss, colsi)
+                for ri in range(1, len(data) + 1):
+                    for ci in colsi:
+                        # do format of columns ci - 1, fill_format(colss)
+                        #print(colss, columns[ci-1], fill_format[colss])
+                        if fill_format[colss] == "int" or fill_format[colss] == "int." \
+                        or fill_format[colss] == "int," \
+                        or fill_format[colss] == "float" or fill_format[colss] == "float." \
+                        or fill_format[colss] == "float,":
+                            rsign = 1
+                            rstring = ""
+                            dstring = ""
+                            if fill_format[colss] == "int.": dstring = "."
+                            if fill_format[colss] == "int,": dstring = ","
+                            if fill_format[colss] == "float" or fill_format[colss] == "float.": dstring = "."
+                            if fill_format[colss] == "float,": dstring = ","
+                            value = str(data[ri-1][ci-1])
+                            for vi in range(len(value)):
+                                v = value[vi]
+                                if v in ["-","0","1","2","3","4","5","6","7","8","9",dstring]:
+                                    if v == "-" and vi < len(value) and vi > 0:
+                                        if value[vi+1] in ["0","1","2","3","4","5","6","7","8","9",dstring] and value[vi-1] not in ["0","1","2","3","4","5","6","7","8","9"]:
+                                            rsign = -1
+                                    elif v == "-" and vi < len(value):
+                                        if value[vi+1] in ["0","1","2","3","4","5","6","7","8","9"]:
+                                            rsign = -1
+                                    elif v == dstring and vi < len(value):
+                                        if value[vi+1] in ["0","1","2","3","4","5","6","7","8","9"]:
+                                            rstring += "."
+                                    else:
+                                        rstring += v
+                            try:
+                                #print(rstring)
+                                if fill_format[colss][:1] == "i":
+                                    value = int(float(rstring))*rsign
+                                elif fill_format[colss][:1] == "f":
+                                    value = float(rstring)*rsign
+                                data[ri-1][ci-1] = value
+                            except:
+                                #print("Error")
+                                data[ri-1][ci-1] = None
+
+
+
+
 def data_select():
     global fromm, too, stepp, randd, listt, colss, listi
     nrows = len(data)
     ncols = len(columns)
     colsi = range(1, ncols + 1)
     if len(colss) > 0:
-        colsi = []
-        for cols in colss:
-            is_column = 0
-            for i, col in enumerate(columns):
-                if col == cols: colsi.append(i + 1)
-                is_column += 1
-            if is_column < 1:
-                printRed(f"Column '{cols}' not in columns!")
-                print()
-            elif is_column > 1:
-                printRed(f"Multiple columns '{cols}' are in columns!")
-                print()
+        colsi = find_columns(colss)
     #columns_show = [columns[i] for i in colsi] # only existing
     rowsi = []
     listi = []
@@ -1019,9 +1077,10 @@ def parseCommand(command_line):
                     options_list_line = ",".join(parseText(options_list_line, " "))
                     lst_old = parseText(options_list_line, ",")
                     lst_new = {}
-                    print(lst_old)
+                    print("lst_old", lst_old)
                     for l_old in lst_old:
                         lst = parseText(l_old, ":", do_strip = False)
+                        print("lst:", lst)
                         if len(lst) > 1:
                             lst[0] = lst[0].strip()
                             lst[1] = lst[1].strip()
@@ -1031,7 +1090,9 @@ def parseCommand(command_line):
                                 l = lst[0].strip("'")
                             else:
                                 l = lst[0]
-                            if lst[1][0] == '"' and lst[1][-1] == '"':
+                            if len(lst[1]) == 0:
+                                r = ""
+                            elif lst[1][0] == '"' and lst[1][-1] == '"':
                                 r = lst[1].strip('"')
                             elif lst[1][0] == "'" and lst[1][-1] == "'":
                                 r = lst[1].strip("'")
@@ -1105,6 +1166,7 @@ def check_filename(filename):
     file_exists = os.path.isfile(full_filename)
     #print(full_filename)
     return file_exists, full_filename
+
 
 def do_sql(sql):
 
@@ -1618,62 +1680,56 @@ def do_sql(sql):
                         print(note)
 
 
-            elif command == "data fill easy" or command == "data fill":
+        elif command == "data fill easy" or command == "data fill":
 
-                if not data_old and not columns_old:
-                    data_old = data.copy()
-                    columns_old = columns.copy()
+            if not data_old and not columns_old:
+                data_old = data.copy()
+                columns_old = columns.copy()
 
-                fill_format = options["format"]
-                title = options.get("title")
-                note = options.get("note")
-                title_color = options.get("title_color")
-                note_color = options.get("note_color")
-                #print("Title:", title)
-                #print(fromm, too, stepp)
+            fill_format = options["format"]
+            title = options.get("title")
+            note = options.get("note")
+            title_color = options.get("title_color")
+            note_color = options.get("note_color")
+            #print("Title:", title)
+            #print(fromm, too, stepp)
 
-                nrows = len(data)
-                ncols = len(columns)
+            nrows = len(data)
+            ncols = len(columns)
 
-                rowsi, colsi = data_select()
-                #print(rows_show)
+            data_fill_format(fill_format)
+            #print(rows_show)
 
-                columns_selected = [columns[ci-1] for ci in colsi]
-                data_selected = [[data[ri-1][ci-1] for ci in colsi] for ri in rowsi]
+            title_text = ""
 
-                title_text = ""
+            if title is not None:   # include empty string to show no title
+                title_text = title
+                #printInvGreen(title)
+            else:
+                title_text = f"Format data {fill_format}"
 
-                if title is not None:   # include empty string to show no title
-                    title_text = title
-                    #printInvGreen(title)
+            if title_text: # excluse empty string to show title
+                if title_color:
+                    cc = colorCode(title_color)
+                    printColor(title_text, cc)
                 else:
-                    title_text = "Format data"
+                    cc = INVGREEN
+                    printColor(title_text, cc)
 
-                if title_text: # excluse empty string to show title
-                    if title_color:
-                        cc = colorCode(title_color)
-                        printColor(title_text, cc)
-                    else:
-                        cc = INVGREEN
-                        printColor(title_text, cc)
+            #rows = range(1, nrows + 1)
+            #print(rows)
+            #print_data(rowsi, colsi, data, columns, rows, rows_label)
+            show_data(data, columns, False)
 
-                #rows = range(1, nrows + 1)
-                #print(rows)
-                #print_data(rowsi, colsi, data, columns, rows, rows_label)
-                show_data(data_selected, columns_selected, False)
+            if note:
+                print()
+                if note_color:
+                    cc = colorCode(note_color)
+                    printColor(note, cc)
+                else:
+                    print(note)
 
-                if note:
-                    print()
-                    if note_color:
-                        cc = colorCode(note_color)
-                        printColor(note, cc)
-                    else:
-                        print(note)
-
-                data = data_selected.copy()
-                columns = columns_selected.copy()
-
-                #print(columns, data)
+            #print(columns, data)
 
         elif command == "data reset":
             if data_old and columns_old:
