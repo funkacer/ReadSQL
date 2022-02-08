@@ -287,7 +287,7 @@ command_options["export"] = {}
 command_options["export"]["name"] = ["filename", "delimiter"]
 command_options["export"]["required"] = [True, False]
 command_options["export"]["type"] = ["str", "str"]
-command_options["export"]["default"] = [None, ";"]
+command_options["export"]["default"] = [None, "	"]
 command_options["export"]["help1"] = "Help for command 'folder'"
 command_options["export"]["help2"] = ["Blabla1", "Blablabla2"]
 command_options["export"]["alternative"] = ["e"]
@@ -705,10 +705,10 @@ def data_fill_format(fill_format = {}):
                                     if v == "-" and vi < len(value) and vi > 0:
                                         if value[vi+1] in ["0","1","2","3","4","5","6","7","8","9",dstring] and value[vi-1] not in ["0","1","2","3","4","5","6","7","8","9"]:
                                             rsign = -1
-                                    elif v == "-" and vi < len(value):
+                                    elif v == "-" and vi < len(value)-1:
                                         if value[vi+1] in ["0","1","2","3","4","5","6","7","8","9"]:
                                             rsign = -1
-                                    elif v == dstring and vi < len(value):
+                                    elif v == dstring and vi < len(value)-1:
                                         if value[vi+1] in ["0","1","2","3","4","5","6","7","8","9"]:
                                             rstring += "."
                                     else:
