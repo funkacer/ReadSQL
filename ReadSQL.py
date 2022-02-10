@@ -678,26 +678,46 @@ def find_columns(colss):
 def data_fill(fill_formats = {}, fill_nulls = {}):
     global data
 
-    if len(fill_formats) > 0:
+    temp_columns = set()
+    if fill_formats is not None:
         for colss in fill_formats:
+            temp_columns.add(colss)
+    if fill_nulls is not None:
+        for colss in fill_nulls:
+            temp_columns.add(colss)
+
+    fill_columns = {}
+    for colss in temp_columns:
+        fill_columns[colss] = {}
+        if fill_formats is not None:
+            if colss in fill_formats: fill_columns[colss]["fill_format"] = fill_formats[colss]
+        if fill_nulls is not None:
+            if colss in fill_nulls: fill_columns[colss]["fill_null"] = fill_nulls[colss]
+
+    print("fill_columns", fill_columns)
+
+    if len(fill_columns) > 0:
+        for colss in fill_columns:
             colsi = find_columns([colss])
+            fill_format = fill_columns[colss].get("fill_format")
+            fill_null = fill_columns[colss].get("fill_null")
             if len(colsi) > 0:
                 #print(colss, colsi)
                 for ri in range(1, len(data) + 1):
                     for ci in colsi:
-                        # do format of columns ci - 1, fill_formats(colss)
-                        #print(colss, columns[ci-1], fill_formats[colss])
-                        if fill_formats[colss] == "int" or fill_formats[colss] == "int." \
-                        or fill_formats[colss] == "int," \
-                        or fill_formats[colss] == "float" or fill_formats[colss] == "float." \
-                        or fill_formats[colss] == "float,":
+                        # do format of columns ci - 1, fill_columns(colss)
+                        #print(colss, columns[ci-1], fill_columns[colss])
+                        if fill_format == "int" or fill_format == "int." \
+                        or fill_format == "int," \
+                        or fill_format == "float" or fill_format == "float." \
+                        or fill_format == "float,":
                             rsign = 1
                             rstring = ""
                             dstring = ""
-                            if fill_formats[colss] == "int.": dstring = "."
-                            if fill_formats[colss] == "int,": dstring = ","
-                            if fill_formats[colss] == "float" or fill_formats[colss] == "float.": dstring = "."
-                            if fill_formats[colss] == "float,": dstring = ","
+                            if fill_format == "int.": dstring = "."
+                            if fill_format == "int,": dstring = ","
+                            if fill_format == "float" or fill_format == "float.": dstring = "."
+                            if fill_format == "float,": dstring = ","
                             value = str(data[ri-1][ci-1])
                             for vi in range(len(value)):
                                 v = value[vi]
@@ -715,16 +735,17 @@ def data_fill(fill_formats = {}, fill_nulls = {}):
                                         rstring += v
                             try:
                                 #print(rstring)
-                                if fill_formats[colss][:1] == "i":
+                                if fill_format[:1] == "i":
                                     value = int(float(rstring))*rsign
-                                elif fill_formats[colss][:1] == "f":
+                                elif fill_format[:1] == "f":
                                     value = float(rstring)*rsign
                                 data[ri-1][ci-1] = value
                             except:
                                 #print("Error")
                                 data[ri-1][ci-1] = None
-
-
+                        if fill_null is not None:
+                            #print(data[ri-1][ci-1])
+                            if data[ri-1][ci-1] is None: data[ri-1][ci-1] = fill_null
 
 
 def data_select():

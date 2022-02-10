@@ -1,8 +1,11 @@
 \f fill;
 
-\r aaa.txtx;
+\#r aaa.txtx;
 
-\#r test4.csvx;
+\r test4.csvx;
+
+\df n = ['TITLE_ACA1T':0];
+\dp;
 
 \df f = ['GENDER_TXT':int., 'TITLE_ACA1T':int., 'VEK':int., 'ZZDEATHDT':int., 'BPCONTFCT_ORG':int.,
 'LEGAL_ENTYT':int., 'ZAMESTNANEC':int., 'DLUZNIK':int., 'BONITA_OP_Sum':int., 'POCET_SMLUV_PLYN':int.,
@@ -12,9 +15,4 @@
 'ZZEDIRATE':int., 'ZZVBSARTT':int., 'MS_REGIONT':int., 'MS_COMMU_CODE':int., 'MS_krajn':int., 'MS_okresn':int.,
 'MS_POCET_OBYVATEL':int., 'OP_REGIONT':int., 'OP_COMMU_CODE':int., 'KA_REGIONT':int., 'KA_COMMU_CODE':int.,
 'WU_branch':int., 'WU_distance':int., 'WU_duration':int., 'id_p':int., 'id':int.];
-
-\dp;
-
-\df n = ['GENDER_TXT':0];
-
 \dp;
