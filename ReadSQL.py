@@ -387,14 +387,14 @@ command_options["break"]["alternative"] = ["b"]
 command_options["break"]["altoption"] = [["w"],["f"], ["t"], ["s"], ["l"], ["c"]]
 
 command_options["data fill easy"] = {}
-command_options["data fill easy"]["name"] = ["format", "title", "note", "title_color", "note_color"]
-command_options["data fill easy"]["required"] = [True, False, False, False, False]
-command_options["data fill easy"]["type"] = ["dictlist", "str", "str", "int", "int"]
-command_options["data fill easy"]["default"] = [None, None, None, None, None]
+command_options["data fill easy"]["name"] = ["format", "null", "title", "note", "title_color", "note_color"]
+command_options["data fill easy"]["required"] = [False, False, False, False, False, False]
+command_options["data fill easy"]["type"] = ["dictlist", "dictlist", "str", "str", "int", "int"]
+command_options["data fill easy"]["default"] = [None, None, None, None, None, None]
 command_options["data fill easy"]["help1"] = "Help for command 'data fill easy'"
-command_options["data fill easy"]["help2"] = ["Bla1","Bla2","Bla3","Bla4","Bla5"]
+command_options["data fill easy"]["help2"] = ["Bla1","Bla2","Bla3","Bla4","Bla5","Bla6"]
 command_options["data fill easy"]["alternative"] = ["data fill", "data f", "d f ", "df"]
-command_options["data fill easy"]["altoption"] = [["f"], ["tt"], ["nt"], ["tc"], ["nc"]]
+command_options["data fill easy"]["altoption"] = [["f"], ["none", "n"], ["tt"], ["nt"], ["tc"], ["nc"]]
 
 command_options["data select easy"] = {}
 command_options["data select easy"]["name"] = ["from", "to", "step", "random", "list", "columns", "title", "note", "title_color", "note_color"]
@@ -675,29 +675,29 @@ def find_columns(colss):
     return colsi
 
 
-def data_fill_format(fill_format = {}):
+def data_fill(fill_formats = {}, fill_nulls = {}):
     global data
 
-    if len(fill_format) > 0:
-        for colss in fill_format:
+    if len(fill_formats) > 0:
+        for colss in fill_formats:
             colsi = find_columns([colss])
             if len(colsi) > 0:
                 #print(colss, colsi)
                 for ri in range(1, len(data) + 1):
                     for ci in colsi:
-                        # do format of columns ci - 1, fill_format(colss)
-                        #print(colss, columns[ci-1], fill_format[colss])
-                        if fill_format[colss] == "int" or fill_format[colss] == "int." \
-                        or fill_format[colss] == "int," \
-                        or fill_format[colss] == "float" or fill_format[colss] == "float." \
-                        or fill_format[colss] == "float,":
+                        # do format of columns ci - 1, fill_formats(colss)
+                        #print(colss, columns[ci-1], fill_formats[colss])
+                        if fill_formats[colss] == "int" or fill_formats[colss] == "int." \
+                        or fill_formats[colss] == "int," \
+                        or fill_formats[colss] == "float" or fill_formats[colss] == "float." \
+                        or fill_formats[colss] == "float,":
                             rsign = 1
                             rstring = ""
                             dstring = ""
-                            if fill_format[colss] == "int.": dstring = "."
-                            if fill_format[colss] == "int,": dstring = ","
-                            if fill_format[colss] == "float" or fill_format[colss] == "float.": dstring = "."
-                            if fill_format[colss] == "float,": dstring = ","
+                            if fill_formats[colss] == "int.": dstring = "."
+                            if fill_formats[colss] == "int,": dstring = ","
+                            if fill_formats[colss] == "float" or fill_formats[colss] == "float.": dstring = "."
+                            if fill_formats[colss] == "float,": dstring = ","
                             value = str(data[ri-1][ci-1])
                             for vi in range(len(value)):
                                 v = value[vi]
@@ -715,9 +715,9 @@ def data_fill_format(fill_format = {}):
                                         rstring += v
                             try:
                                 #print(rstring)
-                                if fill_format[colss][:1] == "i":
+                                if fill_formats[colss][:1] == "i":
                                     value = int(float(rstring))*rsign
-                                elif fill_format[colss][:1] == "f":
+                                elif fill_formats[colss][:1] == "f":
                                     value = float(rstring)*rsign
                                 data[ri-1][ci-1] = value
                             except:
@@ -1686,7 +1686,8 @@ def do_sql(sql):
                 data_old = data.copy()
                 columns_old = columns.copy()
 
-            fill_format = options["format"]
+            fill_formats = options.get("format")
+            fill_nulls = options.get("null")
             title = options.get("title")
             note = options.get("note")
             title_color = options.get("title_color")
@@ -1697,7 +1698,7 @@ def do_sql(sql):
             nrows = len(data)
             ncols = len(columns)
 
-            data_fill_format(fill_format)
+            data_fill(fill_formats, fill_nulls)
             #print(rows_show)
 
             title_text = ""
@@ -1706,7 +1707,7 @@ def do_sql(sql):
                 title_text = title
                 #printInvGreen(title)
             else:
-                title_text = f"Format data {fill_format}"
+                title_text = f"Format data {fill_formats}"
 
             if title_text: # excluse empty string to show title
                 if title_color:
