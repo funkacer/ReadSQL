@@ -2,10 +2,10 @@
 
 \r aaa.txtx l = 1000;
 
-\dsa c = ['GENDER_TXT', 'TITLE_ACA1T', 'VEK', 'ZZDEATHDT'];
+\dsa c = ['GENDER_TXT', 'VEK', 'ZZDEATHDT','KA_REGIONT'];
 
-\ds n = ['GENDER_TXT', 'TITLE_ACA1T', 'VEK', 'ZZDEATHDT'], no = none;
+\pd n = ['GENDER_TXT', 'VEK', 'ZZDEATHDT','KA_REGIONT'];
 
-\q;
+\ds n = ['GENDER_TXT', 'VEK', 'ZZDEATHDT','KA_REGIONT'];
 
 \dp;

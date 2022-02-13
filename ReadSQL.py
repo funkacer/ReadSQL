@@ -325,14 +325,14 @@ command_options["print"]["alternative"] = ["print", "p"]
 command_options["print"]["altoption"] = [["f"], ["t"], ["s"], ["r"], ["l"], ["c"]]
 
 command_options["print data easy"] = {}
-command_options["print data easy"]["name"] = ["from", "to", "step", "random", "list", "columns", "title", "note", "title_color", "note_color"]
-command_options["print data easy"]["required"] = [False, False, False, False, False, False, False, False, False, False]
-command_options["print data easy"]["type"] = ["int", "int", "int", "int", "intlist", "strlist", "str", "str", "int", "int"]
-command_options["print data easy"]["default"] = [0, 0, 1, 0, "[]", "[]", None, None, None, None]
+command_options["print data easy"]["name"] = ["from", "to", "step", "random", "list", "columns", "nones", "nones_option", "title", "note", "title_color", "note_color"]
+command_options["print data easy"]["required"] = [False, False, False, False, False, False, False, False, False, False, False, False]
+command_options["print data easy"]["type"] = ["int", "int", "int", "int", "intlist", "strlist", "strlist", ["any","all","none"], "str", "str", "int", "int"]
+command_options["print data easy"]["default"] = [0, 0, 1, 0, "[]", "[]", "[]", "any", None, None, None, None]
 command_options["print data easy"]["help1"] = "Help for command 'folder'"
-command_options["print data easy"]["help2"] = ["Bla1","Bla2","Bla3","Bla4","Bla5","Bla6","Bla7","Bla8","Bla9","Bla10"]
+command_options["print data easy"]["help2"] = ["Bla1","Bla2","Bla3","Bla4","Bla5","Bla6","Bla7","Bla8","Bla9","Bla10","Bla11","Bla12"]
 command_options["print data easy"]["alternative"] = ["print data", "pd",  "p"]
-command_options["print data easy"]["altoption"] = [["f"], ["t"], ["s"], ["r"], ["l"], ["c"], ["tt"], ["nt"], ["tc"], ["nc"]]
+command_options["print data easy"]["altoption"] = [["f"], ["t"], ["s"], ["r"], ["l"], ["c"], ["nulls", "ns", "n"], ["no"], ["tt"], ["nt"], ["tc"], ["nc"]]
 
 command_options["print data"] = {}
 command_options["print data"]["name"] = ["what", "from", "to", "step", "random", "list", "columns", "title", "note", "title_color", "note_color"]
@@ -789,14 +789,14 @@ def data_select():
         rowni = set()
         rowai = set()
         for ri in range(1, len(data) + 1):
-            for ci in colsi:
+            for ci in nonesi:
                 if data[ri-1][ci-1] is None:
                     rowni.add(ri)
                 else:
                     rowai.add(ri)
         # logika any, all, none
-        print("rowni", rowni)
-        print("rowai", rowai)
+        #print("rowni", rowni)
+        #print("rowai", rowai)
         rowsi = []
         if noneso == "all" or noneso == "any":
             for ri in rowni:
@@ -1670,6 +1670,8 @@ def do_sql(sql):
                 listt = options["list"]
                 randd = options["random"]
                 colss = options["columns"]
+                noness = options.get("nones")
+                noneso = options.get("nones_option")
                 title = options.get("title")
                 note = options.get("note")
                 title_color = options.get("title_color")
