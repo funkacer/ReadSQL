@@ -1,6 +1,5 @@
 \f fill;
 
-\r test4.csvx;
+\r test4.csvx, l = 100;
 
-\ds100;
 \e aaa.txtx;

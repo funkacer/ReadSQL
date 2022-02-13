@@ -1,11 +1,12 @@
 \f fill;
 
-\#r aaa.txtx;
+\r aaa.txtx l = 1000;
 
-\r test4.csvx;
-
-\df n = ['TITLE_ACA1T':0];
+\dsa c = ['TITLE_ACA1T'];
+\df n = ['TITLE_ACA1T':"Chybí"];
 \dp;
+
+\q;
 
 \df f = ['GENDER_TXT':int., 'TITLE_ACA1T':int., 'VEK':int., 'ZZDEATHDT':int., 'BPCONTFCT_ORG':int.,
 'LEGAL_ENTYT':int., 'ZAMESTNANEC':int., 'DLUZNIK':int., 'BONITA_OP_Sum':int., 'POCET_SMLUV_PLYN':int.,

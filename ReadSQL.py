@@ -274,24 +274,24 @@ command_options["connect mssql"]["alternative"] = ["c mssql", "c ms", "cmssql", 
 command_options["connect mssql"]["altoption"] = [["d"],["u"],["p"],["h"],["po"]]
 
 command_options["read"] = {}
-command_options["read"]["name"] = ["filename", "delimiter", "text_qualifier", "read_columns", "strip_columns"]
-command_options["read"]["required"] = [True, False, False, False, False]
-command_options["read"]["type"] = ["str", "str", "str", "bool", "bool"]
-command_options["read"]["default"] = [None, "	", None, True, True]
+command_options["read"]["name"] = ["filename", "delimiter", "text_qualifier", "read_columns", "strip_columns", "lines"]
+command_options["read"]["required"] = [True, False, False, False, False, False]
+command_options["read"]["type"] = ["str", "str", "str", "bool", "bool", "int"]
+command_options["read"]["default"] = [None, "	", None, True, True, None]
 command_options["read"]["help1"] = "Help for command 'folder'"
-command_options["read"]["help2"] = ["Blabla1", "Blabla2", "Blabla3", "Blabla4", "Blabla5"]
+command_options["read"]["help2"] = ["Blabla1", "Blabla2", "Blabla3", "Blabla4", "Blabla5", "Blabla6"]
 command_options["read"]["alternative"] = ["read", "r"]
-command_options["read"]["altoption"] = [["f"],["d"],["t","tq"], ['r','rc'], ['s','sc']]
+command_options["read"]["altoption"] = [["f"],["d"],["t","tq"], ['r','rc'], ['s','sc'], ["l"]]
 
 command_options["export"] = {}
-command_options["export"]["name"] = ["filename", "delimiter"]
-command_options["export"]["required"] = [True, False]
-command_options["export"]["type"] = ["str", "str"]
-command_options["export"]["default"] = [None, "	"]
+command_options["export"]["name"] = ["filename", "delimiter", "none"]
+command_options["export"]["required"] = [True, False, False]
+command_options["export"]["type"] = ["str", "str", "str"]
+command_options["export"]["default"] = [None, "	", ""]
 command_options["export"]["help1"] = "Help for command 'folder'"
-command_options["export"]["help2"] = ["Blabla1", "Blablabla2"]
+command_options["export"]["help2"] = ["Blabla1", "Blabla2", "Blabla3"]
 command_options["export"]["alternative"] = ["e"]
-command_options["export"]["altoption"] = [["f"],["d"]]
+command_options["export"]["altoption"] = [["f"],["d"],["n"]]
 
 command_options["load"] = {}
 command_options["load"]["name"] = ["filename"]
@@ -1331,6 +1331,10 @@ def do_sql(sql):
         elif command == "read":
             read_filename = options["filename"]
             read_delimiter = options["delimiter"]
+            if options.get("lines"):
+                read_lines = options["lines"]
+            else:
+                read_lines = 0
             if options.get("text_qualifier"):
                 read_text_qualifier = options["text_qualifier"]
             else:
@@ -1408,6 +1412,7 @@ def do_sql(sql):
                                 else:
                                     row_new.append(None)
                             data_new.append(row_new)
+                            if read_lines == row: break
                             #print(row_new)
                             row += 1
                             #time.sleep(1)
@@ -1468,6 +1473,11 @@ def do_sql(sql):
         elif command == "export":
             export_filename = options["filename"]
             export_delimiter = options["delimiter"]
+            if options.get("none") is not None:
+                export_none = options["none"]
+            else:
+                export_none = None
+            #print("export_none", export_none)
             file_exists, full_filename = check_filename(export_filename)
             #print("Export: '{}'".format(export_filename))
             col_len = len(columns)-1
@@ -1481,6 +1491,7 @@ def do_sql(sql):
                     f.write("\n")
                     for d in data:
                         for i, c in enumerate(d):
+                            if c is None: c = export_none
                             if i < col_len:
                                 f.write(str(c) + export_delimiter)
                             else:
