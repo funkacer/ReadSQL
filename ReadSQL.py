@@ -291,7 +291,7 @@ command_options["export"]["default"] = [None, "	", ""]
 command_options["export"]["help1"] = "Help for command 'folder'"
 command_options["export"]["help2"] = ["Blabla1", "Blabla2", "Blabla3"]
 command_options["export"]["alternative"] = ["e"]
-command_options["export"]["altoption"] = [["f"],["d"],["n"]]
+command_options["export"]["altoption"] = [["f"],["d"],["null","n"]]
 
 command_options["load"] = {}
 command_options["load"]["name"] = ["filename"]
@@ -387,24 +387,24 @@ command_options["break"]["alternative"] = ["b"]
 command_options["break"]["altoption"] = [["w"],["f"], ["t"], ["s"], ["l"], ["c"]]
 
 command_options["data fill easy"] = {}
-command_options["data fill easy"]["name"] = ["format", "null", "title", "note", "title_color", "note_color"]
+command_options["data fill easy"]["name"] = ["formats", "nones", "title", "note", "title_color", "note_color"]
 command_options["data fill easy"]["required"] = [False, False, False, False, False, False]
 command_options["data fill easy"]["type"] = ["dictlist", "dictlist", "str", "str", "int", "int"]
 command_options["data fill easy"]["default"] = [None, None, None, None, None, None]
 command_options["data fill easy"]["help1"] = "Help for command 'data fill easy'"
 command_options["data fill easy"]["help2"] = ["Bla1","Bla2","Bla3","Bla4","Bla5","Bla6"]
 command_options["data fill easy"]["alternative"] = ["data fill", "data f", "d f ", "df"]
-command_options["data fill easy"]["altoption"] = [["f"], ["none", "n"], ["tt"], ["nt"], ["tc"], ["nc"]]
+command_options["data fill easy"]["altoption"] = [["fs", "f"], ["nulls", "ns", "n"], ["tt"], ["nt"], ["tc"], ["nc"]]
 
 command_options["data select easy"] = {}
-command_options["data select easy"]["name"] = ["from", "to", "step", "random", "list", "columns", "title", "note", "title_color", "note_color"]
-command_options["data select easy"]["required"] = [False, False, False, False, False, False, False, False, False, False]
-command_options["data select easy"]["type"] = ["int", "int", "int", "int", "intlist", "strlist", "str", "str", "int", "int"]
-command_options["data select easy"]["default"] = [0, 0, 1, 0, "[]", "[]", None, None, None, None]
+command_options["data select easy"]["name"] = ["from", "to", "step", "random", "list", "columns", "nones", "title", "note", "title_color", "note_color"]
+command_options["data select easy"]["required"] = [False, False, False, False, False, False, False, False, False, False, False]
+command_options["data select easy"]["type"] = ["int", "int", "int", "int", "intlist", "strlist", "dictlist", "str", "str", "int", "int"]
+command_options["data select easy"]["default"] = [0, 0, 1, 0, "[]", "[]", None, None, None, None, None]
 command_options["data select easy"]["help1"] = "Help for command 'data select easy'"
-command_options["data select easy"]["help2"] = ["Bla1","Bla2","Bla3","Bla4","Bla5","Bla6","Bla7","Bla8","Bla9","Bla10"]
+command_options["data select easy"]["help2"] = ["Bla1","Bla2","Bla3","Bla4","Bla5","Bla6","Bla7","Bla8","Bla9","Bla10", "Bla10"]
 command_options["data select easy"]["alternative"] = ["data select", "data s", "d s", "ds"]
-command_options["data select easy"]["altoption"] = [["f"], ["t"], ["s"], ["r"], ["l"], ["c"], ["tt"], ["nt"], ["tc"], ["nc"]]
+command_options["data select easy"]["altoption"] = [["f"], ["t"], ["s"], ["r"], ["l"], ["c"], ["nulls", "ns", "n"], ["tt"], ["nt"], ["tc"], ["nc"]]
 
 command_options["data select"] = {}
 command_options["data select"]["name"] = ["what", "from", "to", "step", "random", "list", "columns", "title", "note", "title_color", "note_color"]
@@ -675,15 +675,15 @@ def find_columns(colss):
     return colsi
 
 
-def data_fill(fill_formats = {}, fill_nulls = {}):
+def data_fill(fill_formats = {}, fill_nones = {}):
     global data
 
     temp_columns = set()
     if fill_formats is not None:
         for colss in fill_formats:
             temp_columns.add(colss)
-    if fill_nulls is not None:
-        for colss in fill_nulls:
+    if fill_nones is not None:
+        for colss in fill_nones:
             temp_columns.add(colss)
 
     fill_columns = {}
@@ -691,8 +691,8 @@ def data_fill(fill_formats = {}, fill_nulls = {}):
         fill_columns[colss] = {}
         if fill_formats is not None:
             if colss in fill_formats: fill_columns[colss]["fill_format"] = fill_formats[colss]
-        if fill_nulls is not None:
-            if colss in fill_nulls: fill_columns[colss]["fill_null"] = fill_nulls[colss]
+        if fill_nones is not None:
+            if colss in fill_nones: fill_columns[colss]["fill_none"] = fill_nones[colss]
 
     print("fill_columns", fill_columns)
 
@@ -700,7 +700,7 @@ def data_fill(fill_formats = {}, fill_nulls = {}):
         for colss in fill_columns:
             colsi = find_columns([colss])
             fill_format = fill_columns[colss].get("fill_format")
-            fill_null = fill_columns[colss].get("fill_null")
+            fill_none = fill_columns[colss].get("fill_none")
             if len(colsi) > 0:
                 #print(colss, colsi)
                 for ri in range(1, len(data) + 1):
@@ -743,9 +743,9 @@ def data_fill(fill_formats = {}, fill_nulls = {}):
                             except:
                                 #print("Error")
                                 data[ri-1][ci-1] = None
-                        if fill_null is not None:
+                        if fill_none is not None:
                             #print(data[ri-1][ci-1])
-                            if data[ri-1][ci-1] is None: data[ri-1][ci-1] = fill_null
+                            if data[ri-1][ci-1] is None: data[ri-1][ci-1] = fill_none
 
 
 def data_select():
@@ -1192,7 +1192,7 @@ def check_filename(filename):
 def do_sql(sql):
 
     global conn, data, columns, data_old, columns_old, db_filename, folder_exists, folder_name, db_version, db_schema, \
-            fromm, too, stepp, randd, listt, colss, variables, command_history
+            fromm, too, stepp, randd, listt, colss, noness, variables, command_history
 
     #time.sleep(0.1)
 
@@ -1476,7 +1476,7 @@ def do_sql(sql):
             if options.get("none") is not None:
                 export_none = options["none"]
             else:
-                export_none = None
+                export_none = None  # never happens, but was before, now is ""
             #print("export_none", export_none)
             file_exists, full_filename = check_filename(export_filename)
             #print("Export: '{}'".format(export_filename))
@@ -1718,8 +1718,8 @@ def do_sql(sql):
                 data_old = data.copy()
                 columns_old = columns.copy()
 
-            fill_formats = options.get("format")
-            fill_nulls = options.get("null")
+            fill_formats = options.get("formats")
+            fill_nones = options.get("nones")
             title = options.get("title")
             note = options.get("note")
             title_color = options.get("title_color")
@@ -1730,7 +1730,7 @@ def do_sql(sql):
             nrows = len(data)
             ncols = len(columns)
 
-            data_fill(fill_formats, fill_nulls)
+            data_fill(fill_formats, fill_nones)
             #print(rows_show)
 
             title_text = ""
@@ -1782,6 +1782,7 @@ def do_sql(sql):
             listt = options["list"]
             randd = options["random"]
             colss = options["columns"]
+            noness = options.get("nones")
             title = options.get("title")
             note = options.get("note")
             title_color = options.get("title_color")
@@ -1868,7 +1869,7 @@ def do_sql(sql):
             colsp = data_profile(rowsi, colsi, data, columns, rows, rows_label, progress_indicator = True)
             profile_data = []
             profile_columns = columns
-            profile_rows = ["Type", "Valids", "Nulls", "Valid %", "Sum", "Min", "Max", "Mean", "Q1", "Median", "Q3", "Range", "IQR", "Variance", "STD", "Skew", "Unique", "FirstCat"]
+            profile_rows = ["Type", "Valids", "Nones", "Valid %", "Sum", "Min", "Max", "Mean", "Q1", "Median", "Q3", "Range", "IQR", "Variance", "STD", "Skew", "Unique", "FirstCat"]
             profile_rows_label = '(Stat)'
             stats = ["t", "v", "n", "v%", "sum", "min", "max", "mean", "q1", "q2", "q3", "ran", "iqr", "var", "std", "skw","uni", "fnq"]
 

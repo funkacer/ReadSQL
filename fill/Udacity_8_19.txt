@@ -1,0 +1,12 @@
+Taste	Color	Smell	Score
+Sweet	Red	Floral	20
+Sour	Yellow	Citrus	15
+Spicy	Green	Bold	25
+Salty	Yellow	Bold	32
+Sweet	Blue	Bright	20
+Input	Red		
+			
+Floral			
+20			
+Sweet			
+Floral			
