@@ -397,14 +397,14 @@ command_options["data fill easy"]["alternative"] = ["data fill", "data f", "d f 
 command_options["data fill easy"]["altoption"] = [["fs", "f"], ["nulls", "ns", "n"], ["tt"], ["nt"], ["tc"], ["nc"]]
 
 command_options["data select easy"] = {}
-command_options["data select easy"]["name"] = ["from", "to", "step", "random", "list", "columns", "nones", "title", "note", "title_color", "note_color"]
-command_options["data select easy"]["required"] = [False, False, False, False, False, False, False, False, False, False, False]
-command_options["data select easy"]["type"] = ["int", "int", "int", "int", "intlist", "strlist", "dictlist", "str", "str", "int", "int"]
-command_options["data select easy"]["default"] = [0, 0, 1, 0, "[]", "[]", None, None, None, None, None]
+command_options["data select easy"]["name"] = ["from", "to", "step", "random", "list", "columns", "nones", "nones_option", "title", "note", "title_color", "note_color"]
+command_options["data select easy"]["required"] = [False, False, False, False, False, False, False, False, False, False, False, False]
+command_options["data select easy"]["type"] = ["int", "int", "int", "int", "intlist", "strlist", "strlist", ["any","all","none"],"str", "str", "int", "int"]
+command_options["data select easy"]["default"] = [0, 0, 1, 0, "[]", "[]", "[]", "any", None, None, None, None]
 command_options["data select easy"]["help1"] = "Help for command 'data select easy'"
-command_options["data select easy"]["help2"] = ["Bla1","Bla2","Bla3","Bla4","Bla5","Bla6","Bla7","Bla8","Bla9","Bla10", "Bla10"]
+command_options["data select easy"]["help2"] = ["Bla1","Bla2","Bla3","Bla4","Bla5","Bla6","Bla7","Bla8","Bla9","Bla10", "Bla10", "Bla11"]
 command_options["data select easy"]["alternative"] = ["data select", "data s", "d s", "ds"]
-command_options["data select easy"]["altoption"] = [["f"], ["t"], ["s"], ["r"], ["l"], ["c"], ["nulls", "ns", "n"], ["tt"], ["nt"], ["tc"], ["nc"]]
+command_options["data select easy"]["altoption"] = [["f"], ["t"], ["s"], ["r"], ["l"], ["c"], ["nulls", "ns", "n"], ["no"], ["tt"], ["nt"], ["tc"], ["nc"]]
 
 command_options["data select"] = {}
 command_options["data select"]["name"] = ["what", "from", "to", "step", "random", "list", "columns", "title", "note", "title_color", "note_color"]
@@ -755,6 +755,9 @@ def data_select():
     colsi = range(1, ncols + 1)
     if len(colss) > 0:
         colsi = find_columns(colss)
+    nonesi = []
+    if len(noness) > 0:
+        nonesi = find_columns(noness)
     #columns_show = [columns[i] for i in colsi] # only existing
     rowsi = []
     listi = []
@@ -782,7 +785,32 @@ def data_select():
     if stepp <= 0: stepp = 1
     if too > nrows: too = nrows
     if fromm < 1: fromm = 1
-    if randd > 0:
+    if len(nonesi) > 0:
+        rowni = set()
+        rowai = set()
+        for ri in range(1, len(data) + 1):
+            for ci in colsi:
+                if data[ri-1][ci-1] is None:
+                    rowni.add(ri)
+                else:
+                    rowai.add(ri)
+        # logika any, all, none
+        print("rowni", rowni)
+        print("rowai", rowai)
+        rowsi = []
+        if noneso == "all" or noneso == "any":
+            for ri in rowni:
+                if noneso == "all" and ri not in rowai:
+                    rowsi.append(ri)
+                elif noneso == "any":
+                    rowsi.append(ri)
+        elif noneso == "none":
+            for ri in range(1, len(data) + 1):
+                if ri not in rowni:
+                    rowsi.append(ri)
+        else:
+            printInvRed("Error, none_option not recognized")
+    elif randd > 0:
         if too == 0: too = nrows
         if len(listi) > 0:
             # select from listt
@@ -1192,7 +1220,7 @@ def check_filename(filename):
 def do_sql(sql):
 
     global conn, data, columns, data_old, columns_old, db_filename, folder_exists, folder_name, db_version, db_schema, \
-            fromm, too, stepp, randd, listt, colss, noness, variables, command_history
+            fromm, too, stepp, randd, listt, colss, noness, noneso, variables, command_history
 
     #time.sleep(0.1)
 
@@ -1783,6 +1811,7 @@ def do_sql(sql):
             randd = options["random"]
             colss = options["columns"]
             noness = options.get("nones")
+            noneso = options.get("nones_option")
             title = options.get("title")
             note = options.get("note")
             title_color = options.get("title_color")
