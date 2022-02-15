@@ -1129,7 +1129,7 @@ def parseCommand(command_line):
                     print("lst_old", lst_old)
                     for l_old in lst_old:
                         lst = parseText(l_old, ":", do_strip = False)
-                        print("lst:", lst)
+                        #print("lst:", lst)
                         if len(lst) > 1:
                             lst[0] = lst[0].strip()
                             lst[1] = lst[1].strip()
@@ -1149,7 +1149,7 @@ def parseCommand(command_line):
                                 r = lst[1]
                             lst_new[l] = r
                         else:
-                            print("Chyba!!!")
+                            printRed(f"Error parsing dictlist option {lst}. Check results carefully!!!")
                     options[n] = lst_new
 
         print("Command:", command)
