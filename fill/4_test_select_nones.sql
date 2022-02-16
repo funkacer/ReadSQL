@@ -1,19 +1,14 @@
 \f fill;
 
-\r aaa.txtx l = 1000;
+\r aaa.txtx l = 0;
 
-\dsa c = ['TITLE_ACA1T'];
-\df n = ['TITLE_ACA1T':"Chybí"];
-\dp;
+\ds n = ['GENDER_TXT', 'TITLE_ACA1T', 'VEK', 'ZZDEATHDT', 'BPCONTFCT_ORG',
+'LEGAL_ENTYT', 'ZAMESTNANEC', 'DLUZNIK', 'BONITA_OP_Sum', 'POCET_SMLUV_PLYN',
+'POCET_SMLUV_PLYN_AKTIVNI', 'POCET_SMLUV_PLYN_VAKTIVACI', 'POCET_SMLUV_EE', 'POCET_SMLUV_EE_AKTIVNI',
+'POCET_SMLUV_EE_VAKTIVACI', 'EINZDAT', 'AUSZDAT', 'DIVISIONT', 'C_ABSZYKT', 'UCACTDETIDT',
+'UCCON_CLAST', 'DISTRIBUTOTT', 'SPOTREBA_MWH_AKTUALNI_PLYN', 'SPOTREBA_MWH_AKTUALNI_EE',
+'ZZEDIRATE', 'ZZVBSARTT', 'MS_REGIONT', 'MS_COMMU_CODE', 'MS_krajn', 'MS_okresn',
+'MS_POCET_OBYVATEL', 'OP_REGIONT', 'OP_COMMU_CODE', 'KA_REGIONT', 'KA_COMMU_CODE',
+'WU_branch', 'WU_distance', 'WU_duration', 'id_p', 'id'], no = "all";
 
-\q;
-
-\df f = ['GENDER_TXT':int., 'TITLE_ACA1T':int., 'VEK':int., 'ZZDEATHDT':int., 'BPCONTFCT_ORG':int.,
-'LEGAL_ENTYT':int., 'ZAMESTNANEC':int., 'DLUZNIK':int., 'BONITA_OP_Sum':int., 'POCET_SMLUV_PLYN':int.,
-'POCET_SMLUV_PLYN_AKTIVNI':int., 'POCET_SMLUV_PLYN_VAKTIVACI':int., 'POCET_SMLUV_EE':int., 'POCET_SMLUV_EE_AKTIVNI':int.,
-'POCET_SMLUV_EE_VAKTIVACI':int., 'EINZDAT':int., 'AUSZDAT':int., 'DIVISIONT':int., 'C_ABSZYKT':int., 'UCACTDETIDT':int.,
-'UCCON_CLAST':int., 'DISTRIBUTOTT':int., 'SPOTREBA_MWH_AKTUALNI_PLYN':int., 'SPOTREBA_MWH_AKTUALNI_EE':int.,
-'ZZEDIRATE':int., 'ZZVBSARTT':int., 'MS_REGIONT':int., 'MS_COMMU_CODE':int., 'MS_krajn':int., 'MS_okresn':int.,
-'MS_POCET_OBYVATEL':int., 'OP_REGIONT':int., 'OP_COMMU_CODE':int., 'KA_REGIONT':int., 'KA_COMMU_CODE':int.,
-'WU_branch':int., 'WU_distance':int., 'WU_duration':int., 'id_p':int., 'id':int.];
 \dp;

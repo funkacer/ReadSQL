@@ -9,4 +9,6 @@
 'UCCON_CLAST', 'DISTRIBUTOTT', 'SPOTREBA_MWH_AKTUALNI_PLYN', 'SPOTREBA_MWH_AKTUALNI_EE',
 'ZZEDIRATE', 'ZZVBSARTT', 'MS_REGIONT', 'MS_COMMU_CODE', 'MS_krajn', 'MS_okresn',
 'MS_POCET_OBYVATEL', 'OP_REGIONT', 'OP_COMMU_CODE', 'KA_REGIONT', 'KA_COMMU_CODE',
-'WU_branch', 'WU_distance', 'WU_duration', 'id_p', 'id'];
+'WU_branch', 'WU_distance', 'WU_duration', 'id_p', 'id'], no = "all";
+
+\dp;

@@ -600,6 +600,17 @@ def data_profile(rowsi, colsi, data, columns, rows, rows_label, progress_indicat
             proc = int(90+ci/len(colsi)*10)
             sys.stdout.write(u"\u001b[1000D" +  "Processed: " + str(proc) + "% ")
             sys.stdout.flush()
+
+    if progress_indicator:
+        print("\nQuantitative:", [colsp[ci]['name'] for ci in colsi if colsp[ci]['t'] == "Quantitative"])
+        variables["$columns_quantitative"] = {}
+        variables["$columns_quantitative"]["shorts"] = ["$columns_quant","$cq"]
+        variables["$columns_quantitative"]["print data"] = {}
+        variables["$columns_quantitative"]["print data"]["value"] = [colsp[ci]['name'] for ci in colsi if colsp[ci]['t'] == "Quantitative"]
+        variables["$columns_quantitative"]["print data"]["print"] = {}
+        variables["$columns_quantitative"]["print data"]["print data"] = {}
+        variables["$columns_quantitative"]["print data"]["print data easy"] = {}
+
     #print(colsp)
     return colsp
 
@@ -1017,6 +1028,11 @@ def parseCommand(command_line):
                 options[n] = d
             if n in options:
                 if isinstance(t, list):
+                    if len(options[n]) > 0:
+                        if options[n][0] == '"' and options[n][-1] == '"':
+                            options[n] = options[n].strip('"')
+                        elif options[n][0] == "'" and options[n][-1] == "'":
+                            options[n] = options[n].strip("'")
                     bCond = options[n] in t
                     #print(options[n], t, bCond)
                     sTxt = f"Value '{options[n]}' is not valid for option '{n}'. Use one of these options: {t}."
@@ -1026,6 +1042,7 @@ def parseCommand(command_line):
                         break
                 elif t == "str":
                     #options[n] = options[n].strip('"')
+                    #print("options[n]", options[n])
                     if len(options[n]) > 0:
                         if options[n][0] == '"' and options[n][-1] == '"':
                             options[n] = options[n].strip('"')
@@ -1108,6 +1125,7 @@ def parseCommand(command_line):
                     options_list_line = ",".join(parseText(options_list_line, " "))
                     lst_old = parseText(options_list_line, ",")
                     lst_new = []
+                    #print("lst_old", lst_old)
                     for l_old in lst_old:
                         if l_old[0] == '"' and l_old[-1] == '"':
                             lst_new.append(l_old.strip('"'))
@@ -1126,7 +1144,7 @@ def parseCommand(command_line):
                     options_list_line = ",".join(parseText(options_list_line, " "))
                     lst_old = parseText(options_list_line, ",")
                     lst_new = {}
-                    print("lst_old", lst_old)
+                    #print("lst_old", lst_old)
                     for l_old in lst_old:
                         lst = parseText(l_old, ":", do_strip = False)
                         #print("lst:", lst)
