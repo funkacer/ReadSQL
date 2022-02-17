@@ -1027,45 +1027,6 @@ def parseCommand(command_line):
                 #print(f'''Default argument '{n}' set to '{d}'.''')
                 options[n] = d
             if n in options:
-                # get variables in context
-                opt = 0
-                vartest = str(options[n])
-                if vartest[0] not in ["0","1","2","3","5","6","7","8","9","-","+"," "]:
-                    if vartest[0] != "$": vartest = "$" + vartest #variable start with "$", user can omit like in print data all
-                    variable = None
-                    contexts = []
-                    if vartest in variables:
-                        variable = vartest
-                    else:
-                        for var in variables:
-                            if variables[var].get("shorts"):
-                                if vartest in variables[var]["shorts"]:
-                                    variable = var
-                                    break
-                    if variable:
-                        #get context
-                        print(f"Getting context for variable '{variable}' in command '{command}' and option '{options[n]}':")
-                        for contexttest in variables[variable]:
-                            #print(variables[variable][contexttest])
-                            if command in variables[variable][contexttest] or contexttest == "user":
-                                contexts.append(contexttest)
-                        for context in contexts:
-                            print(f"Command '{command}' test passed with context '{context}'!")
-                            print(variables[variable][contexttest])
-                            print(options)
-                            opt = 1
-                            if context != "user":
-                                for optiontest in variables[variable][context][command]:
-                                    if optiontest in options:
-                                        if options[optiontest] in variables[variable][context][command][optiontest]:
-                                            print(f"Option '{optiontest}' test passed with value '{options[optiontest]}'!")
-                                        else:
-                                            opt = 0
-                                    else:
-                                        opt = 0
-                            else:
-                                opt = 1
-                            if opt: options[n] = str(variables[variable][context]["value"]) # must look like string input from user
                 if isinstance(t, list):
                     if len(options[n]) > 0:
                         if options[n][0] == '"' and options[n][-1] == '"':
@@ -1092,10 +1053,48 @@ def parseCommand(command_line):
                 elif t == "int":
                     #print(f"I am going to translate '{options[n]}' to 'int'")
                     # check variables first
-                    if opt:
-                        result_message = f"Option '{n}' should be integer but is '{options[n]}', which is not a variable. Probably not doing what expected!"
-                    else:
-                        result_message = f"Option '{n}' should be integer but is '{options[n]}'. Probably not doing what expected!"
+                    result_message = f"Option '{n}' should be integer but is '{options[n]}'. Probably not doing what expected!"
+                    vartest = str(options[n])
+                    if vartest[0] not in ["0","1","2","3","5","6","7","8","9","-","+"," "]:
+                        if vartest[0] != "$": vartest = "$" + vartest #variable start with "$", user can omit like in print data all
+                        variable = None
+                        contexts = []
+                        if vartest in variables:
+                            variable = vartest
+                        else:
+                            for var in variables:
+                                if variables[var].get("shorts"):
+                                    if vartest in variables[var]["shorts"]:
+                                        variable = var
+                                        break
+                        if variable:
+                            #get context
+                            print(f"Getting context for variable '{variable}' in command '{command}' and option '{options[n]}':")
+                            for contexttest in variables[variable]:
+                                #print(variables[variable][contexttest])
+                                if command in variables[variable][contexttest] or contexttest == "user":
+                                    contexts.append(contexttest)
+                            for context in contexts:
+                                print(f"Command '{command}' test passed with context '{context}'!")
+                                print(variables[variable][contexttest])
+                                print(options)
+                                opt = 1
+                                if context != "user":
+                                    for optiontest in variables[variable][context][command]:
+                                        if optiontest in options:
+                                            if options[optiontest] in variables[variable][context][command][optiontest]:
+                                                print(f"Option '{optiontest}' test passed with value '{options[optiontest]}'!")
+                                            else:
+                                                opt = 0
+                                        else:
+                                            opt = 0
+                                else:
+                                    opt = 1
+                                if opt: options[n] = variables[variable][context]["value"]
+                        else:
+                            result_message = 1
+                            result_message = f"Option '{n}' should be integer but is '{options[n]}', which is not a variable. Probably not doing what expected!"
+
                     try:
                         options[n] = int(options[n])
                     except Exception as e:
@@ -1122,7 +1121,6 @@ def parseCommand(command_line):
                     options[n] = lst_new
                 elif t == "strlist":
                     Assert(options[n][0] == "[" and options[n][-1] == "]", "Lists must be enclosed with []. Probably not doing what expected!")
-                    #print(options[n])
                     options_list_line = options[n][1:-1]
                     options_list_line = ",".join(parseText(options_list_line, " "))
                     lst_old = parseText(options_list_line, ",")
