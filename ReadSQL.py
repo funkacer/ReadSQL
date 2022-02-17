@@ -873,7 +873,7 @@ def parseArgv(argument_list):
 
 
 
-def parseText(myText, delimiter, text_qualifiers = ['"', "'", "["], do_strip = True):
+def parseText(myText, delimiter, text_qualifiers = ['"', "'", "[", "{"], do_strip = True):
 
     #print("Uvozovky", myText.count('"'), myText.count("'"))
 
@@ -894,7 +894,10 @@ def parseText(myText, delimiter, text_qualifiers = ['"', "'", "["], do_strip = T
             # Are there any items before the first apostrophe?
             #lst_new += [o.strip() for o in myText[maxx+1:i].split(spl) if o.strip() is not ""]
             apos = chr
-            if apos == "[": apos = "]"
+            if apos == "[":
+                apos = "]"
+            elif apos == "{":
+                apos = "}"
             #print(lst_new)
             #print(chr, i)
         elif chr == apos:
@@ -1140,8 +1143,9 @@ def parseCommand(command_line):
                     if options[n] == True or options[n] == "True" or options[n] == "1": options[n] = True
                     if options[n] == False or options[n] == "False" or options[n] == "0": options[n] = False
                 elif t == "dictlist":
-                    Assert(options[n][0] == "[" and options[n][-1] == "]", "Lists must be enclosed with []. Probably not doing what expected!")
+                    Assert(options[n][0] == "{" and options[n][-1] == "}", "Dicts must be enclosed with {}. Probably not doing what expected!")
                     options_list_line = options[n][1:-1]
+                    print("options_list_line", options_list_line)
                     options_list_line = ":".join(parseText(options_list_line, ":"))
                     options_list_line = ",".join(parseText(options_list_line, " "))
                     lst_old = parseText(options_list_line, ",")
