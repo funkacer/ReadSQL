@@ -175,6 +175,13 @@ variables["$all"]["print data"]["data select easy"] = {}
 variables["$all"]["print history"] = {}
 variables["$all"]["print history"]["value"] = 0
 variables["$all"]["print history"]["print history"] = {}
+variables["$columns_all"] = {}
+variables["$columns_all"]["shorts"] = ["$columns_a","$ca"]
+variables["$columns_all"]["print data"] = {}
+variables["$columns_all"]["print data"]["value"] = []
+variables["$columns_all"]["print data"]["print"] = {}
+variables["$columns_all"]["print data"]["print data"] = {}
+variables["$columns_all"]["print data"]["print data easy"] = {}
 variables["$red"] = {}
 variables["$red"]["shorts"] = ["$r"]
 variables["$red"]["user"] = {}
@@ -492,6 +499,7 @@ def terminal_resize(colsp):
 
 
 def data_profile(rowsi, colsi, data, columns, rows, rows_label, progress_indicator = False):
+    global variables
     #print("Len rowsi", len(rowsi))
     nrows = len(data)
     ncols = len(columns)
@@ -647,6 +655,7 @@ def show_data(data, columns, show_title = True):
     global variables
     nrows = len(data)
     variables["$all"]["print data"]["value"] = nrows
+    variables["$columns_all"]["print data"]["value"] = columns
     ncols = len(columns)
     rows = range(1, nrows + 1)
     colsi = range(1, ncols + 1)
@@ -1145,7 +1154,7 @@ def parseCommand(command_line):
                 elif t == "dictlist":
                     Assert(options[n][0] == "{" and options[n][-1] == "}", "Dicts must be enclosed with {}. Probably not doing what expected!")
                     options_list_line = options[n][1:-1]
-                    print("options_list_line", options_list_line)
+                    #print("options_list_line", options_list_line)
                     options_list_line = ":".join(parseText(options_list_line, ":"))
                     options_list_line = ",".join(parseText(options_list_line, " "))
                     lst_old = parseText(options_list_line, ",")
@@ -1153,17 +1162,30 @@ def parseCommand(command_line):
                     #print("lst_old", lst_old)
                     for l_old in lst_old:
                         lst = parseText(l_old, ":", do_strip = False)
-                        #print("lst:", lst)
+                        print("lst:", lst)
+                        # check if list on any side
+                        #print(lst[0].strip().__class__)
+                        l, r, ll, rr = None, None, None, None
                         if len(lst) > 1:
                             lst[0] = lst[0].strip()
                             lst[1] = lst[1].strip()
-                            if lst[0][0] == '"' and lst[0][-1] == '"':
+                            if lst[0][0] == '[' and lst[0][-1] == ']':
+                                #its a list, mrs walker, its a list
+                                left_list_line = lst[0][1:-1]
+                                left_list_line = ",".join(parseText(left_list_line, " "))
+                                ll = parseText(left_list_line, ",")
+                            elif lst[0][0] == '"' and lst[0][-1] == '"':
                                 l = lst[0].strip('"')
                             elif lst[0][0] == "'" and lst[0][-1] == "'":
                                 l = lst[0].strip("'")
                             else:
                                 l = lst[0]
-                            if len(lst[1]) == 0:
+                            if lst[1][0] == '[' and lst[1][-1] == ']':
+                                #its a list, mrs walker, its a list
+                                right_list_line = lst[1][1:-1]
+                                right_list_line = ",".join(parseText(right_list_line, " "))
+                                rr = parseText(right_list_line, ",")
+                            elif len(lst[1]) == 0:
                                 r = ""
                             elif lst[1][0] == '"' and lst[1][-1] == '"':
                                 r = lst[1].strip('"')
@@ -1171,7 +1193,31 @@ def parseCommand(command_line):
                                 r = lst[1].strip("'")
                             else:
                                 r = lst[1]
-                            lst_new[l] = r
+                            if l is not None and r is not None:
+                                lst_new[l] = r
+                            if ll is not None and r is not None:
+                                for l in ll:
+                                    if l[0] == '"' and l[-1] == '"':
+                                        l = l.strip('"')
+                                    elif l[0] == "'" and l[-1] == "'":
+                                        l = l.strip("'")
+                                    lst_new[l] = r
+                            elif ll is not None and rr is not None:
+                                # make two lists
+                                Assert(len(ll) == len(rr), f"Lists {ll}:{rr} in dict '{n}' not of the same size. Check results carefully!!!")
+                                print(list(zip(ll, rr)))
+                                for l, r in zip(ll, rr):
+                                    if l[0] == '"' and l[-1] == '"':
+                                        l = l.strip('"')
+                                    elif l[0] == "'" and l[-1] == "'":
+                                        l = l.strip("'")
+                                    if len(r) == 0:
+                                        r = ""
+                                    elif r[0] == '"' and r[-1] == '"':
+                                        r = r.strip('"')
+                                    elif r[0] == "'" and r[-1] == "'":
+                                        r = r.strip("'")
+                                    lst_new[l] = r
                         else:
                             printRed(f"Error parsing dictlist option {lst}. Check results carefully!!!")
                     options[n] = lst_new
