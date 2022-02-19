@@ -33,10 +33,6 @@ END AS TYP,
 count(*) as count
  from t2 group by 1 order by 2 desc;
 
-select * from t2
-WHERE TYP IS NULL
-;
-
 CREATE TABLE t3 AS select * from t2;
 
 UPDATE t3 set TYP = '#Chybí' WHERE TYP IS NULL;
@@ -49,6 +45,10 @@ select TYP, count(*) as count from t3 group by 1 order by 2 desc;
 
 \pda;
 
-\q;
+select * from t2
+WHERE TYP IS NULL
+;
 
 \df n={TYP:#Chybí};
+
+\q;

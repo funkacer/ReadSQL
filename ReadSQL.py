@@ -759,13 +759,17 @@ def data_fill(fill_formats = {}, fill_nones = {}):
                                     value = int(float(rstring))*rsign
                                 elif fill_format[:1] == "f":
                                     value = float(rstring)*rsign
+                                if isinstance(data[ri-1], tuple): data[ri-1] = list(data[ri-1])
                                 data[ri-1][ci-1] = value
                             except:
                                 #print("Error")
+                                if isinstance(data[ri-1], tuple): data[ri-1] = list(data[ri-1])
                                 data[ri-1][ci-1] = None
                         if fill_none is not None:
                             #print(data[ri-1][ci-1])
-                            if data[ri-1][ci-1] is None: data[ri-1][ci-1] = fill_none
+                            if data[ri-1][ci-1] is None:
+                                if isinstance(data[ri-1], tuple): data[ri-1] = list(data[ri-1])
+                                data[ri-1][ci-1] = fill_none
 
 
 def data_select():
@@ -819,11 +823,13 @@ def data_select():
         #print("rowai", rowai)
         rowsi = []
         if noneso == "all" or noneso == "any":
-            for ri in rowni:
-                if noneso == "all" and ri not in rowai:
-                    rowsi.append(ri)
-                elif noneso == "any":
-                    rowsi.append(ri)
+            for ri in range(1, len(data) + 1):
+                if ri in rowni:
+                    if noneso == "any":
+                        rowsi.append(ri)
+                    elif noneso == "all" and ri not in rowai:
+                        rowsi.append(ri)
+
         elif noneso == "none":
             for ri in range(1, len(data) + 1):
                 if ri not in rowni:
