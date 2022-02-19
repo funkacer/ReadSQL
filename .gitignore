@@ -1,5 +1,6 @@
 *.lnk
 *.csvx
+*.txtx
 *.dbx
 /__pycache__/
 /.pytest_cache/
