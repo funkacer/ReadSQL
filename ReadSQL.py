@@ -165,23 +165,29 @@ variables = {}
 
 variables["$all"] = {}
 variables["$all"]["shorts"] = ["$a","$al"]
-variables["$all"]["print data"] = {}
-variables["$all"]["print data"]["value"] = 0
-variables["$all"]["print data"]["print"] = {}
-variables["$all"]["print data"]["print data"] = {}
-variables["$all"]["print data"]["print data easy"] = {}
+variables["$all"]["data"] = {}
+variables["$all"]["data"]["value"] = 0
+variables["$all"]["data"]["print"] = {}
+variables["$all"]["data"]["print data"] = {}
+variables["$all"]["data"]["print data easy"] = {}
 #variables["$all"]["print data"]["print data easy"]["what"] = []
-variables["$all"]["print data"]["data select easy"] = {}
+variables["$all"]["data"]["data"] = {}
+variables["$all"]["data"]["data select"] = {}
+variables["$all"]["data"]["data select easy"] = {}
 variables["$all"]["print history"] = {}
 variables["$all"]["print history"]["value"] = 0
 variables["$all"]["print history"]["print history"] = {}
 variables["$columns_all"] = {}
 variables["$columns_all"]["shorts"] = ["$columns_a","$ca"]
-variables["$columns_all"]["print data"] = {}
-variables["$columns_all"]["print data"]["value"] = []
-variables["$columns_all"]["print data"]["print"] = {}
-variables["$columns_all"]["print data"]["print data"] = {}
-variables["$columns_all"]["print data"]["print data easy"] = {}
+variables["$columns_all"]["data"] = {}
+variables["$columns_all"]["data"]["value"] = []
+variables["$columns_all"]["data"]["print"] = {}
+variables["$columns_all"]["data"]["print data"] = {}
+variables["$columns_all"]["data"]["print data easy"] = {}
+variables["$columns_all"]["data"]["data"] = {}
+variables["$columns_all"]["data"]["data select"] = {}
+variables["$columns_all"]["data"]["data select easy"] = {}
+
 variables["$red"] = {}
 variables["$red"]["shorts"] = ["$r"]
 variables["$red"]["user"] = {}
@@ -194,6 +200,11 @@ variables["$invgreen"] = {}
 variables["$green"]["shorts"] = ["$invg","$ig"]
 variables["$invgreen"]["user"] = {}
 variables["$invgreen"]["user"]["value"] = 20255
+variables["$list"] = {}
+variables["$list"]["shorts"] = ["$l"]
+variables["$list"]["user"] = {}
+#a = "a"
+variables["$list"]["user"]["value"] = "[1,2,a]"
 
 
 #variables["$a"] = 0
@@ -613,11 +624,14 @@ def data_profile(rowsi, colsi, data, columns, rows, rows_label, progress_indicat
         print("\nQuantitative:", [colsp[ci]['name'] for ci in colsi if colsp[ci]['t'] == "Quantitative"])
         variables["$columns_quantitative"] = {}
         variables["$columns_quantitative"]["shorts"] = ["$columns_quant","$cq"]
-        variables["$columns_quantitative"]["print data"] = {}
-        variables["$columns_quantitative"]["print data"]["value"] = [colsp[ci]['name'] for ci in colsi if colsp[ci]['t'] == "Quantitative"]
-        variables["$columns_quantitative"]["print data"]["print"] = {}
-        variables["$columns_quantitative"]["print data"]["print data"] = {}
-        variables["$columns_quantitative"]["print data"]["print data easy"] = {}
+        variables["$columns_quantitative"]["data"] = {}
+        variables["$columns_quantitative"]["data"]["value"] = [colsp[ci]['name'] for ci in colsi if colsp[ci]['t'] == "Quantitative"]
+        variables["$columns_quantitative"]["data"]["print"] = {}
+        variables["$columns_quantitative"]["data"]["print data"] = {}
+        variables["$columns_quantitative"]["data"]["print data easy"] = {}
+        variables["$columns_quantitative"]["data"]["data"] = {}
+        variables["$columns_quantitative"]["data"]["data select"] = {}
+        variables["$columns_quantitative"]["data"]["data select easy"] = {}
 
     #print(colsp)
     return colsp
@@ -654,8 +668,9 @@ def print_data(rowsi, colsi, data, columns, rows, rows_label):
 def show_data(data, columns, show_title = True):
     global variables
     nrows = len(data)
-    variables["$all"]["print data"]["value"] = nrows
-    variables["$columns_all"]["print data"]["value"] = columns
+    variables["$all"]["data"]["value"] = nrows
+    variables["$columns_all"]["data"]["value"] = columns
+
     ncols = len(columns)
     rows = range(1, nrows + 1)
     colsi = range(1, ncols + 1)
@@ -934,13 +949,16 @@ def parseText(myText, delimiter, text_qualifiers = ['"', "'", "[", "{"], do_stri
 
     return lst_new
 
-def parseVariable(command, options, n):
+
+def parseVariable(command, options, n, vartest):
     # get variables in context
     ret = None
     opt = None
-    vartest = str(options[n])
-    if vartest[0] not in ["0","1","2","3","5","6","7","8","9","-","+"," "]:
+    #vartest = str(options[n])
+    if vartest[0] not in ["0","1","2","3","5","6","7","8","9","-","+"," ","'",'"']:
+        #if vartest[0] == "'" and vartest[-1] == "'": vartest = vartest[1:-1]
         if vartest[0] != "$": vartest = "$" + vartest #variable start with "$", user can omit like in print data all
+        print("vartest", vartest)
         variable = None
         contexts = []
         if vartest in variables:
@@ -1105,6 +1123,9 @@ def parseCommand(command_line):
                 elif t == "str":
                     #options[n] = options[n].strip('"')
                     #print("options[n]", options[n])
+                    var, opt = parseVariable(command, options, n, str(options[n]))
+                    if var is not None:
+                        options[n] = var
                     if len(options[n]) > 0:
                         if options[n][0] == '"' and options[n][-1] == '"':
                             options[n] = options[n].strip('"')
@@ -1115,7 +1136,7 @@ def parseCommand(command_line):
                 elif t == "int":
                     #print(f"I am going to translate '{options[n]}' to 'int'")
                     # check variables first
-                    var, opt = parseVariable(command, options, n)
+                    var, opt = parseVariable(command, options, n, str(options[n]))
                     if var is not None:
                         options[n] = var
                     if opt == 0:
@@ -1132,6 +1153,9 @@ def parseCommand(command_line):
                         execute = False
                     #print(f"Parse option '{n}' as integer:", options[n])
                 elif t == "intlist":
+                    var, opt = parseVariable(command, options, n, str(options[n]))
+                    if var is not None:
+                        options[n] = var
                     Assert(options[n][0] == "[" and options[n][-1] == "]", "Lists must be enclosed with []. Probably not doing what expected!")
                     options_list_line = options[n][1:-1]
                     options_list_line = ",".join(parseText(options_list_line, " "))
@@ -1139,14 +1163,25 @@ def parseCommand(command_line):
                     lst_new = []
                     for l_old in lst_old:
                         l_new = None
+                        var, opt = parseVariable(command, options, n, str(l_old))
+                        if var is not None:
+                            l_old = var
+                        if opt == 0:
+                            result_message = f"Option '{n}' should be integer but is '{options[n]}', which is not a variable in context of {command}. Probably not doing what expected!"
+                        else:
+                            result_message = f"Option '{n}' should be integer but is '{options[n]}'. Probably not doing what expected!"
                         try:
                             l_new = int(l_old)
                         except Exception as e:
                             traceback.print_exc()
-                        assert isinstance(l_new, int)
-                        if l_new not in lst_new: lst_new.append(l_new)
+                        Assert(isinstance(l_new, int), result_message)
+                        if isinstance(l_new, int) and l_new not in lst_new: lst_new.append(l_new)
                     options[n] = lst_new
                 elif t == "strlist":
+                    var, opt = parseVariable(command, options, n, str(options[n]))
+                    print("var", var)
+                    if var is not None:
+                        options[n] = var
                     Assert(options[n][0] == "[" and options[n][-1] == "]", "Lists must be enclosed with []. Probably not doing what expected!")
                     #print(options[n])
                     options_list_line = options[n][1:-1]
@@ -1155,13 +1190,18 @@ def parseCommand(command_line):
                     lst_new = []
                     #print("lst_old", lst_old)
                     for l_old in lst_old:
-                        if l_old[0] == '"' and l_old[-1] == '"':
-                            lst_new.append(l_old.strip('"'))
-                        elif l_old[0] == "'" and l_old[-1] == "'":
-                            lst_new.append(l_old.strip("'"))
+                        var, opt = parseVariable(command, options, n, str(l_old))
+                        if var is not None:
+                            lst_new.append(var)
                         else:
-                            lst_new.append(l_old)
+                            if l_old[0] == '"' and l_old[-1] == '"':
+                                lst_new.append(l_old.strip('"'))
+                            elif l_old[0] == "'" and l_old[-1] == "'":
+                                lst_new.append(l_old.strip("'"))
+                            else:
+                                lst_new.append(l_old)
                     options[n] = lst_new
+                    #options[n] = lst_old
                 elif t == "bool":
                     if options[n] == True or options[n] == "True" or options[n] == "1": options[n] = True
                     if options[n] == False or options[n] == "False" or options[n] == "0": options[n] = False
