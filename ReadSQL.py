@@ -632,6 +632,8 @@ def data_profile(rowsi, colsi, data, columns, rows, rows_label, progress_indicat
         variables["$columns_quantitative"]["data"]["data"] = {}
         variables["$columns_quantitative"]["data"]["data select"] = {}
         variables["$columns_quantitative"]["data"]["data select easy"] = {}
+        variables["$columns_quantitative"]["data"]["data fill"] = {}
+        variables["$columns_quantitative"]["data"]["data fill easy"] = {}
 
     #print(colsp)
     return colsp
@@ -1179,7 +1181,7 @@ def parseCommand(command_line):
                     options[n] = lst_new
                 elif t == "strlist":
                     var, opt = parseVariable(command, options, n, str(options[n]))
-                    print("var", var)
+                    #print("var", var)
                     if var is not None:
                         options[n] = var
                     Assert(options[n][0] == "[" and options[n][-1] == "]", "Lists must be enclosed with []. Probably not doing what expected!")
@@ -1206,6 +1208,9 @@ def parseCommand(command_line):
                     if options[n] == True or options[n] == "True" or options[n] == "1": options[n] = True
                     if options[n] == False or options[n] == "False" or options[n] == "0": options[n] = False
                 elif t == "dictlist":
+                    var, opt = parseVariable(command, options, n, str(options[n]))
+                    if var is not None:
+                        options[n] = var
                     Assert(options[n][0] == "{" and options[n][-1] == "}", "Dicts must be enclosed with {}. Probably not doing what expected!")
                     options_list_line = options[n][1:-1]
                     #print("options_list_line", options_list_line)
@@ -1223,6 +1228,9 @@ def parseCommand(command_line):
                         if len(lst) > 1:
                             lst[0] = lst[0].strip()
                             lst[1] = lst[1].strip()
+                            var, opt = parseVariable(command, options, n, str(lst[0]))
+                            if var is not None:
+                                lst[0] = var
                             if lst[0][0] == '[' and lst[0][-1] == ']':
                                 #its a list, mrs walker, its a list
                                 left_list_line = lst[0][1:-1]
@@ -1234,6 +1242,9 @@ def parseCommand(command_line):
                                 l = lst[0].strip("'")
                             else:
                                 l = lst[0]
+                            var, opt = parseVariable(command, options, n, str(lst[1]))
+                            if var is not None:
+                                lst[1] = var
                             if lst[1][0] == '[' and lst[1][-1] == ']':
                                 #its a list, mrs walker, its a list
                                 right_list_line = lst[1][1:-1]
