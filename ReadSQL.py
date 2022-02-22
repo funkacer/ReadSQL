@@ -163,6 +163,11 @@ commands = {}
 variables = {}
 
 
+variables["$parse_value_type"] = {}
+variables["$parse_value_type"]["shorts"] = []
+variables["$parse_value_type"]["options"] = {}
+variables["$parse_value_type"]["options"]["value"] = "auto"
+
 variables["$all"] = {}
 variables["$all"]["shorts"] = ["$a","$al"]
 variables["$all"]["data"] = {}
@@ -174,6 +179,8 @@ variables["$all"]["data"]["print data easy"] = {}
 variables["$all"]["data"]["data"] = {}
 variables["$all"]["data"]["data select"] = {}
 variables["$all"]["data"]["data select easy"] = {}
+variables["$all"]["data"]["data fill"] = {}
+variables["$all"]["data"]["data fill easy"] = {}
 variables["$all"]["print history"] = {}
 variables["$all"]["print history"]["value"] = 0
 variables["$all"]["print history"]["print history"] = {}
@@ -187,6 +194,8 @@ variables["$columns_all"]["data"]["print data easy"] = {}
 variables["$columns_all"]["data"]["data"] = {}
 variables["$columns_all"]["data"]["data select"] = {}
 variables["$columns_all"]["data"]["data select easy"] = {}
+variables["$columns_all"]["data"]["data fill"] = {}
+variables["$columns_all"]["data"]["data fill easy"] = {}
 
 variables["$red"] = {}
 variables["$red"]["shorts"] = ["$r"]
@@ -210,17 +219,17 @@ variables["$list"]["user"]["value"] = "[1,2,a]"
 #variables["$a"] = 0
 
 command_options = {}
-command_options["#"] = {}
-command_options["#"]["name"] = []
-command_options["#"]["required"] = []
-command_options["#"]["type"] = []
-command_options["#"]["default"] = []
-command_options["#"]["help1"] = "Help for command 'folder'"
-command_options["#"]["help2"] = []
-command_options["#"]["alternative"] = ["q"]
-command_options["#"]["altoption"] = []
 
-command_options = {}
+command_options["#"] = {}
+command_options["#"]["name"] = ["title", "note", "title_color", "note_color"]
+command_options["#"]["required"] = [False, False, False, False]
+command_options["#"]["type"] = ["str", "str", "int", "int"]
+command_options["#"]["default"] = [None, None, None, None]
+command_options["#"]["help1"] = "Help for command '#'"
+command_options["#"]["help2"] = ["Bla1","Bla2","Bla3","Bla4"]
+command_options["#"]["alternative"] = ["#"]
+command_options["#"]["altoption"] = [["tt"], ["nt"], ["tc"], ["nc"]]
+
 command_options["quit"] = {}
 command_options["quit"]["name"] = []
 command_options["quit"]["required"] = []
@@ -241,15 +250,27 @@ command_options["folder"]["help2"] = ["Blabla1"]
 command_options["folder"]["alternative"] = ["folder", "f"]
 command_options["folder"]["altoption"] = [["f","fn"]]
 
-command_options["set"] = {}
-command_options["set"]["name"] = ["what", "variable"]
-command_options["set"]["required"] = [True, False]
-command_options["set"]["type"] = [["user", "u"], "str"]
-command_options["set"]["default"] = [None, None]
-command_options["set"]["help1"] = "Help for command 'set'"
-command_options["set"]["help2"] = ["Blabla1", "Blabla2"]
-command_options["set"]["alternative"] = ["s"]
-command_options["set"]["altoption"] = [["w"], ["v"]]
+
+command_options["set variable easy"] = {}
+command_options["set variable easy"]["name"] = ["names"]
+command_options["set variable easy"]["required"] = [True]
+command_options["set variable easy"]["type"] = ["dictlist"]
+command_options["set variable easy"]["default"] = [None]
+command_options["set variable easy"]["help1"] = "Help for command 'set'"
+command_options["set variable easy"]["help2"] = ["Bla1"]
+command_options["set variable easy"]["alternative"] = ["set variable", "sv"]
+command_options["set variable easy"]["altoption"] = [["n"]]
+
+
+command_options["set variable"] = {}
+command_options["set variable"]["name"] = ["what", "names"]
+command_options["set variable"]["required"] = [True, True]
+command_options["set variable"]["type"] = [["variable", "v"], "dictlist"]
+command_options["set variable"]["default"] = [None, None]
+command_options["set variable"]["help1"] = "Help for command 'set'"
+command_options["set variable"]["help2"] = ["Bla1", "Bla2"]
+command_options["set variable"]["alternative"] = ["set", "s"]
+command_options["set variable"]["altoption"] = [["w"], ["n"]]
 
 command_options["connect sqlite3"] = {}
 command_options["connect sqlite3"]["name"] = ["filename"]
@@ -366,7 +387,7 @@ command_options["print columns"] = {}
 command_options["print columns"]["name"] = ["what"]
 command_options["print columns"]["required"] = [True]
 command_options["print columns"]["type"] = [["columns", "c"]]
-command_options["print columns"]["default"] = ["columns"]
+command_options["print columns"]["default"] = [None]
 command_options["print columns"]["help1"] = "Help for command 'folder'"
 command_options["print columns"]["help2"] = ["Bla1"]
 command_options["print columns"]["alternative"] = ["print", "p"]
@@ -381,6 +402,17 @@ command_options["print history"]["help1"] = "Help for command 'folder'"
 command_options["print history"]["help2"] = []
 command_options["print history"]["alternative"] = ["print h", "p h", "ph"]
 command_options["print history"]["altoption"] = []
+
+
+command_options["print variables"] = {}
+command_options["print variables"]["name"] = ["what"]
+command_options["print variables"]["required"] = [True]
+command_options["print variables"]["type"] = [["variables", "v"]]
+command_options["print variables"]["default"] = [None]
+command_options["print variables"]["help1"] = "Help for command 'folder'"
+command_options["print variables"]["help2"] = ["Bla1"]
+command_options["print variables"]["alternative"] = ["print", "p"]
+command_options["print variables"]["altoption"] = [["w"]]
 
 '''
 command_options["print"] = {}
@@ -712,6 +744,26 @@ def find_columns(colss):
     return colsi
 
 
+
+def parseValue(value, typestr):
+    dstring = "."
+    if typestr == "auto":
+        if len(value) > 0:
+            if value[0] in ["-","0","1","2","3","4","5","6","7","8","9"] and dstring not in value:
+                try:
+                    value = int(value)
+                except Exception as e:
+                    traceback.print_exc()
+                Assert(isinstance(value, int), f"Tried parse int value {value} as {typestr} and failed. Check results carefully!!!")
+            elif value[0] in ["-","0","1","2","3","4","5","6","7","8","9",dstring] and dstring in value:
+                try:
+                    value = float(value)
+                except Exception as e:
+                    traceback.print_exc()
+                Assert(isinstance(value, float), f"Tried parse float value {value} as {typestr} and failed. Check results carefully!!!")
+    return value
+
+
 def data_fill(fill_formats = {}, fill_nones = {}):
     global data
 
@@ -741,52 +793,62 @@ def data_fill(fill_formats = {}, fill_nones = {}):
             if len(colsi) > 0:
                 #print(colss, colsi)
                 for ri in range(1, len(data) + 1):
+                    if isinstance(data[ri-1], tuple): data[ri-1] = list(data[ri-1])
                     for ci in colsi:
                         # do format of columns ci - 1, fill_columns(colss)
                         #print(colss, columns[ci-1], fill_columns[colss])
-                        if fill_format == "int" or fill_format == "int." \
-                        or fill_format == "int," \
-                        or fill_format == "float" or fill_format == "float." \
-                        or fill_format == "float,":
-                            rsign = 1
-                            rstring = ""
-                            dstring = ""
-                            if fill_format == "int.": dstring = "."
-                            if fill_format == "int,": dstring = ","
-                            if fill_format == "float" or fill_format == "float.": dstring = "."
-                            if fill_format == "float,": dstring = ","
-                            value = str(data[ri-1][ci-1])
-                            for vi in range(len(value)):
-                                v = value[vi]
-                                if v in ["-","0","1","2","3","4","5","6","7","8","9",dstring]:
-                                    if v == "-" and vi < len(value) and vi > 0:
-                                        if value[vi+1] in ["0","1","2","3","4","5","6","7","8","9",dstring] and value[vi-1] not in ["0","1","2","3","4","5","6","7","8","9"]:
-                                            rsign = -1
-                                    elif v == "-" and vi < len(value)-1:
-                                        if value[vi+1] in ["0","1","2","3","4","5","6","7","8","9"]:
-                                            rsign = -1
-                                    elif v == dstring and vi < len(value)-1:
-                                        if value[vi+1] in ["0","1","2","3","4","5","6","7","8","9"]:
-                                            rstring += "."
-                                    else:
-                                        rstring += v
-                            try:
-                                #print(rstring)
-                                if fill_format[:1] == "i":
-                                    value = int(float(rstring))*rsign
-                                elif fill_format[:1] == "f":
-                                    value = float(rstring)*rsign
-                                if isinstance(data[ri-1], tuple): data[ri-1] = list(data[ri-1])
-                                data[ri-1][ci-1] = value
-                            except:
-                                #print("Error")
-                                if isinstance(data[ri-1], tuple): data[ri-1] = list(data[ri-1])
-                                data[ri-1][ci-1] = None
+                        value = data[ri-1][ci-1]
+                        result = None
+                        if isinstance(value, str):
+                            if (fill_format == "int" or fill_format == "int." or fill_format == "int," \
+                            or fill_format == "float" or fill_format == "float." or fill_format == "float," \
+                            or fill_format == "auto") and len(value) > 0:
+                                rsign = 1
+                                rstring = ""
+                                dstring = "."
+                                if fill_format == "int": dstring = ""
+                                if fill_format == "int," or fill_format == "float," or fill_format == "auto,": dstring = ","
+                                if fill_format == "auto":
+                                    if value[0] in ["-","0","1","2","3","4","5","6","7","8","9"] and dstring not in value:
+                                        try:
+                                            result = int(value)
+                                        except Exception as e:
+                                            pass
+                                    elif value[0] in ["-","0","1","2","3","4","5","6","7","8","9",dstring] and dstring in value:
+                                        try:
+                                            result = float(value)
+                                        except Exception as e:
+                                            pass
+                                else:
+                                    for vi in range(len(value)):
+                                        v = value[vi]
+                                        if v in ["-","0","1","2","3","4","5","6","7","8","9",dstring]:
+                                            if v == "-" and vi < len(value) and vi > 0:
+                                                if value[vi+1] in ["0","1","2","3","4","5","6","7","8","9",dstring] and value[vi-1] not in ["0","1","2","3","4","5","6","7","8","9"]:
+                                                    rsign = -1
+                                            elif v == "-" and vi < len(value)-1:
+                                                if value[vi+1] in ["0","1","2","3","4","5","6","7","8","9"]:
+                                                    rsign = -1
+                                            elif v == dstring and vi < len(value)-1:
+                                                if value[vi+1] in ["0","1","2","3","4","5","6","7","8","9"]:
+                                                    rstring += "."
+                                            else:
+                                                rstring += v
+                                    try:
+                                        #print(rstring)
+                                        if fill_format[:1] == "i":
+                                            result = int(float(rstring))*rsign
+                                        elif fill_format[:1] == "f":
+                                            result = float(rstring)*rsign
+                                    except:
+                                        #print("Error")
+                                        result = None
                         if fill_none is not None:
                             #print(data[ri-1][ci-1])
-                            if data[ri-1][ci-1] is None:
-                                if isinstance(data[ri-1], tuple): data[ri-1] = list(data[ri-1])
-                                data[ri-1][ci-1] = fill_none
+                            if value is None:
+                                result = fill_none
+
+                        if result is not None: data[ri-1][ci-1] = result
 
 
 def data_select():
@@ -956,22 +1018,23 @@ def parseVariable(command, options, n, vartest):
     # get variables in context
     ret = None
     opt = None
+    variable = None
     #vartest = str(options[n])
-    if vartest[0] not in ["0","1","2","3","5","6","7","8","9","-","+"," ","'",'"']:
-        #if vartest[0] == "'" and vartest[-1] == "'": vartest = vartest[1:-1]
-        if vartest[0] != "$": vartest = "$" + vartest #variable start with "$", user can omit like in print data all
-        print("vartest", vartest)
-        variable = None
-        contexts = []
-        if vartest in variables:
-            variable = vartest
-        else:
-            for var in variables:
-                if variables[var].get("shorts"):
-                    if vartest in variables[var]["shorts"]:
-                        variable = var
-                        opt = 0
-                        break
+    if len (vartest) > 0:
+        if vartest[0] not in ["0","1","2","3","5","6","7","8","9","-","+"," ","'",'"']:
+            #if vartest[0] == "'" and vartest[-1] == "'": vartest = vartest[1:-1]
+            if vartest[0] != "$": vartest = "$" + vartest #variable start with "$", user can omit like in print data all
+            #print("vartest", vartest)
+            contexts = []
+            if vartest in variables:
+                variable = vartest
+            else:
+                for var in variables:
+                    if variables[var].get("shorts"):
+                        if vartest in variables[var]["shorts"]:
+                            variable = var
+                            opt = 0
+                            break
         if variable:
             #get context
             print(f"Getting context for variable '{variable}' in command '{command}' and option '{options[n]}':")
@@ -1257,7 +1320,7 @@ def parseCommand(command_line):
                             elif lst[1][0] == "'" and lst[1][-1] == "'":
                                 r = lst[1].strip("'")
                             else:
-                                r = lst[1]
+                                r = parseValue(lst[1], variables["$parse_value_type"]["options"]["value"])
                             if l is not None and r is not None:
                                 lst_new[l] = r
                             if ll is not None and r is not None:
@@ -1362,8 +1425,30 @@ def do_sql(sql):
     OK = 1
     if sql.startswith("\\"):
         command, options = parseCommand(sql)
+
         if command == "quit" or command == "q":
             OK = 0
+
+        elif command == "#":
+            title = options.get("title")
+            note = options.get("note")
+            title_color = options.get("title_color")
+            note_color = options.get("note_color")
+            if title: # excluse empty string to show title
+                    if title_color:
+                        cc = colorCode(title_color)
+                        printColor(title, cc)
+                    else:
+                        cc = INVGREEN
+                        printColor(title, cc)
+            if note:
+                print()
+                if note_color:
+                    cc = colorCode(note_color)
+                    printColor(note, cc)
+                else:
+                    print(note)
+
 
         elif command == "connect sqlite3":
             # , isolation_level=None == autocommit
@@ -1469,6 +1554,38 @@ def do_sql(sql):
             except Exception as e:
                 print("No MsSQL support. Please run 'pip install pyodbc'.\n")
                 traceback.print_exc()
+
+
+        elif command == "set variable easy" or command == "set variable":
+
+            set_variable_names = options.get("names")
+            set_variable_type = variables["$parse_value_type"]["options"]["value"]
+
+            for vn in set_variable_names:
+                if len(vn) > 0:
+                    print(vn)
+                    if vn[0] != "$":
+                        v = "$" + vn
+                    else:
+                        v = vn
+            if v not in variables:
+                variables[v] = {}
+                variables[v]["shorts"] = []
+            variables[v]["user"] = {}
+            variables[v]["user"]["value"] = set_variable_names[vn]
+
+
+        elif command == "print variables easy" or command == "print variables":
+
+            print_variable_names = options.get("names")
+
+            if print_variable_names is not None:
+                pass
+            else:
+                #print(",\n".join(str(v) for v in [vi for vi in variables.items()]))
+                print(",\n".join(str(v) for v in variables.items()))
+
+
 
         elif command == "folder":
             folder_exists_old = folder_exists
@@ -1795,7 +1912,7 @@ def do_sql(sql):
 
             elif options["what"] == "history":
 
-                print(", ".join([str(c) for c in command_history]))
+                print(";\n".join([str(c) for c in command_history]) + ";")
 
             elif options["what"] == "data":
 
