@@ -161,7 +161,6 @@ command_history = []
 default_columns_name = "Column_"
 commands = {}
 variables = {}
-colsp = {}
 
 
 variables["$parse_value_type"] = {}
@@ -542,15 +541,31 @@ def terminal_resize(colsp):
         #print(col, screen)
 
 
-def data_profile(rowsi, colsi):
+def data_profile(rowsi, colsi, data, columns, rows, rows_label, progress_indicator = False):
     global variables
     #print("Len rowsi", len(rowsi))
     nrows = len(data)
     ncols = len(columns)
+    colsp = {}
+    colsp[0] = {}
+    colsp[0]['name'] = rows_label
+    colsp[0]['w'] = len(str(rows_label))  # Columns 0 is Row number with header '(Row)' = 5 chars
+    colsp[0]['wd'] = 0
+    colsp[0]['t'] = "Quantitative"
+    colsp[0]['qt'] = "Integer"
+    colsp[0]['fnq'] = None
+    colsp[0]['n'] = 0
+    colsp[0]['v'] = 0
+    colsp[0]['c'] = {}
+    colsp[0]['sum'] = 0
+    colsp[0]['min'] = 0
+    colsp[0]['max'] = 0
+    colsp[0]['mean'] = 0
     for ci in colsi:
         colsp[ci] = {}
         colsp[ci]['name'] = columns[ci-1]
-        colsp[ci]['w'] = 0
+        colsp[ci]['w'] = len(columns[ci-1]) + 1
+        colsp[ci]['wd'] = 0
         #colsp[columns[ci-1]]['t'] = "Categorical"
         colsp[ci]['t'] = "Quantitative"
         colsp[ci]['qt'] = "Integer"
@@ -566,9 +581,10 @@ def data_profile(rowsi, colsi):
         colsp[ci]['smd2'] = 0
         colsp[ci]['smd3'] = 0
     for ri in rowsi:
+        if len(str(rows[ri-1])) > colsp[0]['w']: colsp[0]['w'] = len(str(rows[ri-1]))
         for ci in colsi:
             w = len(str(data[ri-1][ci-1]))
-            if w > colsp[ci]['w']: colsp[ci]['w'] = w
+            if w > colsp[ci]['wd']: colsp[ci]['wd'] = w
             if data[ri-1][ci-1] is not None:
                 colsp[ci]['v'] += 1
                 if colsp[ci]['t'] == "Quantitative":
@@ -597,11 +613,13 @@ def data_profile(rowsi, colsi):
             else:
                 #count None
                 colsp[ci]['n'] += 1
-        proc = int(ri/len(rowsi)*90)
-        sys.stdout.write(u"\u001b[1000D" +  "Processed: " + str(proc) + "% ")
-        sys.stdout.flush()
+        if progress_indicator:
+            proc = int(ri/len(rowsi)*90)
+            sys.stdout.write(u"\u001b[1000D" +  "Processed: " + str(proc) + "% ")
+            sys.stdout.flush()
 
     for ci in colsi:
+        if colsp[ci]['wd'] >= colsp[ci]['w']: colsp[ci]['w'] = colsp[ci]['wd'] + 1   # if data is wider than column name (+1), and add 1 to separate columns
         if colsp[ci]['v'] > 0 and colsp[ci]['t'] == "Quantitative":
             colsp[ci]['mean'] = colsp[ci]['sum'] / colsp[ci]['v']
             lenc = len(colsp[ci]['m'])
@@ -639,55 +657,34 @@ def data_profile(rowsi, colsi):
             colsp[ci]['q3'] = None
         if len(colsp[ci]['c']) > 0:
             colsp[ci]['c'] = {k:v for k, v in sorted(colsp[ci]['c'].items(), reverse = True, key = lambda x: x[1])[:profile_max_categorical]}
+        if progress_indicator:
+            proc = int(90+ci/len(colsi)*10)
+            sys.stdout.write(u"\u001b[1000D" +  "Processed: " + str(proc) + "% ")
+            sys.stdout.flush()
+        print(colsp[ci]['name'], colsp[ci]['qt'], colsp[ci]['v'])
 
-        proc = int(90+ci/len(colsi)*10)
-        sys.stdout.write(u"\u001b[1000D" +  "Processed: " + str(proc) + "% ")
-        sys.stdout.flush()
-        #print(colsp[ci]['name'], colsp[ci]['qt'], colsp[ci]['v'])
-
-    print("\nQuantitative:", [colsp[ci]['name'] for ci in colsi if colsp[ci]['t'] == "Quantitative"])
-    variables["$columns_quantitative"] = {}
-    variables["$columns_quantitative"]["shorts"] = ["$columns_quant","$cq"]
-    variables["$columns_quantitative"]["data"] = {}
-    variables["$columns_quantitative"]["data"]["value"] = [colsp[ci]['name'] for ci in colsi if colsp[ci]['t'] == "Quantitative"]
-    variables["$columns_quantitative"]["data"]["print"] = {}
-    variables["$columns_quantitative"]["data"]["print data"] = {}
-    variables["$columns_quantitative"]["data"]["print data easy"] = {}
-    variables["$columns_quantitative"]["data"]["data"] = {}
-    variables["$columns_quantitative"]["data"]["data select"] = {}
-    variables["$columns_quantitative"]["data"]["data select easy"] = {}
-    variables["$columns_quantitative"]["data"]["data fill"] = {}
-    variables["$columns_quantitative"]["data"]["data fill easy"] = {}
+    if progress_indicator:
+        print("\nQuantitative:", [colsp[ci]['name'] for ci in colsi if colsp[ci]['t'] == "Quantitative"])
+        variables["$columns_quantitative"] = {}
+        variables["$columns_quantitative"]["shorts"] = ["$columns_quant","$cq"]
+        variables["$columns_quantitative"]["data"] = {}
+        variables["$columns_quantitative"]["data"]["value"] = [colsp[ci]['name'] for ci in colsi if colsp[ci]['t'] == "Quantitative"]
+        variables["$columns_quantitative"]["data"]["print"] = {}
+        variables["$columns_quantitative"]["data"]["print data"] = {}
+        variables["$columns_quantitative"]["data"]["print data easy"] = {}
+        variables["$columns_quantitative"]["data"]["data"] = {}
+        variables["$columns_quantitative"]["data"]["data select"] = {}
+        variables["$columns_quantitative"]["data"]["data select easy"] = {}
+        variables["$columns_quantitative"]["data"]["data fill"] = {}
+        variables["$columns_quantitative"]["data"]["data fill easy"] = {}
 
     #print(colsp)
     return colsp
 
 
-
-def data_width(rowsi, colsi, data, columns, rows, rows_label):
-    #print("Len rowsi", len(rowsi))
-    nrows = len(data)
-    ncols = len(columns)
-    colsp = {}
-    colsp[0] = {}
-    colsp[0]['name'] = rows_label
-    colsp[0]['w'] = len(str(rows_label)) + 1    # Columns 0 is Row number with header '(Row)' = 5 chars
-    for ci in colsi:
-        colsp[ci] = {}
-        colsp[ci]['name'] = columns[ci-1]
-        colsp[ci]['w'] = len(columns[ci-1]) + 1
-    for ri in rowsi:
-        if len(str(rows[ri-1])) >= colsp[0]['w']: colsp[0]['w'] = len(str(rows[ri-1])) +1
-        for ci in colsi:
-            w = len(str(data[ri-1][ci-1]))
-            if w >= colsp[ci]['w']: colsp[ci]['w'] = w + 1
-
-    return colsp
-
-
 def print_data(rowsi, colsi, data, columns, rows, rows_label):
     #print(rows_show)
-    colsp = data_width(rowsi, colsi, data, columns, rows, rows_label)
+    colsp = data_profile(rowsi, colsi, data, columns, rows, rows_label)
     terminal_resize(colsp)
     #print(row_format)
     #row_format = row_format_l(colsp)
@@ -1442,7 +1439,7 @@ def check_filename(filename):
 def do_sql(sql):
 
     global conn, data, columns, data_old, columns_old, db_filename, folder_exists, folder_name, db_version, db_schema, \
-            fromm, too, stepp, randd, listt, colss, noness, noneso, variables, command_history, colsp
+            fromm, too, stepp, randd, listt, colss, noness, noneso, variables, command_history
 
     #time.sleep(0.1)
 
@@ -2173,7 +2170,7 @@ def do_sql(sql):
             colsi = range(1, ncols + 1)
             rowsi = range(1, nrows + 1)
             rows = range(1, nrows + 1)
-            colsp = data_profile(rowsi, colsi)
+            colsp = data_profile(rowsi, colsi, data, columns, rows, rows_label, progress_indicator = True)
             profile_data = []
             profile_columns = columns
             profile_rows = ["Type", "Valids", "Nones", "Valid %", "Sum", "Min", "Max", "Mean", "Q1", "Median", "Q3", "Range", "IQR", "Variance", "STD", "Skew", "Unique", "FirstCat"]
