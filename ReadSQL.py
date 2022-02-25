@@ -182,6 +182,9 @@ variables["$all"]["data"]["data select"] = {}
 variables["$all"]["data"]["data select easy"] = {}
 variables["$all"]["data"]["data fill"] = {}
 variables["$all"]["data"]["data fill easy"] = {}
+variables["$all"]["data"]["data profile"] = {}
+variables["$all"]["data"]["data profile easy"] = {}
+
 variables["$all"]["print history"] = {}
 variables["$all"]["print history"]["value"] = 0
 variables["$all"]["print history"]["print history"] = {}
@@ -468,14 +471,14 @@ command_options["data select"]["alternative"] = ["data", "d"]
 command_options["data select"]["altoption"] = [["w"], ["f"], ["t"], ["s"], ["r"], ["l"], ["c"], ["tt"], ["nt"], ["tc"], ["nc"]]
 
 command_options["data profile easy"] = {}
-command_options["data profile easy"]["name"] = ["from", "to", "step", "random", "list", "columns", "title", "note", "title_color", "note_color"]
-command_options["data profile easy"]["required"] = [False, False, False, False, False, False, False, False, False, False]
-command_options["data profile easy"]["type"] = ["int", "int", "int", "int", "intlist", "strlist", "str", "str", "int", "int"]
-command_options["data profile easy"]["default"] = [0, 0, 1, 0, "[]", "[]", None, None, None, None]
+command_options["data profile easy"]["name"] = ["from", "to", "step", "random", "list", "columns", "nones", "nones_option", "title", "note", "title_color", "note_color"]
+command_options["data profile easy"]["required"] = [False, False, False, False, False, False, False, False, False, False, False, False]
+command_options["data profile easy"]["type"] = ["int", "int", "int", "int", "intlist", "strlist", "strlist", ["any","all","none"], "str", "str", "int", "int"]
+command_options["data profile easy"]["default"] = [0, 0, 1, 0, "[]", "[]", "[]", "all", None, None, None, None]
 command_options["data profile easy"]["help1"] = "Help for command 'folder'"
-command_options["data profile easy"]["help2"] = ["Bla1","Bla2","Bla3","Bla4","Bla5","Bla6","Bla7","Bla8","Bla9","Bla10"]
+command_options["data profile easy"]["help2"] = ["Bla1","Bla2","Bla3","Bla4","Bla5","Bla6","Bla7","Bla8","Bla9","Bla10","Bla11","Bla12"]
 command_options["data profile easy"]["alternative"] = ["data profile", "d profile", "d pr", "d p", "dpr", "dp"]
-command_options["data profile easy"]["altoption"] = [["f"], ["t"], ["s"], ["r"], ["l"], ["c"], ["tt"], ["nt"], ["tc"], ["nc"]]
+command_options["data profile easy"]["altoption"] = [["f"], ["t"], ["s"], ["r"], ["l"], ["c"], ["nulls", "ns", "n"], ["no"], ["tt"], ["nt"], ["tc"], ["nc"]]
 
 command_options["data profile"] = {}
 command_options["data profile"]["name"] = ["what", "from", "to", "step", "random", "list", "columns", "title", "note", "title_color", "note_color"]
@@ -553,7 +556,7 @@ def data_profile(rowsi, colsi):
         colsp[ci]['w'] = 0
         #colsp[columns[ci-1]]['t'] = "Categorical"
         colsp[ci]['t'] = "Quantitative"
-        colsp[ci]['qt'] = "Integer"
+        colsp[ci]['qt'] = "Int"
         colsp[ci]['fnq'] = None
         colsp[ci]['n'] = 0
         colsp[ci]['v'] = 0
@@ -567,6 +570,7 @@ def data_profile(rowsi, colsi):
         colsp[ci]['smd3'] = 0
     for ri in rowsi:
         for ci in colsi:
+            #print(data[ri-1][ci-1], data[ri-1][ci-1].__class__)
             w = len(str(data[ri-1][ci-1]))
             if w > colsp[ci]['w']: colsp[ci]['w'] = w
             if data[ri-1][ci-1] is not None:
@@ -574,19 +578,24 @@ def data_profile(rowsi, colsi):
                 if colsp[ci]['t'] == "Quantitative":
                     try:
                         a = float(data[ri-1][ci-1])
-                        if colsp[ci]['qt'] == "Integer":
-                            b = int(data[ri-1][ci-1])
-                            if a != b: colsp[ci]['qt'] = "Float"
+                        #print(a)
+                        if colsp[ci]['qt'] == "Int":
+                            b = int(a)
+                            if a != b:
+                                colsp[ci]['qt'] = "Float"
+                            else:
+                                a = b
                         if colsp[ci]['v'] == 1:
-                            colsp[ci]['min'] = data[ri-1][ci-1]
-                            colsp[ci]['max'] = data[ri-1][ci-1]
-                        elif data[ri-1][ci-1] < colsp[ci]['min']:
-                            colsp[ci]['min'] = data[ri-1][ci-1]
-                        elif data[ri-1][ci-1] > colsp[ci]['max']:
-                            colsp[ci]['max'] = data[ri-1][ci-1]
-                        colsp[ci]['sum'] += data[ri-1][ci-1]
-                        colsp[ci]['m'].append(data[ri-1][ci-1])
-                    except:
+                            colsp[ci]['min'] = a
+                            colsp[ci]['max'] = a
+                        elif a < colsp[ci]['min']:
+                            colsp[ci]['min'] = a
+                        elif a > colsp[ci]['max']:
+                            colsp[ci]['max'] = a
+                        colsp[ci]['sum'] += a
+                        colsp[ci]['m'].append(a)
+                    except Exception as e:
+                        traceback.print_exc()
                         colsp[ci]['t'] = "Categorical"
                         if colsp[ci]['fnq'] is None:
                             colsp[ci]['fnq'] = data[ri-1][ci-1]
@@ -2168,17 +2177,40 @@ def do_sql(sql):
 
         elif command == "data profile easy" or command == "data profile":
 
+            fromm = options["from"]
+            too = options["to"]
+            stepp = options["step"]
+            listt = options["list"]
+            randd = options["random"]
+            colss = options["columns"]
+            noness = options.get("nones")
+            noneso = options.get("nones_option")
+            title = options.get("title")
+            note = options.get("note")
+            title_color = options.get("title_color")
+            note_color = options.get("note_color")
+            #print("Title:", title)
+            #print(fromm, too, stepp)
+
+            nrows = len(data)
+            ncols = len(columns)
+
+            rowsi, colsi = data_select()
+
+            '''
             nrows = len(data)
             ncols = len(columns)
             colsi = range(1, ncols + 1)
             rowsi = range(1, nrows + 1)
             rows = range(1, nrows + 1)
+            '''
+
             colsp = data_profile(rowsi, colsi)
             profile_data = []
             profile_columns = columns
-            profile_rows = ["Type", "Valids", "Nones", "Valid %", "Sum", "Min", "Max", "Mean", "Q1", "Median", "Q3", "Range", "IQR", "Variance", "STD", "Skew", "Unique", "FirstCat"]
+            profile_rows = ["Type", "QType", "Valids", "Nones", "Valid %", "Sum", "Min", "Max", "Mean", "Q1", "Median", "Q3", "Range", "IQR", "Variance", "STD", "Skew", "Unique", "FirstCat"]
             profile_rows_label = '(Stat)'
-            stats = ["t", "v", "n", "v%", "sum", "min", "max", "mean", "q1", "q2", "q3", "ran", "iqr", "var", "std", "skw","uni", "fnq"]
+            stats = ["t", "qt", "v", "n", "v%", "sum", "min", "max", "mean", "q1", "q2", "q3", "ran", "iqr", "var", "std", "skw","uni", "fnq"]
 
             maxc = 0
             for i, stat in enumerate(stats):
