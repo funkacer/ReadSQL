@@ -675,6 +675,8 @@ def data_profile(rowsi, colsi):
 
 def data_width(rowsi, colsi, data, columns, rows, rows_label):
     #print("Len rowsi", len(rowsi))
+    print("Colsi", colsi)
+    print(data)
     nrows = len(data)
     ncols = len(columns)
     colsp = {}
@@ -688,6 +690,7 @@ def data_width(rowsi, colsi, data, columns, rows, rows_label):
     for ri in rowsi:
         if len(str(rows[ri-1])) >= colsp[0]['w']: colsp[0]['w'] = len(str(rows[ri-1])) +1
         for ci in colsi:
+            #print(ri, ci)
             w = len(str(data[ri-1][ci-1]))
             if w >= colsp[ci]['w']: colsp[ci]['w'] = w + 1
 
@@ -2192,8 +2195,8 @@ def do_sql(sql):
             #print("Title:", title)
             #print(fromm, too, stepp)
 
-            nrows = len(data)
-            ncols = len(columns)
+            #nrows = len(data)
+            #ncols = len(columns)
 
             rowsi, colsi = data_select()
 
@@ -2207,7 +2210,8 @@ def do_sql(sql):
 
             colsp = data_profile(rowsi, colsi)
             profile_data = []
-            profile_columns = columns
+            #profile_columns = [colsp[ci]["name"] for ci in colsp ] # print all profiled columns
+            profile_columns = [colsp[ci]["name"] for ci in colsp if ci in colsi] # print last profiled columns
             profile_rows = ["Type", "QType", "Valids", "Nones", "Valid %", "Sum", "Min", "Max", "Mean", "Q1", "Median", "Q3", "Range", "IQR", "Variance", "STD", "Skew", "Unique", "FirstCat"]
             profile_rows_label = '(Stat)'
             stats = ["t", "qt", "v", "n", "v%", "sum", "min", "max", "mean", "q1", "q2", "q3", "ran", "iqr", "var", "std", "skw","uni", "fnq"]
@@ -2216,7 +2220,8 @@ def do_sql(sql):
             for i, stat in enumerate(stats):
                 profile_data.append([])
                 for ci in colsp:
-                    if ci > 0:  # rows_label
+                    #if ci > 0:  # rows_label, all profiled columns
+                    if ci > 0 and ci in colsi:  # rows_label, ast profiled columns
                         if stat == "v%":
                             if (colsp[ci]["v"] + colsp[ci]["n"]) > 0:
                                 profile_data[i].append(round(100 * colsp[ci]["v"] / (colsp[ci]["v"] + colsp[ci]["n"]), 2))
@@ -2313,6 +2318,8 @@ def do_sql(sql):
 
             colsi = range(1, ncols + 1)
             rowsi = range(1, nrows + 1)
+
+            print("ncols", ncols)
 
             print()
             print()
