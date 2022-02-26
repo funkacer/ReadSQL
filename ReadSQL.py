@@ -252,7 +252,7 @@ command_options["folder"]["default"] = [None]
 command_options["folder"]["help1"] = "Help for command 'folder'"
 command_options["folder"]["help2"] = ["Blabla1"]
 command_options["folder"]["alternative"] = ["folder", "f"]
-command_options["folder"]["altoption"] = [["f","fn"]]
+command_options["folder"]["altoption"] = [["fn","f"]]
 
 
 command_options["set variable easy"] = {}
@@ -334,7 +334,7 @@ command_options["export"]["default"] = [None, "	", ""]
 command_options["export"]["help1"] = "Help for command 'folder'"
 command_options["export"]["help2"] = ["Blabla1", "Blabla2", "Blabla3"]
 command_options["export"]["alternative"] = ["e"]
-command_options["export"]["altoption"] = [["f"],["d"],["null","n"]]
+command_options["export"]["altoption"] = [["fn","f"],["d"],["null","n"]]
 
 command_options["load"] = {}
 command_options["load"]["name"] = ["filename"]
@@ -344,7 +344,18 @@ command_options["load"]["default"] = [None]
 command_options["load"]["help1"] = "Help for command 'folder'"
 command_options["load"]["help2"] = ["Blabla1"]
 command_options["load"]["alternative"] = ["l"]
-command_options["load"]["altoption"] = [["f"]]
+command_options["load"]["altoption"] = [[["fn","f"]]
+
+
+command_options["table"] = {}
+command_options["table"]["name"] = ["tablename"]
+command_options["table"]["required"] = [True]
+command_options["table"]["type"] = ["str"]
+command_options["table"]["default"] = [None]
+command_options["table"]["help1"] = "Help for command 'folder'"
+command_options["table"]["help2"] = ["Blabla1"]
+command_options["table"]["alternative"] = ["table", "t"]
+command_options["table"]["altoption"] = [["tn","t"]]
 
 command_options["insert"] = {}
 command_options["insert"]["name"] = ["tablename"]
@@ -354,7 +365,7 @@ command_options["insert"]["default"] = [None]
 command_options["insert"]["help1"] = "Help for command 'folder'"
 command_options["insert"]["help2"] = ["Blabla1"]
 command_options["insert"]["alternative"] = ["insert", "i"]
-command_options["insert"]["altoption"] = [["t"]]
+command_options["insert"]["altoption"] = [["tn","t"]]
 
 # print data via command print
 command_options["print"] = {}
