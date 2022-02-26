@@ -471,14 +471,14 @@ command_options["data select"]["alternative"] = ["data", "d"]
 command_options["data select"]["altoption"] = [["w"], ["f"], ["t"], ["s"], ["r"], ["l"], ["c"], ["tt"], ["nt"], ["tc"], ["nc"]]
 
 command_options["data profile easy"] = {}
-command_options["data profile easy"]["name"] = ["from", "to", "step", "random", "list", "columns", "nones", "nones_option", "title", "note", "title_color", "note_color"]
-command_options["data profile easy"]["required"] = [False, False, False, False, False, False, False, False, False, False, False, False]
-command_options["data profile easy"]["type"] = ["int", "int", "int", "int", "intlist", "strlist", "strlist", ["any","all","none"], "str", "str", "int", "int"]
-command_options["data profile easy"]["default"] = [0, 0, 1, 0, "[]", "[]", "[]", "all", None, None, None, None]
+command_options["data profile easy"]["name"] = ["from", "to", "step", "random", "list", "columns", "nones", "nones_option", "title", "note", "title_color", "note_color", "print_all"]
+command_options["data profile easy"]["required"] = [False, False, False, False, False, False, False, False, False, False, False, False, False]
+command_options["data profile easy"]["type"] = ["int", "int", "int", "int", "intlist", "strlist", "strlist", ["any","all","none"], "str", "str", "int", "int", "bool"]
+command_options["data profile easy"]["default"] = [0, 0, 1, 0, "[]", "[]", "[]", "all", None, None, None, None, False]
 command_options["data profile easy"]["help1"] = "Help for command 'folder'"
-command_options["data profile easy"]["help2"] = ["Bla1","Bla2","Bla3","Bla4","Bla5","Bla6","Bla7","Bla8","Bla9","Bla10","Bla11","Bla12"]
+command_options["data profile easy"]["help2"] = ["Bla1","Bla2","Bla3","Bla4","Bla5","Bla6","Bla7","Bla8","Bla9","Bla10","Bla11","Bla12","Bla13"]
 command_options["data profile easy"]["alternative"] = ["data profile", "d profile", "d pr", "d p", "dpr", "dp"]
-command_options["data profile easy"]["altoption"] = [["f"], ["t"], ["s"], ["r"], ["l"], ["c"], ["nulls", "ns", "n"], ["no"], ["tt"], ["nt"], ["tc"], ["nc"]]
+command_options["data profile easy"]["altoption"] = [["f"], ["t"], ["s"], ["r"], ["l"], ["c"], ["nulls", "ns", "n"], ["no"], ["tt"], ["nt"], ["tc"], ["nc"], ["pa"]]
 
 command_options["data profile"] = {}
 command_options["data profile"]["name"] = ["what", "from", "to", "step", "random", "list", "columns", "title", "note", "title_color", "note_color"]
@@ -538,7 +538,7 @@ def terminal_resize(colsp):
     for col in colsp:
         if first == 0: first = colsp[col]['w']
         width += colsp[col]['w']
-        if width > columns:
+        if width >= columns:
             screen += 1
             width = first + colsp[col]['w']
         colsp[col]['screen'] = screen
@@ -2192,6 +2192,7 @@ def do_sql(sql):
             note = options.get("note")
             title_color = options.get("title_color")
             note_color = options.get("note_color")
+            print_all = options.get("print_all")
             #print("Title:", title)
             #print(fromm, too, stepp)
 
@@ -2210,8 +2211,10 @@ def do_sql(sql):
 
             colsp = data_profile(rowsi, colsi)
             profile_data = []
-            #profile_columns = [colsp[ci]["name"] for ci in colsp ] # print all profiled columns
-            profile_columns = [colsp[ci]["name"] for ci in colsp if ci in colsi] # print last profiled columns
+            if print_all:
+                profile_columns = [colsp[ci]["name"] for ci in colsp ] # print all profiled columns
+            else:
+                profile_columns = [colsp[ci]["name"] for ci in colsp if ci in colsi] # print last profiled columns
             profile_rows = ["Type", "QType", "Valids", "Nones", "Valid %", "Sum", "Min", "Max", "Mean", "Q1", "Median", "Q3", "Range", "IQR", "Variance", "STD", "Skew", "Unique", "FirstCat"]
             profile_rows_label = '(Stat)'
             stats = ["t", "qt", "v", "n", "v%", "sum", "min", "max", "mean", "q1", "q2", "q3", "ran", "iqr", "var", "std", "skw","uni", "fnq"]
@@ -2221,7 +2224,7 @@ def do_sql(sql):
                 profile_data.append([])
                 for ci in colsp:
                     #if ci > 0:  # rows_label, all profiled columns
-                    if ci > 0 and ci in colsi:  # rows_label, ast profiled columns
+                    if ci > 0 and (ci in colsi or print_all):  # rows_label, all or last profiled columns
                         if stat == "v%":
                             if (colsp[ci]["v"] + colsp[ci]["n"]) > 0:
                                 profile_data[i].append(round(100 * colsp[ci]["v"] / (colsp[ci]["v"] + colsp[ci]["n"]), 2))
@@ -2285,7 +2288,7 @@ def do_sql(sql):
                 profile_rows.append("Cat " + str(i + 1) + "_1")
                 profile_data.append([])
                 for ci in colsp:
-                    if ci > 0:  # rows_label
+                    if ci > 0 and (ci in colsi or print_all):  # rows_label, all or last profiled columns
                         if i < len(colsp[ci]["c"]):
                             #profile_data[i + minc].append(str(list(colsp[ci]["c"].keys())[i]) + "(" + str(colsp[ci]["c"][list(colsp[ci]["c"].keys())[i]]) + ")")
                             profile_data[i*3 + minc].append(str(list(colsp[ci]["c"].keys())[i]))
@@ -2294,7 +2297,7 @@ def do_sql(sql):
                 profile_rows.append("Cat " + str(i + 1) + "_2")
                 profile_data.append([])
                 for ci in colsp:
-                    if ci > 0:  # rows_label
+                    if ci > 0 and (ci in colsi or print_all):  # rows_label, all or last profiled columns
                         if i < len(colsp[ci]["c"]):
                             #profile_data[i + minc].append(str(list(colsp[ci]["c"].keys())[i]) + "(" + str(colsp[ci]["c"][list(colsp[ci]["c"].keys())[i]]) + ")")
                             profile_data[i*3 + minc + 1].append(str(colsp[ci]["c"][list(colsp[ci]["c"].keys())[i]]))
@@ -2303,7 +2306,7 @@ def do_sql(sql):
                 profile_rows.append("Cat " + str(i + 1) + "_3")
                 profile_data.append([])
                 for ci in colsp:
-                    if ci > 0: # rows_label
+                    if ci > 0 and (ci in colsi or print_all):  # rows_label, all or last profiled columns
                         if i < len(colsp[ci]["c"]):
                             #profile_data[i + minc].append(str(list(colsp[ci]["c"].keys())[i]) + "(" + str(colsp[ci]["c"][list(colsp[ci]["c"].keys())[i]]) + ")")
                             profile_data[i*3 + minc + 2].append(str(round(100*colsp[ci]["c"][list(colsp[ci]["c"].keys())[i]]/colsp[ci]["v"],2)) + "%")
