@@ -344,7 +344,7 @@ command_options["load"]["default"] = [None]
 command_options["load"]["help1"] = "Help for command 'folder'"
 command_options["load"]["help2"] = ["Blabla1"]
 command_options["load"]["alternative"] = ["l"]
-command_options["load"]["altoption"] = [[["fn","f"]]
+command_options["load"]["altoption"] = [["fn","f"]]
 
 
 command_options["table"] = {}
@@ -356,6 +356,7 @@ command_options["table"]["help1"] = "Help for command 'folder'"
 command_options["table"]["help2"] = ["Blabla1"]
 command_options["table"]["alternative"] = ["table", "t"]
 command_options["table"]["altoption"] = [["tn","t"]]
+
 
 command_options["insert"] = {}
 command_options["insert"]["name"] = ["tablename"]
@@ -1862,6 +1863,142 @@ def do_sql(sql):
                         printRed("Elapsed time: " + str(timedelta(seconds=end-start)))
                         time.sleep(2)
                     else: break
+
+
+
+        elif command == "table":
+            tablename = options["tablename"]
+            #print(columns)
+            #print("\n" + "Insert:", tablename)
+
+            #print(db_version + sql.format(columns_print))
+            #print(columns, data)
+
+            sql = f"drop table if exists {tablename}"
+            print(sql)
+            try:
+                c = conn.cursor()
+                #print(columns_print)
+                #print(sql.format(columns_print))
+                c.execute(sql)
+                conn.commit()
+                print()
+                printInvGreen("! There are no data returned from this sql query !")
+            except Exception as e:
+                traceback.print_exc()
+                printInvRed(str(e))
+                if OK: OK = 2
+
+
+            columns_create = ""
+            #columns_create += "ida INTEGER PRIMARY KEY AUTOINCREMENT"
+            columns_create += "ida int"
+            #print(colsp[0])
+            for ci in colsp:
+                columns_create += f", {colsp[ci]['name']} "
+                if colsp[ci]["t"] == "Quantitative":
+                    if colsp[ci]["qt"] == "Int":
+                        columns_create += "int"
+                    elif colsp[ci]["qt"] == "Float":
+                        columns_create += "real"
+                    else:
+                        columns_create += "text"
+                else:
+                    columns_create += "text"
+
+            sql = f"create table {tablename} ({columns_create})"
+            print(sql)
+            try:
+                c = conn.cursor()
+                #print(columns_print)
+                #print(sql.format(columns_print))
+                c.execute(sql)
+                conn.commit()
+                print()
+                printInvGreen("! There are no data returned from this sql query !")
+            except Exception as e:
+                traceback.print_exc()
+                printInvRed(str(e))
+                if OK: OK = 2
+
+            part1 = ""
+            part2 = ""
+            if db_version[:7] == "Sqlite3":
+                for i, c in enumerate(columns):
+                    if i == 0:
+                        #part1 += '''{{0[{}]}}'''.format(str(i))
+                        part1 += f"{{0[{str(i)}]}}"
+                        #part2 += '''?'''.format(str(i))
+                        part2 += "?"
+                    else:
+                        part1 += f",{{0[{str(i)}]}}"
+                        part2 += ",?"
+                    #print(i)
+                sql = f'''insert into "{tablename}" ({part1}) values ({part2})'''
+                columns_print = []
+                for col in columns:
+                    columns_print.append(f'''"{col}"''')
+
+            elif db_version[:5] == "MySQL":
+                for i, c in enumerate(columns):
+                    if i == 0:
+                        part1 += f"{{0[{str(i)}]}}"
+                        part2 += "%s"
+                    else:
+                        part1 += f",{{0[{str(i)}]}}"
+                        part2 += ",%s"
+                    #print(i)
+                sql = f'''insert into `{tablename}` ({part1}) values ({part2})'''
+                columns_print = []
+                for col in columns:
+                    columns_print.append(f'''`{col}`''')
+
+            elif db_version[:10] == "PostgreSQL":
+                for i, c in enumerate(columns):
+                    if i == 0:
+                        part1 += f"{{0[{str(i)}]}}"
+                        part2 += "%s"
+                    else:
+                        part1 += f",{{0[{str(i)}]}}"
+                        part2 += ",%s"
+                    #print(i)
+                sql = f'''insert into "{tablename}" ({part1}) values ({part2})'''
+                columns_print = []
+                for col in columns:
+                    columns_print.append(f'''"{col}"''')
+
+            elif db_version[:5] == "MsSQL":
+                for i, c in enumerate(columns):
+                    if i == 0:
+                        part1 += f"{{0[{str(i)}]}}"
+                        part2 += "?"
+                    else:
+                        part1 += f",{{0[{str(i)}]}}"
+                        part2 += ",?"
+                    #print(i)
+                sql = f'''insert into "{tablename}" ({part1}) values ({part2})'''
+                columns_print = []
+                for col in columns:
+                    columns_print.append(f'''"{col}"''')
+
+            #print()
+            #print(db_version + sql)
+            print(db_version + sql.format(columns_print))
+            #print(columns, data)
+            try:
+                c = conn.cursor()
+                #print(columns_print)
+                #print(sql.format(columns_print))
+                c.executemany(sql.format(columns_print), data)
+                conn.commit()
+                print()
+                printInvGreen("! There are no data returned from this sql query !")
+            except Exception as e:
+                traceback.print_exc()
+                printInvRed(str(e))
+                if OK: OK = 2
+
+
 
         elif command == "insert":
             tablename = options["tablename"]
