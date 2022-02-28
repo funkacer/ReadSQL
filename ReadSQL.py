@@ -14,7 +14,7 @@ import sqlite3
 import traceback
 import socket
 import time
-from datetime import timedelta
+from datetime import timedelta, datetime
 import random
 
 from importlib.metadata import version
@@ -218,6 +218,34 @@ variables["$list"]["shorts"] = ["$l"]
 variables["$list"]["user"] = {}
 #a = "a"
 variables["$list"]["user"]["value"] = "[1,2,a]"
+
+variables["$date"] = {}
+variables["$date"]["shorts"] = ["$d"]
+variables["$date"]["user"] = {}
+variables["$date"]["user"]["value"] = "%Y-%m-%d"
+variables["$time"] = {}
+variables["$time"]["shorts"] = ["$t"]
+variables["$time"]["user"] = {}
+variables["$time"]["user"]["value"] = "%H:%M:%S"
+variables["$datetime"] = {}
+variables["$datetime"]["shorts"] = ["$dt"]
+variables["$datetime"]["user"] = {}
+variables["$datetime"]["user"]["value"] = "%Y-%m-%d %H:%M:%S"
+
+variables["$now"] = {}
+variables["$now"]["shorts"] = ["$n"]
+variables["$now"]["user"] = {}
+variables["$now"]["user"]["value"] = lambda x: datetime.now()
+
+print(datetime.strptime('24052010', "%d%m%Y").date())
+print(datetime.strptime('24.02.2021 19:39', "%d.%m.%Y %H:%M"))
+print(datetime.strptime('2. 2. 2021 9 : 9 : 9', "%d. %m. %Y %H : %M : %S"))
+
+
+'''
+import datetime
+datetime.datetime.strptime('24052010', "%d%m%Y").date()
+'''
 
 
 #variables["$a"] = 0
@@ -611,6 +639,79 @@ def data_profile(rowsi, colsi):
                         colsp[ci]['t'] = "Categorical"
                         if colsp[ci]['fnq'] is None:
                             colsp[ci]['fnq'] = data[ri-1][ci-1]
+                if colsp[ci]['v'] == 1 and colsp[ci]['t'] == "Categorical":
+                    # try parse date firsttime
+                    try:
+                        a = datetime.strptime(data[ri-1][ci-1], variables["$datetime"]["user"]["value"])
+                        #print("Datime firsttime:", a)
+                        colsp[ci]['t'] = "Datetime"
+                        colsp[ci]['min'] = a
+                        colsp[ci]['max'] = a
+                        colsp[ci]['fnq'] = None
+                    except Exception as e:
+                        traceback.print_exc()
+                        try:
+                            a = datetime.strptime(data[ri-1][ci-1], variables["$date"]["user"]["value"])
+                            #print("Datime firsttime:", a)
+                            colsp[ci]['t'] = "Date"
+                            colsp[ci]['min'] = a
+                            colsp[ci]['max'] = a
+                            colsp[ci]['fnq'] = None
+                        except Exception as e:
+                            traceback.print_exc()
+                            try:
+                                a = datetime.strptime(data[ri-1][ci-1], variables["$time"]["user"]["value"])
+                                #print("Datime firsttime:", a)
+                                colsp[ci]['t'] = "Time"
+                                colsp[ci]['min'] = a
+                                colsp[ci]['max'] = a
+                                colsp[ci]['fnq'] = None
+                            except Exception as e:
+                                traceback.print_exc()
+                        
+                if colsp[ci]['v'] > 1 and colsp[ci]['t'] == "Datetime":
+                    #datetime
+                    try:
+                        a = datetime.strptime(data[ri-1][ci-1], variables["$datetime"]["user"]["value"])
+                        #print("Datime:", a)
+                        if a < colsp[ci]['min']:
+                            colsp[ci]['min'] = a
+                        elif a > colsp[ci]['max']:
+                            colsp[ci]['max'] = a
+                    except Exception as e:
+                        traceback.print_exc()
+                        colsp[ci]['t'] = "Categorical"
+                        if colsp[ci]['fnq'] is None:
+                            colsp[ci]['fnq'] = data[ri-1][ci-1]
+                elif colsp[ci]['v'] > 1 and colsp[ci]['t'] == "Date":
+                    #datetime
+                    try:
+                        a = datetime.strptime(data[ri-1][ci-1], variables["$date"]["user"]["value"])
+                        #print("Datime:", a)
+                        if a < colsp[ci]['min']:
+                            colsp[ci]['min'] = a
+                        elif a > colsp[ci]['max']:
+                            colsp[ci]['max'] = a
+                    except Exception as e:
+                        traceback.print_exc()
+                        colsp[ci]['t'] = "Categorical"
+                        if colsp[ci]['fnq'] is None:
+                            colsp[ci]['fnq'] = data[ri-1][ci-1]
+                elif colsp[ci]['v'] > 1 and colsp[ci]['t'] == "Time":
+                    #datetime
+                    try:
+                        a = datetime.strptime(data[ri-1][ci-1], variables["$time"]["user"]["value"])
+                        #print("Datime:", a)
+                        if a < colsp[ci]['min']:
+                            colsp[ci]['min'] = a
+                        elif a > colsp[ci]['max']:
+                            colsp[ci]['max'] = a
+                    except Exception as e:
+                        traceback.print_exc()
+                        colsp[ci]['t'] = "Categorical"
+                        if colsp[ci]['fnq'] is None:
+                            colsp[ci]['fnq'] = data[ri-1][ci-1]
+                        
                 if data[ri-1][ci-1] not in colsp[ci]['c']:
                     colsp[ci]['c'][data[ri-1][ci-1]] = 1
                 else:
@@ -648,6 +749,13 @@ def data_profile(rowsi, colsi):
             for i in colsp[ci]['m']:
                 colsp[ci]['smd2'] += (i - colsp[ci]['mean'])**2
                 colsp[ci]['smd3'] += (i - colsp[ci]['mean'])**3
+        elif colsp[ci]['v'] > 0 and (colsp[ci]['t'] == "Datetime" or colsp[ci]['t'] == "Date" or colsp[ci]['t'] == "Time"):
+            colsp[ci]['qt'] = None
+            colsp[ci]['sum'] = None
+            colsp[ci]['mean'] = None
+            colsp[ci]['q1'] = None
+            colsp[ci]['q2'] = None
+            colsp[ci]['q3'] = None
         else:
             colsp[ci]['t'] = "Categorical"
             colsp[ci]['qt'] = None
@@ -687,8 +795,8 @@ def data_profile(rowsi, colsi):
 
 def data_width(rowsi, colsi, data, columns, rows, rows_label):
     #print("Len rowsi", len(rowsi))
-    print("Colsi", colsi)
-    print(data)
+    #print("Colsi", colsi)
+    #print(data)
     nrows = len(data)
     ncols = len(columns)
     colsp = {}
@@ -1895,6 +2003,12 @@ def do_sql(sql):
                             columns_create += "real"
                         else:
                             columns_create += "text"
+                    elif colsp[ci]["t"] == "Datetime":
+                        columns_create += "datetime"
+                    elif colsp[ci]["t"] == "Date":
+                        columns_create += "date"
+                    elif colsp[ci]["t"] == "Time":
+                        columns_create += "time"
                     else:
                         columns_create += "text"
                 sql2 = f'''create table "{tablename}" ({columns_create})'''
@@ -2378,7 +2492,7 @@ def do_sql(sql):
                             else:
                                 profile_data[i].append("-")
                         elif stat == "ran":
-                            if colsp[ci]["max"] and colsp[ci]["max"]:
+                            if colsp[ci]["min"] and colsp[ci]["max"] and colsp[ci]["t"] == "Quantitative":
                                 profile_data[i].append(round(colsp[ci]["max"] - colsp[ci]["min"], 2))
                             else:
                                 profile_data[i].append("-")
