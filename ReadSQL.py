@@ -714,7 +714,8 @@ def data_profile(rowsi, colsi):
                                 traceback.print_exc()
                                 try:
                                     a = datetime.strptime(data[ri-1][ci-1], variables["$time"]["user"]["value"])
-                                    #print("Datime firsttime:", a)
+                                    #print("Datime firsttime:", a.hour, a.minute, a.second)
+                                    a = timedelta(days = 0, hours = a.hour, minutes = a.minute, seconds = a.second)
                                     colsp[ci]['t'] = "Time"
                                     colsp[ci]['min'] = a
                                     colsp[ci]['max'] = a
@@ -755,6 +756,7 @@ def data_profile(rowsi, colsi):
                         try:
                             a = datetime.strptime(data[ri-1][ci-1], variables["$time"]["user"]["value"])
                             #print("Datime:", a)
+                            a = timedelta(days = 0, hours = a.hour, minutes = a.minute, seconds = a.second)
                             if a < colsp[ci]['min']:
                                 colsp[ci]['min'] = a
                             elif a > colsp[ci]['max']:
@@ -2428,7 +2430,10 @@ def do_sql(sql):
         elif command == "data select easy" or command == "data select":
 
             if not data_old and not columns_old:
-                data_old = data.copy()
+                if isinstance(data, tuple):
+                    data_old = list(data).copy()
+                else:
+                    data_old = data.copy()
                 columns_old = columns.copy()
 
             fromm = options["from"]
