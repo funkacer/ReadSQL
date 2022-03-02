@@ -175,6 +175,7 @@ variables["$all"]["data"] = {}
 variables["$all"]["data"]["value"] = 0
 variables["$all"]["data"]["print"] = {}
 variables["$all"]["data"]["print data"] = {}
+variables["$all"]["data"]["print data all"] = {}
 variables["$all"]["data"]["print data easy"] = {}
 #variables["$all"]["print data"]["print data easy"]["what"] = []
 variables["$all"]["data"]["data"] = {}
@@ -232,15 +233,21 @@ variables["$datetime"]["shorts"] = ["$dt"]
 variables["$datetime"]["user"] = {}
 variables["$datetime"]["user"]["value"] = "%Y-%m-%d %H:%M:%S"
 
+variables["$decimal_separator"] = {}
+variables["$decimal_separator"]["shorts"] = ["$ds"]
+variables["$decimal_separator"]["user"] = {}
+variables["$decimal_separator"]["user"]["value"] = "."
+variables["$thousands_separator"] = {}
+variables["$thousands_separator"]["shorts"] = ["$ts"]
+variables["$thousands_separator"]["user"] = {}
+variables["$thousands_separator"]["user"]["value"] = ","
+
 variables["$now"] = {}
 variables["$now"]["shorts"] = ["$n"]
 variables["$now"]["user"] = {}
 variables["$now"]["user"]["value"] = lambda x: datetime.now()
 
-print(datetime.strptime('24052010', "%d%m%Y").date())
-print(datetime.strptime('24.02.2021 19:39', "%d.%m.%Y %H:%M"))
-print(datetime.strptime('2. 2. 2021 9 : 9 : 9', "%d. %m. %Y %H : %M : %S"))
-
+print((variables["$now"]["user"]["value"]))
 
 '''
 import datetime
@@ -407,6 +414,16 @@ command_options["print"]["help2"] = ["Bla1","Bla2","Bla3","Bla4","Bla5","Bla6"]
 command_options["print"]["alternative"] = ["print", "p"]
 command_options["print"]["altoption"] = [["f"], ["t"], ["s"], ["r"], ["l"], ["c"]]
 
+command_options["print data all"] = {}
+command_options["print data all"]["name"] = ["from", "to", "step", "random", "list", "columns", "nones", "nones_option", "title", "note", "title_color", "note_color"]
+command_options["print data all"]["required"] = [False, False, False, False, False, False, False, False, False, False, False, False]
+command_options["print data all"]["type"] = ["int", "int", "int", "int", "intlist", "strlist", "strlist", ["any","all","none"], "str", "str", "int", "int"]
+command_options["print data all"]["default"] = [0, "$all", 1, 0, "[]", "[]", "[]", "any", None, None, None, None]
+command_options["print data all"]["help1"] = "Help for command 'folder'"
+command_options["print data all"]["help2"] = ["Bla1","Bla2","Bla3","Bla4","Bla5","Bla6","Bla7","Bla8","Bla9","Bla10","Bla11","Bla12"]
+command_options["print data all"]["alternative"] = ["print data all", "pda"]
+command_options["print data all"]["altoption"] = [["f"], ["t"], ["s"], ["r"], ["l"], ["c"], ["nulls", "ns", "n"], ["no"], ["tt"], ["nt"], ["tc"], ["nc"]]
+
 command_options["print data easy"] = {}
 command_options["print data easy"]["name"] = ["from", "to", "step", "random", "list", "columns", "nones", "nones_option", "title", "note", "title_color", "note_color"]
 command_options["print data easy"]["required"] = [False, False, False, False, False, False, False, False, False, False, False, False]
@@ -414,7 +431,7 @@ command_options["print data easy"]["type"] = ["int", "int", "int", "int", "intli
 command_options["print data easy"]["default"] = [0, 0, 1, 0, "[]", "[]", "[]", "any", None, None, None, None]
 command_options["print data easy"]["help1"] = "Help for command 'folder'"
 command_options["print data easy"]["help2"] = ["Bla1","Bla2","Bla3","Bla4","Bla5","Bla6","Bla7","Bla8","Bla9","Bla10","Bla11","Bla12"]
-command_options["print data easy"]["alternative"] = ["print data", "pd",  "p"]
+command_options["print data easy"]["alternative"] = ["print data", "pd"]
 command_options["print data easy"]["altoption"] = [["f"], ["t"], ["s"], ["r"], ["l"], ["c"], ["nulls", "ns", "n"], ["no"], ["tt"], ["nt"], ["tc"], ["nc"]]
 
 command_options["print data"] = {}
@@ -670,7 +687,9 @@ def data_profile(rowsi, colsi):
                 else:
                     if colsp[ci]['t'] == "Quantitative":
                         try:
-                            a = float(data[ri-1][ci-1])
+                            if variables["$decimal_separator"]["user"]["value"] != ".": a = a.replace(variables["$decimal_separator"]["user"]["value"], '.')
+                            if variables["$thousands_separator"]["user"]["value"] in a: a = a.replace(variables["$thousands_separator"]["user"]["value"], '')
+                            a = float(a)
                             #print(a)
                             if colsp[ci]['qt'] == "Int":
                                 b = int(a)
@@ -704,7 +723,7 @@ def data_profile(rowsi, colsi):
                         except Exception as e:
                             traceback.print_exc()
                             try:
-                                a = datetime.strptime(data[ri-1][ci-1], variables["$date"]["user"]["value"])
+                                a = datetime.strptime(data[ri-1][ci-1], variables["$date"]["user"]["value"]).date()
                                 #print("Datime firsttime:", a)
                                 colsp[ci]['t'] = "Date"
                                 colsp[ci]['min'] = a
@@ -740,7 +759,7 @@ def data_profile(rowsi, colsi):
                     elif colsp[ci]['v'] > 1 and colsp[ci]['t'] == "Date":
                         #datetime
                         try:
-                            a = datetime.strptime(data[ri-1][ci-1], variables["$date"]["user"]["value"])
+                            a = datetime.strptime(data[ri-1][ci-1], variables["$date"]["user"]["value"]).date()
                             #print("Datime:", a)
                             if a < colsp[ci]['min']:
                                 colsp[ci]['min'] = a
@@ -766,6 +785,8 @@ def data_profile(rowsi, colsi):
                             colsp[ci]['t'] = "Categorical"
                             if colsp[ci]['fnq'] is None:
                                 colsp[ci]['fnq'] = data[ri-1][ci-1]
+
+                    data[ri-1][ci-1] = a
 
                 if data[ri-1][ci-1] not in colsp[ci]['c']:
                     colsp[ci]['c'][data[ri-1][ci-1]] = 1
@@ -836,6 +857,7 @@ def data_profile(rowsi, colsi):
     variables["$columns_quantitative"]["data"]["value"] = [colsp[ci]['name'] for ci in colsi if colsp[ci]['t'] == "Quantitative"]
     variables["$columns_quantitative"]["data"]["print"] = {}
     variables["$columns_quantitative"]["data"]["print data"] = {}
+    variables["$columns_quantitative"]["data"]["print data all"] = {}
     variables["$columns_quantitative"]["data"]["print data easy"] = {}
     variables["$columns_quantitative"]["data"]["data"] = {}
     variables["$columns_quantitative"]["data"]["data select"] = {}
@@ -1232,9 +1254,9 @@ def parseVariable(command, options, n, vartest):
     variable = None
     #vartest = str(options[n])
     if len (vartest) > 0:
-        if vartest[0] not in ["0","1","2","3","5","6","7","8","9","-","+"," ","'",'"']:
+        if vartest[0] == "$" :
             #if vartest[0] == "'" and vartest[-1] == "'": vartest = vartest[1:-1]
-            if vartest[0] != "$": vartest = "$" + vartest #variable start with "$", user can omit like in print data all
+            #if vartest[0] != "$": vartest = "$" + vartest #variable start with "$", user can omit like in print data all
             #print("vartest", vartest)
             contexts = []
             if vartest in variables:
@@ -2272,9 +2294,9 @@ def do_sql(sql):
                 printInvRed(str(e))
                 if OK: OK = 2
 
-        elif command == "print" or command == "print data" or command == "print data easy" or command == "print columns" or command == "print history":
+        elif command == "print" or command == "print data" or command == "print data all" or command == "print data easy" or command == "print columns" or command == "print history":
             if command == "print columns": options["what"] = "columns"
-            if command == "print" or command == "print data" or command == "print data easy": options["what"] = "data"
+            if command == "print" or command == "print data" or command == "print data all" or command == "print data easy": options["what"] = "data"
             if command == "print history": options["what"] = "history"
             if options["what"] == "c": options["what"] = "columns"
             if options["what"] == "d": options["what"] = "data"
