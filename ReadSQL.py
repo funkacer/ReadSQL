@@ -1,3 +1,4 @@
+#conn = sqlite3.connect(":memory:", detect_types=sqlite3.PARSE_DECLTYPES) PARSE_COLNAMES
 #import socket
 #print(socket.gethostname())
 
@@ -210,10 +211,14 @@ variables["$green"] = {}
 variables["$green"]["shorts"] = ["$g"]
 variables["$green"]["user"] = {}
 variables["$green"]["user"]["value"] = 2
-variables["$invgreen"] = {}
-variables["$green"]["shorts"] = ["$invg","$ig"]
-variables["$invgreen"]["user"] = {}
-variables["$invgreen"]["user"]["value"] = 20255
+variables["$invGreen"] = {}
+variables["$invGreen"]["shorts"] = ["$invgreen","$invg","$ig"]
+variables["$invGreen"]["user"] = {}
+variables["$invGreen"]["user"]["value"] = 20255
+variables["$invRed"] = {}
+variables["$invRed"]["shorts"] = ["$invred","$invr","$ir"]
+variables["$invRed"]["user"] = {}
+variables["$invRed"]["user"]["value"] = 10255
 variables["$list"] = {}
 variables["$list"]["shorts"] = ["$l"]
 variables["$list"]["user"] = {}
@@ -627,12 +632,12 @@ def data_profile(rowsi, colsi):
         colsp[ci]['smd3'] = 0
     for ri in rowsi:
         for ci in colsi:
-            #print(data[ri-1][ci-1], data[ri-1][ci-1].__class__)
             w = len(str(data[ri-1][ci-1]))
             if w > colsp[ci]['w']: colsp[ci]['w'] = w
             if data[ri-1][ci-1] is not None:
                 colsp[ci]['v'] += 1
                 a = data[ri-1][ci-1]
+                if colsp[ci]['v'] == 1: print(colsp[ci]['name'], a, a.__class__)
                 if isinstance (a, int):
                     if colsp[ci]['v'] == 1:
                         colsp[ci]['min'] = a
@@ -786,6 +791,7 @@ def data_profile(rowsi, colsi):
                             if colsp[ci]['fnq'] is None:
                                 colsp[ci]['fnq'] = data[ri-1][ci-1]
 
+                    if isinstance(data[ri-1], tuple): data[ri-1] = list(data[ri-1])
                     data[ri-1][ci-1] = a
 
                 if data[ri-1][ci-1] not in colsp[ci]['c']:
@@ -1688,7 +1694,7 @@ def do_sql(sql):
             if options["filename"] == ":memory:":
                 print("\n" + "Using database in memory. Save or loose!")
                 try:
-                    conn = sqlite3.connect(":memory:")
+                    conn = sqlite3.connect(":memory:", detect_types=sqlite3.PARSE_DECLTYPES)
                     db_version = "Sqlite3 (memory): "
                 except Exception as e:
                     traceback.print_exc()
@@ -1701,7 +1707,7 @@ def do_sql(sql):
                     print("Creating database '{}'.".format(full_filename))
                 try:
                     #conn = sqlite3.connect(full_filename, isolation_level=None)
-                    conn = sqlite3.connect(full_filename)
+                    conn = sqlite3.connect(full_filename, detect_types=sqlite3.PARSE_DECLTYPES)
                     db_version = f"Sqlite3 ({full_filename}): "
                 except Exception as e:
                     traceback.print_exc()
@@ -1842,6 +1848,7 @@ def do_sql(sql):
                 OK = 2
 
         elif command == "read":
+            colsp = {}  #reset columns profile
             read_filename = options["filename"]
             read_delimiter = options["delimiter"]
             if options.get("lines"):
@@ -2085,9 +2092,20 @@ def do_sql(sql):
                     elif colsp[ci]["t"] == "Date":
                         columns_create += "date"
                     elif colsp[ci]["t"] == "Time":
+                        # sqlite does not use timedelta for time format, min datetime is 0001-01-01 0:0:0:
                         columns_create += "time"
+                        for ri in range(1, len(data) + 1):
+                            #data[ri-1][ci-1] = datetime.min + data[ri-1][ci-1] # saves 0001-01-01 + timedelta
+                            #data[ri-1][ci-1] = str(data[ri-1][ci-1])
+                            data[ri-1][ci-1] = str(datetime.min + data[ri-1][ci-1])[11:]    #time without date starting 0/1/2 (02:02:02, not 2:02:02)
                     else:
                         columns_create += "text"
+                        for ri in range(1, len(data) + 1):
+                            if isinstance(data[ri-1][ci-1], timedelta):
+                                data[ri-1][ci-1] = str(datetime.min + data[ri-1][ci-1])[11:]    #time without date starting 0/1/2 (02:02:02, not 2:02:02)
+                            elif not isinstance(data[ri-1][ci-1], str):
+                                data[ri-1][ci-1] = str(data[ri-1][ci-1])
+                                print(data[ri-1][ci-1])
                 sql2 = f'''create table "{tablename}" ({columns_create})'''
                 for i, c in enumerate(columns):
                     if i == 0:
