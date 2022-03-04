@@ -388,14 +388,14 @@ command_options["load"]["altoption"] = [["fn","f"]]
 
 
 command_options["table"] = {}
-command_options["table"]["name"] = ["tablename", "drop_if_exists"]
-command_options["table"]["required"] = [True, False]
-command_options["table"]["type"] = ["str", "bool"]
-command_options["table"]["default"] = [None, False]
+command_options["table"]["name"] = ["tablename", "drop_if_exists", "id"]
+command_options["table"]["required"] = [True, False, False]
+command_options["table"]["type"] = ["str", "bool", "str"]
+command_options["table"]["default"] = [None, False, None]
 command_options["table"]["help1"] = "Help for command 'folder'"
-command_options["table"]["help2"] = ["Blabla1", "Blabla2"]
+command_options["table"]["help2"] = ["Blabla1", "Blabla2", "Blabla3"]
 command_options["table"]["alternative"] = ["table", "t"]
-command_options["table"]["altoption"] = [["tn","t"], ["die","de","d"]]
+command_options["table"]["altoption"] = [["tn","t"], ["die","de","dt","d"], ["i"]]
 
 
 command_options["insert"] = {}
@@ -2061,6 +2061,7 @@ def do_sql(sql):
         elif command == "table":
             tablename = options["tablename"]
             table_drop = options["drop_if_exists"]
+            table_id = options.get("id")
             #print(columns)
             #print("\n" + "Insert:", tablename)
 
@@ -2075,11 +2076,15 @@ def do_sql(sql):
             if db_version[:7] == "Sqlite3":
                 sql1 = f'''drop table if exists "{tablename}"'''
                 #columns_create += "ida INTEGER PRIMARY KEY AUTOINCREMENT"
-                columns_create += "ida int"
-                for ci in colsp:
+                if table_id is not None:
+                    columns_create += table_id + " INTEGER PRIMARY KEY AUTOINCREMENT"
+                for i, ci in enumerate(colsp):
                     col = colsp[ci]['name']
                     columns_print.append(f'''"{col}"''')
-                    columns_create += f''', "{col}" '''
+                    if table_id is None and i == 0:
+                        columns_create += f'''"{col}" '''
+                    else:
+                        columns_create += f''', "{col}" '''
                     if colsp[ci]["t"] == "Quantitative":
                         if colsp[ci]["qt"] == "Int":
                             columns_create += "int"
@@ -2095,19 +2100,21 @@ def do_sql(sql):
                         # sqlite does not use timedelta for time format, min datetime is 0001-01-01 0:0:0:
                         columns_create += "time"
                         for ri in range(1, len(data) + 1):
-                            #data[ri-1][ci-1] = datetime.min + data[ri-1][ci-1] # saves 0001-01-01 + timedelta
-                            #data[ri-1][ci-1] = str(data[ri-1][ci-1])
-                            data[ri-1][ci-1] = str(datetime.min + data[ri-1][ci-1])[11:]    #time without date starting 0/1/2 (02:02:02, not 2:02:02)
-                    else:
-                        columns_create += "text"
-                        for ri in range(1, len(data) + 1):
+                            if isinstance(data[ri-1], tuple): data[ri-1] = list(data[ri-1])
                             if isinstance(data[ri-1][ci-1], timedelta):
                                 data[ri-1][ci-1] = str(datetime.min + data[ri-1][ci-1])[11:]    #time without date starting 0/1/2 (02:02:02, not 2:02:02)
                             elif not isinstance(data[ri-1][ci-1], str):
                                 data[ri-1][ci-1] = str(data[ri-1][ci-1])
-                                print(data[ri-1][ci-1])
-                sql2 = f'''create table "{tablename}" ({columns_create})'''
-                for i, c in enumerate(columns):
+                                #print(data[ri-1][ci-1])
+                    else:
+                        columns_create += "text"
+                        for ri in range(1, len(data) + 1):
+                            if isinstance(data[ri-1], tuple): data[ri-1] = list(data[ri-1])
+                            if isinstance(data[ri-1][ci-1], timedelta):
+                                data[ri-1][ci-1] = str(datetime.min + data[ri-1][ci-1])[11:]    #time without date starting 0/1/2 (02:02:02, not 2:02:02)
+                            elif not isinstance(data[ri-1][ci-1], str):
+                                data[ri-1][ci-1] = str(data[ri-1][ci-1])
+                                #print(data[ri-1][ci-1])
                     if i == 0:
                         #part1 += '''{{0[{}]}}'''.format(str(i))
                         part1 += f"{{0[{str(i)}]}}"
@@ -2117,16 +2124,21 @@ def do_sql(sql):
                         part1 += f",{{0[{str(i)}]}}"
                         part2 += ",?"
                     #print(i)
+                sql2 = f'''create table "{tablename}" ({columns_create})'''
                 sql3 = f'''insert into "{tablename}" ({part1}) values ({part2})'''
 
             elif db_version[:5] == "MySQL":
                 sql1 = f'''drop table if exists `{tablename}`'''
                 #columns_create += "ida INTEGER PRIMARY KEY AUTOINCREMENT"
-                columns_create += "ida int"
-                for ci in colsp:
+                if table_id is not None:
+                    columns_create += table_id + " INTEGER PRIMARY KEY AUTO_INCREMENT"
+                for i, ci in enumerate(colsp):
                     col = colsp[ci]['name']
                     columns_print.append(f'''`{col}`''')
-                    columns_create += f''', `{col}` '''
+                    if table_id is None and i == 0:
+                        columns_create += f'''`{col}` '''
+                    else:
+                        columns_create += f''', `{col}` '''
                     if colsp[ci]["t"] == "Quantitative":
                         if colsp[ci]["qt"] == "Int":
                             columns_create += "int"
@@ -2142,8 +2154,6 @@ def do_sql(sql):
                         columns_create += "time"
                     else:
                         columns_create += "text"
-                sql2 = f'''create table `{tablename}` ({columns_create})'''
-                for i, c in enumerate(columns):
                     if i == 0:
                         part1 += f"{{0[{str(i)}]}}"
                         part2 += "%s"
@@ -2151,6 +2161,7 @@ def do_sql(sql):
                         part1 += f",{{0[{str(i)}]}}"
                         part2 += ",%s"
                     #print(i)
+                sql2 = f'''create table `{tablename}` ({columns_create})'''
                 sql3 = f'''insert into `{tablename}` ({part1}) values ({part2})'''
 
             elif db_version[:10] == "PostgreSQL":
@@ -2247,6 +2258,10 @@ def do_sql(sql):
                     else:
                         part1 += f",{{0[{str(i)}]}}"
                         part2 += ",?"
+                    for ri in range(1, len(data) + 1):
+                        if isinstance(data[ri-1], tuple): data[ri-1] = list(data[ri-1])
+                        if isinstance(data[ri-1][i], timedelta):
+                            data[ri-1][i] = str(datetime.min + data[ri-1][i])[11:]    #time without date starting 0/1/2 (02:02:02, not 2:02:02)
                     #print(i)
                 sql = f'''insert into "{tablename}" ({part1}) values ({part2})'''
                 columns_print = []
@@ -2470,10 +2485,7 @@ def do_sql(sql):
         elif command == "data select easy" or command == "data select":
 
             if not data_old and not columns_old:
-                if isinstance(data, tuple):
-                    data_old = list(data).copy()
-                else:
-                    data_old = data.copy()
+                data_old = data.copy()
                 columns_old = columns.copy()
 
             fromm = options["from"]
@@ -2775,7 +2787,11 @@ def do_sql(sql):
         finally:
             if conn: conn.commit()
         if data_new or columns_new:
-            data = data_new
+            if isinstance(data_new, tuple):
+                #print("Converting to list")
+                data = list(data_new)
+            else:
+                data = data_new
             columns = columns_new
             data_old = None
             columns_old = None
