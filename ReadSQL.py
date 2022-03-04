@@ -317,14 +317,14 @@ command_options["set variable"]["alternative"] = ["set", "s"]
 command_options["set variable"]["altoption"] = [["w"], ["n"]]
 
 command_options["connect sqlite3"] = {}
-command_options["connect sqlite3"]["name"] = ["filename"]
-command_options["connect sqlite3"]["required"] = [False]
-command_options["connect sqlite3"]["type"] = ["str"]
-command_options["connect sqlite3"]["default"] = [":memory:"]
+command_options["connect sqlite3"]["name"] = ["filename", "parse_formats"]
+command_options["connect sqlite3"]["required"] = [False, False]
+command_options["connect sqlite3"]["type"] = ["str", "bool"]
+command_options["connect sqlite3"]["default"] = [":memory:", True]
 command_options["connect sqlite3"]["help1"] = "Help for command 'connect'"
-command_options["connect sqlite3"]["help2"] = ["Blabla1"]
+command_options["connect sqlite3"]["help2"] = ["Blabla1","Blabla2"]
 command_options["connect sqlite3"]["alternative"] = ["connect sqlite3", "connect sqlite", "connect sql3", "connect sql", "connect s", "c sqlite3", "c sqlite", "c sql3", "c sql", "c s",  "csqlite3", "csqlite", "csql3", "csql", "cs"]
-command_options["connect sqlite3"]["altoption"] = [["f"]]
+command_options["connect sqlite3"]["altoption"] = [["fn","f"], ["pf","p"]]
 
 command_options["connect mysql"] = {}
 command_options["connect mysql"]["name"] = ["database", "user", "password", "host", "port"]
@@ -1507,8 +1507,12 @@ def parseCommand(command_line):
                     options[n] = lst_new
                     #options[n] = lst_old
                 elif t == "bool":
-                    if options[n] == True or options[n] == "True" or options[n] == "1": options[n] = True
-                    if options[n] == False or options[n] == "False" or options[n] == "0": options[n] = False
+                    if options[n] == True or options[n] == "True" or options[n] == "true" or options[n] == "1":
+                        options[n] = True
+                    elif options[n] == False or options[n] == "False" or options[n] == "false" or options[n] == "0":
+                        options[n] = False
+                    else:
+                        options[n] = d
                 elif t == "dictlist":
                     var, opt = parseVariable(command, options, n, str(options[n]))
                     if var is not None:
@@ -1688,13 +1692,16 @@ def do_sql(sql):
                 else:
                     print(note)
 
-
         elif command == "connect sqlite3":
             # , isolation_level=None == autocommit
+            parse_formats = options.get("parse_formats")
             if options["filename"] == ":memory:":
                 print("\n" + "Using database in memory. Save or loose!")
                 try:
-                    conn = sqlite3.connect(":memory:", detect_types=sqlite3.PARSE_DECLTYPES)
+                    if parse_formats:
+                        conn = sqlite3.connect(":memory:", detect_types=sqlite3.PARSE_DECLTYPES)
+                    else:
+                        conn = sqlite3.connect(":memory:")
                     db_version = "Sqlite3 (memory): "
                 except Exception as e:
                     traceback.print_exc()
@@ -1707,7 +1714,10 @@ def do_sql(sql):
                     print("Creating database '{}'.".format(full_filename))
                 try:
                     #conn = sqlite3.connect(full_filename, isolation_level=None)
-                    conn = sqlite3.connect(full_filename, detect_types=sqlite3.PARSE_DECLTYPES)
+                    if parse_formats:
+                        conn = sqlite3.connect(full_filename, detect_types=sqlite3.PARSE_DECLTYPES)
+                    else:
+                        conn = sqlite3.connect(full_filename)
                     db_version = f"Sqlite3 ({full_filename}): "
                 except Exception as e:
                     traceback.print_exc()
