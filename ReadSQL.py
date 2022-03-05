@@ -804,7 +804,7 @@ def data_profile(rowsi, colsi):
                             if colsp[ci]['fnq'] is None:
                                 colsp[ci]['fnq'] = data[ri-1][ci-1]
 
-                if data[ri-1][ci-1] != a: 
+                if data[ri-1][ci-1] != a:
                     if isinstance(data[ri-1], tuple): data[ri-1] = list(data[ri-1])
                     data[ri-1][ci-1] = a
 
@@ -2125,13 +2125,8 @@ def do_sql(sql):
                         columns_create += "time"
                         for ri in range(1, len(data) + 1):
                             if isinstance(data[ri-1], tuple): data[ri-1] = list(data[ri-1])
-                            if isinstance(data[ri-1][ci-1], datetime.timedelta):
-                                data[ri-1][ci-1] = str(datetime.datetime.min + data[ri-1][ci-1])[11:]    #time without date starting 0/1/2 (02:02:02, not 2:02:02)
-                            elif not isinstance(data[ri-1][ci-1], str):
-                                data[ri-1][ci-1] = str(data[ri-1][ci-1])
-                                #print(data[ri-1][ci-1])
-                    else:
-                        columns_create += "text"
+                            data[ri-1][ci-1] = str(data[ri-1][ci-1])
+                        '''
                         for ri in range(1, len(data) + 1):
                             if isinstance(data[ri-1], tuple): data[ri-1] = list(data[ri-1])
                             if isinstance(data[ri-1][ci-1], datetime.timedelta):
@@ -2139,6 +2134,18 @@ def do_sql(sql):
                             elif not isinstance(data[ri-1][ci-1], str):
                                 data[ri-1][ci-1] = str(data[ri-1][ci-1])
                                 #print(data[ri-1][ci-1])
+                        '''
+                    else:
+                        columns_create += "text"
+                        '''
+                        for ri in range(1, len(data) + 1):
+                            if isinstance(data[ri-1], tuple): data[ri-1] = list(data[ri-1])
+                            if isinstance(data[ri-1][ci-1], datetime.timedelta):
+                                data[ri-1][ci-1] = str(datetime.datetime.min + data[ri-1][ci-1])[11:]    #time without date starting 0/1/2 (02:02:02, not 2:02:02)
+                            elif not isinstance(data[ri-1][ci-1], str):
+                                data[ri-1][ci-1] = str(data[ri-1][ci-1])
+                                #print(data[ri-1][ci-1])
+                        '''
                     if i == 0:
                         #part1 += '''{{0[{}]}}'''.format(str(i))
                         part1 += f"{{0[{str(i)}]}}"
@@ -2342,9 +2349,14 @@ def do_sql(sql):
                         part2 += ",?"
                     for ri in range(1, len(data) + 1):
                         if isinstance(data[ri-1], tuple): data[ri-1] = list(data[ri-1])
+                        data[ri-1][i] = str(data[ri-1][i])
+                    '''
+                    for ri in range(1, len(data) + 1):
+                        if isinstance(data[ri-1], tuple): data[ri-1] = list(data[ri-1])
                         if isinstance(data[ri-1][i], datetime.timedelta):
                             data[ri-1][i] = str(datetime.datetime.min + data[ri-1][i])[11:]    #time without date starting 0/1/2 (02:02:02, not 2:02:02)
                     #print(i)
+                    '''
                 sql = f'''insert into "{tablename}" ({part1}) values ({part2})'''
                 columns_print = []
                 for col in columns:
