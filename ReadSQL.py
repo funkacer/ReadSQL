@@ -15,7 +15,8 @@ import sqlite3
 import traceback
 import socket
 import time
-from datetime import timedelta, datetime, date
+import datetime
+#from datetime import timedelta, datetime, date, time
 import random
 
 from importlib.metadata import version
@@ -233,6 +234,8 @@ variables["$time"] = {}
 variables["$time"]["shorts"] = ["$t"]
 variables["$time"]["user"] = {}
 variables["$time"]["user"]["value"] = "%H:%M:%S"
+#variables["$time"]["user"]["value"] = "%H:%M:%S.%f0"
+#variables["$time"]["user"]["value"] = "%H:%M:%S.%f"
 variables["$datetime"] = {}
 variables["$datetime"]["shorts"] = ["$dt"]
 variables["$datetime"]["user"] = {}
@@ -250,7 +253,7 @@ variables["$thousands_separator"]["user"]["value"] = ","
 variables["$now"] = {}
 variables["$now"]["shorts"] = ["$n"]
 variables["$now"]["user"] = {}
-variables["$now"]["user"]["value"] = lambda x: datetime.now()
+variables["$now"]["user"]["value"] = lambda x: datetime.datetime.now()
 
 print((variables["$now"]["user"]["value"]))
 
@@ -662,7 +665,7 @@ def data_profile(rowsi, colsi):
                         colsp[ci]['max'] = a
                     colsp[ci]['sum'] += a
                     colsp[ci]['m'].append(a)
-                elif isinstance (a, datetime):
+                elif isinstance (a, datetime.datetime):
                     colsp[ci]['t'] = "Datetime"
                     if colsp[ci]['v'] == 1:
                         colsp[ci]['min'] = a
@@ -671,7 +674,7 @@ def data_profile(rowsi, colsi):
                         colsp[ci]['min'] = a
                     elif a > colsp[ci]['max']:
                         colsp[ci]['max'] = a
-                elif isinstance (a, date):
+                elif isinstance (a, datetime.date):
                     colsp[ci]['t'] = "Date"
                     if colsp[ci]['v'] == 1:
                         colsp[ci]['min'] = a
@@ -680,8 +683,18 @@ def data_profile(rowsi, colsi):
                         colsp[ci]['min'] = a
                     elif a > colsp[ci]['max']:
                         colsp[ci]['max'] = a
-                elif isinstance (a, timedelta):
+                elif isinstance (a, datetime.time):
                     colsp[ci]['t'] = "Time"
+                    if colsp[ci]['v'] == 1:
+                        colsp[ci]['min'] = a
+                        colsp[ci]['max'] = a
+                    elif a < colsp[ci]['min']:
+                        colsp[ci]['min'] = a
+                    elif a > colsp[ci]['max']:
+                        colsp[ci]['max'] = a
+                elif isinstance (a, datetime.timedelta):
+                    colsp[ci]['t'] = "Time"
+                    a = datetime.datetime.strptime(str(datetime.datetime.min + data[ri-1][ci-1])[11:], variables["$time"]["user"]["value"]).time()
                     if colsp[ci]['v'] == 1:
                         colsp[ci]['min'] = a
                         colsp[ci]['max'] = a
@@ -719,7 +732,7 @@ def data_profile(rowsi, colsi):
                     if colsp[ci]['v'] == 1 and colsp[ci]['t'] == "Categorical":
                         # try parse date firsttime
                         try:
-                            a = datetime.strptime(data[ri-1][ci-1], variables["$datetime"]["user"]["value"])
+                            a = datetime.datetime.strptime(data[ri-1][ci-1], variables["$datetime"]["user"]["value"])
                             #print("Datime firsttime:", a)
                             colsp[ci]['t'] = "Datetime"
                             colsp[ci]['min'] = a
@@ -728,7 +741,7 @@ def data_profile(rowsi, colsi):
                         except Exception as e:
                             traceback.print_exc()
                             try:
-                                a = datetime.strptime(data[ri-1][ci-1], variables["$date"]["user"]["value"]).date()
+                                a = datetime.datetime.strptime(data[ri-1][ci-1], variables["$date"]["user"]["value"]).date()
                                 #print("Datime firsttime:", a)
                                 colsp[ci]['t'] = "Date"
                                 colsp[ci]['min'] = a
@@ -737,9 +750,9 @@ def data_profile(rowsi, colsi):
                             except Exception as e:
                                 traceback.print_exc()
                                 try:
-                                    a = datetime.strptime(data[ri-1][ci-1], variables["$time"]["user"]["value"])
+                                    a = datetime.datetime.strptime(data[ri-1][ci-1], variables["$time"]["user"]["value"]).time()
                                     #print("Datime firsttime:", a.hour, a.minute, a.second)
-                                    a = timedelta(days = 0, hours = a.hour, minutes = a.minute, seconds = a.second)
+                                    #a = datetime.timedelta(days = 0, hours = a.hour, minutes = a.minute, seconds = a.second)
                                     colsp[ci]['t'] = "Time"
                                     colsp[ci]['min'] = a
                                     colsp[ci]['max'] = a
@@ -750,7 +763,7 @@ def data_profile(rowsi, colsi):
                     if colsp[ci]['v'] > 1 and colsp[ci]['t'] == "Datetime":
                         #datetime
                         try:
-                            a = datetime.strptime(data[ri-1][ci-1], variables["$datetime"]["user"]["value"])
+                            a = datetime.datetime.strptime(data[ri-1][ci-1], variables["$datetime"]["user"]["value"])
                             #print("Datime:", a)
                             if a < colsp[ci]['min']:
                                 colsp[ci]['min'] = a
@@ -764,7 +777,7 @@ def data_profile(rowsi, colsi):
                     elif colsp[ci]['v'] > 1 and colsp[ci]['t'] == "Date":
                         #datetime
                         try:
-                            a = datetime.strptime(data[ri-1][ci-1], variables["$date"]["user"]["value"]).date()
+                            a = datetime.datetime.strptime(data[ri-1][ci-1], variables["$date"]["user"]["value"]).date()
                             #print("Datime:", a)
                             if a < colsp[ci]['min']:
                                 colsp[ci]['min'] = a
@@ -778,9 +791,9 @@ def data_profile(rowsi, colsi):
                     elif colsp[ci]['v'] > 1 and colsp[ci]['t'] == "Time":
                         #datetime
                         try:
-                            a = datetime.strptime(data[ri-1][ci-1], variables["$time"]["user"]["value"])
+                            a = datetime.datetime.strptime(data[ri-1][ci-1], variables["$time"]["user"]["value"]).time()
                             #print("Datime:", a)
-                            a = timedelta(days = 0, hours = a.hour, minutes = a.minute, seconds = a.second)
+                            #a = datetime.timedelta(days = 0, hours = a.hour, minutes = a.minute, seconds = a.second)
                             if a < colsp[ci]['min']:
                                 colsp[ci]['min'] = a
                             elif a > colsp[ci]['max']:
@@ -791,6 +804,7 @@ def data_profile(rowsi, colsi):
                             if colsp[ci]['fnq'] is None:
                                 colsp[ci]['fnq'] = data[ri-1][ci-1]
 
+                if data[ri-1][ci-1] != a: 
                     if isinstance(data[ri-1], tuple): data[ri-1] = list(data[ri-1])
                     data[ri-1][ci-1] = a
 
@@ -2060,9 +2074,9 @@ def do_sql(sql):
                     end = time.perf_counter()
                     print()
                     if OK_returned == 1:
-                        print("Elapsed time: " + str(timedelta(seconds=end-start)))
+                        print("Elapsed time: " + str(datetime.timedelta(seconds=end-start)))
                     elif OK_returned > 1:
-                        printRed("Elapsed time: " + str(timedelta(seconds=end-start)))
+                        printRed("Elapsed time: " + str(datetime.timedelta(seconds=end-start)))
                         time.sleep(2)
                     else: break
 
@@ -2111,8 +2125,8 @@ def do_sql(sql):
                         columns_create += "time"
                         for ri in range(1, len(data) + 1):
                             if isinstance(data[ri-1], tuple): data[ri-1] = list(data[ri-1])
-                            if isinstance(data[ri-1][ci-1], timedelta):
-                                data[ri-1][ci-1] = str(datetime.min + data[ri-1][ci-1])[11:]    #time without date starting 0/1/2 (02:02:02, not 2:02:02)
+                            if isinstance(data[ri-1][ci-1], datetime.timedelta):
+                                data[ri-1][ci-1] = str(datetime.datetime.min + data[ri-1][ci-1])[11:]    #time without date starting 0/1/2 (02:02:02, not 2:02:02)
                             elif not isinstance(data[ri-1][ci-1], str):
                                 data[ri-1][ci-1] = str(data[ri-1][ci-1])
                                 #print(data[ri-1][ci-1])
@@ -2120,8 +2134,8 @@ def do_sql(sql):
                         columns_create += "text"
                         for ri in range(1, len(data) + 1):
                             if isinstance(data[ri-1], tuple): data[ri-1] = list(data[ri-1])
-                            if isinstance(data[ri-1][ci-1], timedelta):
-                                data[ri-1][ci-1] = str(datetime.min + data[ri-1][ci-1])[11:]    #time without date starting 0/1/2 (02:02:02, not 2:02:02)
+                            if isinstance(data[ri-1][ci-1], datetime.timedelta):
+                                data[ri-1][ci-1] = str(datetime.datetime.min + data[ri-1][ci-1])[11:]    #time without date starting 0/1/2 (02:02:02, not 2:02:02)
                             elif not isinstance(data[ri-1][ci-1], str):
                                 data[ri-1][ci-1] = str(data[ri-1][ci-1])
                                 #print(data[ri-1][ci-1])
@@ -2175,7 +2189,32 @@ def do_sql(sql):
                 sql3 = f'''insert into `{tablename}` ({part1}) values ({part2})'''
 
             elif db_version[:10] == "PostgreSQL":
-                for i, c in enumerate(columns):
+                sql1 = f'''drop table if exists "{tablename}"'''
+                #columns_create += "ida INTEGER PRIMARY KEY AUTOINCREMENT"
+                if table_id is not None:
+                    columns_create += table_id + " SERIAL PRIMARY KEY"
+                for i, ci in enumerate(colsp):
+                    col = colsp[ci]['name']
+                    columns_print.append(f'''"{col}"''')
+                    if table_id is None and i == 0:
+                        columns_create += f'''"{col}" '''
+                    else:
+                        columns_create += f''', "{col}" '''
+                    if colsp[ci]["t"] == "Quantitative":
+                        if colsp[ci]["qt"] == "Int":
+                            columns_create += "int"
+                        elif colsp[ci]["qt"] == "Float":
+                            columns_create += "real"
+                        else:
+                            columns_create += "text"
+                    elif colsp[ci]["t"] == "Datetime":
+                        columns_create += "timestamp"
+                    elif colsp[ci]["t"] == "Date":
+                        columns_create += "date"
+                    elif colsp[ci]["t"] == "Time":
+                        columns_create += "time"
+                    else:
+                        columns_create += "text"
                     if i == 0:
                         part1 += f"{{0[{str(i)}]}}"
                         part2 += "%s"
@@ -2183,13 +2222,48 @@ def do_sql(sql):
                         part1 += f",{{0[{str(i)}]}}"
                         part2 += ",%s"
                     #print(i)
-                sql = f'''insert into "{tablename}" ({part1}) values ({part2})'''
-                columns_print = []
-                for col in columns:
-                    columns_print.append(f'''"{col}"''')
+                sql2 = f'''create table "{tablename}" ({columns_create})'''
+                sql3 = f'''insert into "{tablename}" ({part1}) values ({part2})'''
 
             elif db_version[:5] == "MsSQL":
-                for i, c in enumerate(columns):
+                sql1 = f'''drop table if exists "{tablename}"'''
+                #columns_create += "ida INTEGER PRIMARY KEY AUTOINCREMENT"
+                if table_id is not None:
+                    columns_create += table_id + " INT NOT NULL IDENTITY(1,1) PRIMARY KEY"
+                for i, ci in enumerate(colsp):
+                    col = colsp[ci]['name']
+                    columns_print.append(f'''"{col}"''')
+                    if table_id is None and i == 0:
+                        columns_create += f'''"{col}" '''
+                    else:
+                        columns_create += f''', "{col}" '''
+                    if colsp[ci]["t"] == "Quantitative":
+                        if colsp[ci]["qt"] == "Int":
+                            columns_create += "int"
+                        elif colsp[ci]["qt"] == "Float":
+                            columns_create += "real"
+                        else:
+                            columns_create += "ntext"
+                    elif colsp[ci]["t"] == "Datetime":
+                        columns_create += "datetime"
+                        for ri in range(1, len(data) + 1):
+                            if isinstance(data[ri-1], tuple): data[ri-1] = list(data[ri-1])
+                            data[ri-1][ci-1] = str(data[ri-1][ci-1])
+                    elif colsp[ci]["t"] == "Date":
+                        columns_create += "date"
+                        for ri in range(1, len(data) + 1):
+                            if isinstance(data[ri-1], tuple): data[ri-1] = list(data[ri-1])
+                            data[ri-1][ci-1] = str(data[ri-1][ci-1])
+                    elif colsp[ci]["t"] == "Time":
+                        columns_create += "time"
+                        for ri in range(1, len(data) + 1):
+                            if isinstance(data[ri-1], tuple): data[ri-1] = list(data[ri-1])
+                            if isinstance(data[ri-1][ci-1], datetime.timedelta):
+                                data[ri-1][ci-1] = str(datetime.datetime.min + data[ri-1][ci-1])[11:]    #time without date starting 0/1/2 (02:02:02, not 2:02:02)
+                            elif not isinstance(data[ri-1][ci-1], str):
+                                data[ri-1][ci-1] = str(data[ri-1][ci-1])
+                    else:
+                        columns_create += "ntext"
                     if i == 0:
                         part1 += f"{{0[{str(i)}]}}"
                         part2 += "?"
@@ -2197,10 +2271,8 @@ def do_sql(sql):
                         part1 += f",{{0[{str(i)}]}}"
                         part2 += ",?"
                     #print(i)
-                sql = f'''insert into "{tablename}" ({part1}) values ({part2})'''
-                columns_print = []
-                for col in columns:
-                    columns_print.append(f'''"{col}"''')
+                sql2 = f'''create table "{tablename}" ({columns_create})'''
+                sql3 = f'''insert into "{tablename}" ({part1}) values ({part2})'''
 
             #print()
             #print(db_version + sql)
@@ -2270,8 +2342,8 @@ def do_sql(sql):
                         part2 += ",?"
                     for ri in range(1, len(data) + 1):
                         if isinstance(data[ri-1], tuple): data[ri-1] = list(data[ri-1])
-                        if isinstance(data[ri-1][i], timedelta):
-                            data[ri-1][i] = str(datetime.min + data[ri-1][i])[11:]    #time without date starting 0/1/2 (02:02:02, not 2:02:02)
+                        if isinstance(data[ri-1][i], datetime.timedelta):
+                            data[ri-1][i] = str(datetime.datetime.min + data[ri-1][i])[11:]    #time without date starting 0/1/2 (02:02:02, not 2:02:02)
                     #print(i)
                 sql = f'''insert into "{tablename}" ({part1}) values ({part2})'''
                 columns_print = []
@@ -2898,9 +2970,9 @@ but {len(command_options[key1][key2])} '{key2}'.'''
                 end = time.perf_counter()
                 print()
                 if OK_returned == 1:
-                    print("Elapsed time: " + str(timedelta(seconds=end-start)))
+                    print("Elapsed time: " + str(datetime.timedelta(seconds=end-start)))
                 elif OK_returned > 1:
-                    printRed("Elapsed time: " + str(timedelta(seconds=end-start)))
+                    printRed("Elapsed time: " + str(datetime.timedelta(seconds=end-start)))
                     time.sleep(2)
                 else: break
 
@@ -2949,9 +3021,9 @@ but {len(command_options[key1][key2])} '{key2}'.'''
                 end = time.perf_counter()
                 print()
                 if OK_returned == 1:
-                    print("Elapsed time: " + str(timedelta(seconds=end-start)))
+                    print("Elapsed time: " + str(datetime.timedelta(seconds=end-start)))
                 elif OK_returned > 1:
-                    printRed("Elapsed time: " + str(timedelta(seconds=end-start)))
+                    printRed("Elapsed time: " + str(datetime.timedelta(seconds=end-start)))
                     time.sleep(1)
                 else: break
             if OK_returned:
