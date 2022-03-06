@@ -2349,14 +2349,10 @@ def do_sql(sql):
                         part2 += ",?"
                     for ri in range(1, len(data) + 1):
                         if isinstance(data[ri-1], tuple): data[ri-1] = list(data[ri-1])
-                        data[ri-1][i] = str(data[ri-1][i])
-                    '''
-                    for ri in range(1, len(data) + 1):
-                        if isinstance(data[ri-1], tuple): data[ri-1] = list(data[ri-1])
                         if isinstance(data[ri-1][i], datetime.timedelta):
                             data[ri-1][i] = str(datetime.datetime.min + data[ri-1][i])[11:]    #time without date starting 0/1/2 (02:02:02, not 2:02:02)
-                    #print(i)
-                    '''
+                        elif isinstance(data[ri-1][i], datetime.time):
+                            data[ri-1][i] = str(data[ri-1][i])
                 sql = f'''insert into "{tablename}" ({part1}) values ({part2})'''
                 columns_print = []
                 for col in columns:
@@ -2403,6 +2399,13 @@ def do_sql(sql):
                 columns_print = []
                 for col in columns:
                     columns_print.append(f'''"{col}"''')
+                '''
+                for ri in range(1, len(data) + 1):
+                    if isinstance(data[ri-1], tuple): data[ri-1] = list(data[ri-1])
+                    if isinstance(data[ri-1][i], datetime.datetime) or \
+                    isinstance(data[ri-1][i], datetime.date) or \
+                    isinstance(data[ri-1][i], datetime.time): data[ri-1][i] = str(data[ri-1][i])
+                '''
 
             #print()
             #print(db_version + sql)
@@ -2889,6 +2892,7 @@ def do_sql(sql):
             columns = columns_new
             data_old = None
             columns_old = None
+            colsp = {}  #reset columns profile
             # mysql returns data as tuples, not lists as sqlite3
             # this causes problems in show_data if nrows > show_cases*2
             # (cannoct add anzthing to tuple, probably)
