@@ -2354,6 +2354,7 @@ def do_sql(sql):
                             data[ri-1][i] = str(datetime.datetime.min + data[ri-1][i])[11:]    #time without date starting 0/1/2 (02:02:02, not 2:02:02)
                         elif isinstance(data[ri-1][i], datetime.time):
                             data[ri-1][i] = str(data[ri-1][i])
+                    #print(i)
                 sql = f'''insert into "{tablename}" ({part1}) values ({part2})'''
                 columns_print = []
                 for col in columns:
@@ -2395,18 +2396,21 @@ def do_sql(sql):
                     else:
                         part1 += f",{{0[{str(i)}]}}"
                         part2 += ",?"
+                    for ri in range(1, len(data) + 1):
+                        if isinstance(data[ri-1], tuple): data[ri-1] = list(data[ri-1])
+                        if isinstance(data[ri-1][i], datetime.timedelta):
+                            data[ri-1][i] = str(datetime.datetime.min + data[ri-1][i])[11:]    #time without date starting 0/1/2 (02:02:02, not 2:02:02)
+                        elif isinstance(data[ri-1][i], datetime.datetime):
+                            data[ri-1][i] = str(data[ri-1][i])
+                        elif isinstance(data[ri-1][i], datetime.date):
+                            data[ri-1][i] = str(data[ri-1][i])
+                        elif isinstance(data[ri-1][i], datetime.time):
+                            data[ri-1][i] = str(data[ri-1][i])
                     #print(i)
                 sql = f'''insert into "{tablename}" ({part1}) values ({part2})'''
                 columns_print = []
                 for col in columns:
                     columns_print.append(f'''"{col}"''')
-                '''
-                for ri in range(1, len(data) + 1):
-                    if isinstance(data[ri-1], tuple): data[ri-1] = list(data[ri-1])
-                    if isinstance(data[ri-1][i], datetime.datetime) or \
-                    isinstance(data[ri-1][i], datetime.date) or \
-                    isinstance(data[ri-1][i], datetime.time): data[ri-1][i] = str(data[ri-1][i])
-                '''
 
             #print()
             #print(db_version + sql)
