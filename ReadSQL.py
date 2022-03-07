@@ -1357,9 +1357,10 @@ def parseCommand(command_line):
         command = c[0]
         command_line = command_line_original[len(c[1]):]
         command_line = "=".join(parseText(command_line, "="))
-        command_line = ",".join(parseText(command_line, " "))
+        #command_line = ",".join(parseText(command_line, " "))
         print("Command line:", command_line)
-        command_line_list = parseText(command_line, ",")
+        #command_line_list = parseText(command_line, ",")
+        command_line_list = [l.strip() for l in parseText(command_line, ",", do_strip = False)]
         print("Command line list:", command_line_list)
 
         execute = True
