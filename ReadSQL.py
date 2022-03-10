@@ -622,6 +622,7 @@ def data_profile(rowsi, colsi):
         #colsp[columns[ci-1]]['t'] = "Categorical"
         colsp[ci]['t'] = "Quantitative"
         colsp[ci]['qt'] = "Int"
+        colsp[ci]['cl'] = None
         colsp[ci]['fnq'] = None
         colsp[ci]['n'] = 0
         colsp[ci]['v'] = 0
@@ -640,7 +641,7 @@ def data_profile(rowsi, colsi):
             if data[ri-1][ci-1] is not None:
                 colsp[ci]['v'] += 1
                 a = data[ri-1][ci-1]
-                if colsp[ci]['v'] == 1: print(colsp[ci]['name'], a, a.__class__)
+                #if colsp[ci]['v'] == 1: print(colsp[ci]['name'], a, a.__class__)
                 if isinstance (a, int):
                     if colsp[ci]['v'] == 1:
                         colsp[ci]['min'] = a
@@ -807,6 +808,11 @@ def data_profile(rowsi, colsi):
                 if data[ri-1][ci-1] != a:
                     if isinstance(data[ri-1], tuple): data[ri-1] = list(data[ri-1])
                     data[ri-1][ci-1] = a
+                if colsp[ci]['v'] == 1:
+                    colsp[ci]['cl'] = type(a)
+                elif colsp[ci]['cl'] is not None:
+                    if colsp[ci]['cl'] != type(a): colsp[ci]['cl'] = None
+                    
 
                 if data[ri-1][ci-1] not in colsp[ci]['c']:
                     colsp[ci]['c'][data[ri-1][ci-1]] = 1
@@ -2711,9 +2717,9 @@ def do_sql(sql):
                 profile_columns = [colsp[ci]["name"] for ci in colsp ] # print all profiled columns
             else:
                 profile_columns = [colsp[ci]["name"] for ci in colsp if ci in colsi] # print last profiled columns
-            profile_rows = ["Type", "QType", "Valids", "Nones", "Valid %", "Sum", "Min", "Max", "Mean", "Q1", "Median", "Q3", "Range", "IQR", "Variance", "STD", "Skew", "Unique", "FirstCat"]
+            profile_rows = ["Type", "QType", "Class", "Valids", "Nones", "Valid %", "Sum", "Min", "Max", "Mean", "Q1", "Median", "Q3", "Range", "IQR", "Variance", "STD", "Skew", "Unique", "FirstCat"]
             profile_rows_label = '(Stat)'
-            stats = ["t", "qt", "v", "n", "v%", "sum", "min", "max", "mean", "q1", "q2", "q3", "ran", "iqr", "var", "std", "skw","uni", "fnq"]
+            stats = ["t", "qt", "cl", "v", "n", "v%", "sum", "min", "max", "mean", "q1", "q2", "q3", "ran", "iqr", "var", "std", "skw","uni", "fnq"]
 
             maxc = 0
             for i, stat in enumerate(stats):
@@ -2770,6 +2776,10 @@ def do_sql(sql):
                                         profile_data[i].append(round(colsp[ci][c],2))
                                     elif isinstance(colsp[ci][c], str):
                                         profile_data[i].append(colsp[ci][c][:5])    # Quant, Categ
+                                    elif isinstance(colsp[ci][c], type):
+                                        cl = str(colsp[ci][c])[8:-2]
+                                        if cl.startswith("datetime."): cl = cl[9:]
+                                        profile_data[i].append(cl)    # <class 'xxx'>
                                     elif colsp[ci][c] is None:
                                         profile_data[i].append("-")
                                     else:
