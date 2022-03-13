@@ -164,7 +164,8 @@ default_columns_name = "Column_"
 commands = {}
 variables = {}
 colsp = {}
-
+class_int = type(0)
+class_float = type(0.0)
 
 variables["$parse_value_type"] = {}
 variables["$parse_value_type"]["shorts"] = []
@@ -621,7 +622,7 @@ def data_profile(rowsi, colsi):
         colsp[ci]['w'] = 0
         #colsp[columns[ci-1]]['t'] = "Categorical"
         colsp[ci]['t'] = "Quantitative"
-        colsp[ci]['qt'] = "Int"
+        #colsp[ci]['qt'] = "Int"
         colsp[ci]['cl'] = None
         colsp[ci]['fnq'] = None
         colsp[ci]['n'] = 0
@@ -647,7 +648,7 @@ def data_profile(rowsi, colsi):
                         colsp[ci]['min'] = a
                         colsp[ci]['max'] = a
                         colsp[ci]['t'] = "Quantitative"
-                        colsp[ci]['qt'] = "Int"
+                        #colsp[ci]['qt'] = "Int"
                     elif a < colsp[ci]['min']:
                         colsp[ci]['min'] = a
                     elif a > colsp[ci]['max']:
@@ -659,7 +660,7 @@ def data_profile(rowsi, colsi):
                         colsp[ci]['min'] = a
                         colsp[ci]['max'] = a
                         colsp[ci]['t'] = "Quantitative"
-                        colsp[ci]['qt'] = "Float"
+                        #colsp[ci]['qt'] = "Float"
                     elif a < colsp[ci]['min']:
                         colsp[ci]['min'] = a
                     elif a > colsp[ci]['max']:
@@ -709,13 +710,17 @@ def data_profile(rowsi, colsi):
                             if variables["$decimal_separator"]["user"]["value"] != ".": a = a.replace(variables["$decimal_separator"]["user"]["value"], '.')
                             if variables["$thousands_separator"]["user"]["value"] in a: a = a.replace(variables["$thousands_separator"]["user"]["value"], '')
                             a = float(a)
+                            if colsp[ci]['cl'] != class_float:
+                                if a == int(a): a = int(a)  # check other way???
                             #print(a)
+                            '''
                             if colsp[ci]['qt'] == "Int":
                                 b = int(a)
                                 if a != b:
                                     colsp[ci]['qt'] = "Float"
                                 else:
                                     a = b
+                            '''
                             if colsp[ci]['v'] == 1:
                                 colsp[ci]['min'] = a
                                 colsp[ci]['max'] = a
@@ -812,7 +817,7 @@ def data_profile(rowsi, colsi):
                     colsp[ci]['cl'] = type(a)
                 elif colsp[ci]['cl'] is not None:
                     if colsp[ci]['cl'] != type(a): colsp[ci]['cl'] = None
-                    
+
 
                 if data[ri-1][ci-1] not in colsp[ci]['c']:
                     colsp[ci]['c'][data[ri-1][ci-1]] = 1
@@ -852,7 +857,7 @@ def data_profile(rowsi, colsi):
                 colsp[ci]['smd2'] += (i - colsp[ci]['mean'])**2
                 colsp[ci]['smd3'] += (i - colsp[ci]['mean'])**3
         elif colsp[ci]['v'] > 0 and (colsp[ci]['t'] == "Datetime" or colsp[ci]['t'] == "Date" or colsp[ci]['t'] == "Time"):
-            colsp[ci]['qt'] = None
+            #colsp[ci]['qt'] = None
             colsp[ci]['sum'] = None
             colsp[ci]['mean'] = None
             colsp[ci]['q1'] = None
@@ -860,7 +865,7 @@ def data_profile(rowsi, colsi):
             colsp[ci]['q3'] = None
         else:
             colsp[ci]['t'] = "Categorical"
-            colsp[ci]['qt'] = None
+            #colsp[ci]['qt'] = None
             colsp[ci]['min'] = None
             colsp[ci]['max'] = None
             colsp[ci]['sum'] = None
@@ -2117,9 +2122,9 @@ def do_sql(sql):
                     else:
                         columns_create += f''', "{col}" '''
                     if colsp[ci]["t"] == "Quantitative":
-                        if colsp[ci]["qt"] == "Int":
+                        if colsp[ci]["cl"] == class_int:
                             columns_create += "int"
-                        elif colsp[ci]["qt"] == "Float":
+                        elif colsp[ci]["cl"] == class_float:
                             columns_create += "real"
                         else:
                             columns_create += "text"
@@ -2131,8 +2136,9 @@ def do_sql(sql):
                         # sqlite does not use timedelta for time format, min datetime is 0001-01-01 0:0:0:
                         columns_create += "time"
                         for ri in range(1, len(data) + 1):
-                            if isinstance(data[ri-1], tuple): data[ri-1] = list(data[ri-1])
-                            data[ri-1][ci-1] = str(data[ri-1][ci-1])
+                            if data[ri-1][ci-1] is not None:
+                                if isinstance(data[ri-1], tuple): data[ri-1] = list(data[ri-1])
+                                data[ri-1][ci-1] = str(data[ri-1][ci-1])
                         '''
                         for ri in range(1, len(data) + 1):
                             if isinstance(data[ri-1], tuple): data[ri-1] = list(data[ri-1])
@@ -2178,9 +2184,9 @@ def do_sql(sql):
                     else:
                         columns_create += f''', `{col}` '''
                     if colsp[ci]["t"] == "Quantitative":
-                        if colsp[ci]["qt"] == "Int":
+                        if colsp[ci]["cl"] == class_int:
                             columns_create += "int"
-                        elif colsp[ci]["qt"] == "Float":
+                        elif colsp[ci]["cl"] == class_float:
                             columns_create += "real"
                         else:
                             columns_create += "text"
@@ -2215,9 +2221,9 @@ def do_sql(sql):
                     else:
                         columns_create += f''', "{col}" '''
                     if colsp[ci]["t"] == "Quantitative":
-                        if colsp[ci]["qt"] == "Int":
+                        if colsp[ci]["cl"] == class_int:
                             columns_create += "int"
-                        elif colsp[ci]["qt"] == "Float":
+                        elif colsp[ci]["cl"] == class_float:
                             columns_create += "real"
                         else:
                             columns_create += "text"
@@ -2252,30 +2258,33 @@ def do_sql(sql):
                     else:
                         columns_create += f''', "{col}" '''
                     if colsp[ci]["t"] == "Quantitative":
-                        if colsp[ci]["qt"] == "Int":
+                        if colsp[ci]["cl"] == class_int:
                             columns_create += "int"
-                        elif colsp[ci]["qt"] == "Float":
+                        elif colsp[ci]["cl"] == class_float:
                             columns_create += "real"
                         else:
                             columns_create += "ntext"
                     elif colsp[ci]["t"] == "Datetime":
                         columns_create += "datetime"
                         for ri in range(1, len(data) + 1):
-                            if isinstance(data[ri-1], tuple): data[ri-1] = list(data[ri-1])
-                            data[ri-1][ci-1] = str(data[ri-1][ci-1])
+                            if data[ri-1][ci-1] is not None:
+                                if isinstance(data[ri-1], tuple): data[ri-1] = list(data[ri-1])
+                                data[ri-1][ci-1] = str(data[ri-1][ci-1])
                     elif colsp[ci]["t"] == "Date":
                         columns_create += "date"
                         for ri in range(1, len(data) + 1):
-                            if isinstance(data[ri-1], tuple): data[ri-1] = list(data[ri-1])
-                            data[ri-1][ci-1] = str(data[ri-1][ci-1])
+                            if data[ri-1][ci-1] is not None:
+                                if isinstance(data[ri-1], tuple): data[ri-1] = list(data[ri-1])
+                                data[ri-1][ci-1] = str(data[ri-1][ci-1])
                     elif colsp[ci]["t"] == "Time":
                         columns_create += "time"
                         for ri in range(1, len(data) + 1):
-                            if isinstance(data[ri-1], tuple): data[ri-1] = list(data[ri-1])
-                            if isinstance(data[ri-1][ci-1], datetime.timedelta):
-                                data[ri-1][ci-1] = str(datetime.datetime.min + data[ri-1][ci-1])[11:]    #time without date starting 0/1/2 (02:02:02, not 2:02:02)
-                            elif not isinstance(data[ri-1][ci-1], str):
-                                data[ri-1][ci-1] = str(data[ri-1][ci-1])
+                            if data[ri-1][ci-1] is not None:
+                                if isinstance(data[ri-1], tuple): data[ri-1] = list(data[ri-1])
+                                if isinstance(data[ri-1][ci-1], datetime.timedelta):
+                                    data[ri-1][ci-1] = str(datetime.datetime.min + data[ri-1][ci-1])[11:]    #time without date starting 0/1/2 (02:02:02, not 2:02:02)
+                                elif not isinstance(data[ri-1][ci-1], str):
+                                    data[ri-1][ci-1] = str(data[ri-1][ci-1])
                     else:
                         columns_create += "ntext"
                     if i == 0:
@@ -2717,9 +2726,9 @@ def do_sql(sql):
                 profile_columns = [colsp[ci]["name"] for ci in colsp ] # print all profiled columns
             else:
                 profile_columns = [colsp[ci]["name"] for ci in colsp if ci in colsi] # print last profiled columns
-            profile_rows = ["Type", "QType", "Class", "Valids", "Nones", "Valid %", "Sum", "Min", "Max", "Mean", "Q1", "Median", "Q3", "Range", "IQR", "Variance", "STD", "Skew", "Unique", "FirstCat"]
+            profile_rows = ["Type", "Class", "Valids", "Nones", "Valid %", "Sum", "Min", "Max", "Mean", "Q1", "Median", "Q3", "Range", "IQR", "Variance", "STD", "Skew", "Unique", "FirstCat"]
             profile_rows_label = '(Stat)'
-            stats = ["t", "qt", "cl", "v", "n", "v%", "sum", "min", "max", "mean", "q1", "q2", "q3", "ran", "iqr", "var", "std", "skw","uni", "fnq"]
+            stats = ["t", "cl", "v", "n", "v%", "sum", "min", "max", "mean", "q1", "q2", "q3", "ran", "iqr", "var", "std", "skw","uni", "fnq"]
 
             maxc = 0
             for i, stat in enumerate(stats):
