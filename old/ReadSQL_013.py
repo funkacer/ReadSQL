@@ -167,22 +167,6 @@ colsp = {}
 class_int = type(0)
 class_float = type(0.0)
 
-functions = []
-functions.append("@(")
-
-def general_function(vartest):
-    ret = None
-    opt = None
-    print("general_function", vartest)
-    return ret, opt
-
-def call_function(vartest, f):
-    ret = None
-    opt = None
-    if f == "@(":
-        ret, opt = general_function(vartest)
-    return ret, opt
-
 variables["$parse_value_type"] = {}
 variables["$parse_value_type"]["shorts"] = []
 variables["$parse_value_type"]["options"] = {}
@@ -267,13 +251,8 @@ variables["$thousands_separator"]["shorts"] = ["$ts"]
 variables["$thousands_separator"]["user"] = {}
 variables["$thousands_separator"]["user"]["value"] = ","
 
-variables["$none"] = {}
-variables["$none"]["shorts"] = ["$n", "$no"]
-variables["$none"]["user"] = {}
-variables["$none"]["user"]["value"] = None
-
 variables["$now"] = {}
-variables["$now"]["shorts"] = ["$now"]
+variables["$now"]["shorts"] = ["$n"]
 variables["$now"]["user"] = {}
 variables["$now"]["user"]["value"] = lambda x: datetime.datetime.now()
 
@@ -1304,11 +1283,9 @@ def parseVariable(command, options, n, vartest):
     ret = None
     opt = None
     variable = None
-    print("vartest", vartest)
     #vartest = str(options[n])
     if len (vartest) > 0:
-        if vartest[0] == "$":
-            # variable
+        if vartest[0] == "$" :
             #if vartest[0] == "'" and vartest[-1] == "'": vartest = vartest[1:-1]
             #if vartest[0] != "$": vartest = "$" + vartest #variable start with "$", user can omit like in print data all
             #print("vartest", vartest)
@@ -1322,39 +1299,30 @@ def parseVariable(command, options, n, vartest):
                             variable = var
                             opt = 0
                             break
-            if variable:
-                #get context
-                print(f"Getting context for variable '{variable}' in command '{command}' and option '{options[n]}':")
-                for contexttest in variables[variable]:
-                    #print(variables[variable][contexttest])
-                    if command in variables[variable][contexttest] or contexttest == "user":
-                        contexts.append(contexttest)
-                for context in contexts:
-                    print(f"Command '{command}' test passed with context '{context}'!")
-                    print(variables[variable][contexttest])
-                    print(options)
-                    opt = 1
-                    if context != "user":
-                        for optiontest in variables[variable][context][command]:
-                            if optiontest in options:
-                                if options[optiontest] in variables[variable][context][command][optiontest]:
-                                    print(f"Option '{optiontest}' test passed with value '{options[optiontest]}'!")
-                                else:
-                                    opt = 0
+        if variable:
+            #get context
+            print(f"Getting context for variable '{variable}' in command '{command}' and option '{options[n]}':")
+            for contexttest in variables[variable]:
+                #print(variables[variable][contexttest])
+                if command in variables[variable][contexttest] or contexttest == "user":
+                    contexts.append(contexttest)
+            for context in contexts:
+                print(f"Command '{command}' test passed with context '{context}'!")
+                print(variables[variable][contexttest])
+                print(options)
+                opt = 1
+                if context != "user":
+                    for optiontest in variables[variable][context][command]:
+                        if optiontest in options:
+                            if options[optiontest] in variables[variable][context][command][optiontest]:
+                                print(f"Option '{optiontest}' test passed with value '{options[optiontest]}'!")
                             else:
                                 opt = 0
-                    if opt:
-                        if variables[variable][context]["value"] is not None:
-                            ret = str(variables[variable][context]["value"]) # must look like string input from user
                         else:
-                            ret = None
-        elif vartest[0] == "@":
-            # function
-            for f in functions:
-                print("vartest[:len(f)]", vartest[:len(f)])
-                if vartest[:len(f)] == f and vartest[-1] == ")":
-                    print("vartest[len(f):-1]", vartest[len(f):-1])
-                    ret, opt = call_function(vartest[len(f):-1], f)
+                            opt = 0
+                else:
+                    opt = 1
+                if opt: ret = str(variables[variable][context]["value"]) # must look like string input from user
     return ret, opt
 
 
@@ -1369,6 +1337,17 @@ def parseCommand(command_line):
     #print (command_line)
     for c in command_options:
         #print(c)
+        '''
+        if command_line[:len(c)].lower() == c:
+            commands.append((c,c))
+            #command_line = command_line[len(c):]
+            #command_line = "=".join(parseText(command_line, "="))
+            #command_line = ",".join(parseText(command_line, " "))
+            #print(command_line)
+            #command_line_list = parseText(command_line, ",")
+            #print(f"Parse command {command} with ',':", command_line_list)
+        else:
+        '''
         for a in command_options[c]["alternative"]:
             if command_line[:len(a)].lower() == a:
                 commands.append((c,a))
@@ -1475,7 +1454,7 @@ def parseCommand(command_line):
                     #options[n] = options[n].strip('"')
                     #print("options[n]", options[n])
                     var, opt = parseVariable(command, options, n, str(options[n]))
-                    if opt:
+                    if var is not None:
                         options[n] = var
                     if len(options[n]) > 0:
                         if options[n][0] == '"' and options[n][-1] == '"':
@@ -1488,7 +1467,7 @@ def parseCommand(command_line):
                     #print(f"I am going to translate '{options[n]}' to 'int'")
                     # check variables first
                     var, opt = parseVariable(command, options, n, str(options[n]))
-                    if opt:
+                    if var is not None:
                         options[n] = var
                     if opt == 0:
                         result_message = f"Option '{n}' should be integer but is '{options[n]}', which is not a variable in context of {command}. Probably not doing what expected!"
@@ -1505,18 +1484,17 @@ def parseCommand(command_line):
                     #print(f"Parse option '{n}' as integer:", options[n])
                 elif t == "intlist":
                     var, opt = parseVariable(command, options, n, str(options[n]))
-                    if opt:
+                    if var is not None:
                         options[n] = var
                     Assert(options[n][0] == "[" and options[n][-1] == "]", "Lists must be enclosed with []. Probably not doing what expected!")
                     options_list_line = options[n][1:-1]
-                    #options_list_line = ",".join(parseText(options_list_line, " "))
+                    options_list_line = ",".join(parseText(options_list_line, " "))
                     lst_old = parseText(options_list_line, ",")
                     lst_new = []
-                    #print("lst_old", lst_old)
                     for l_old in lst_old:
                         l_new = None
                         var, opt = parseVariable(command, options, n, str(l_old))
-                        if opt:
+                        if var is not None:
                             l_old = var
                         if opt == 0:
                             result_message = f"Option '{n}' should be integer but is '{options[n]}', which is not a variable in context of {command}. Probably not doing what expected!"
@@ -1532,18 +1510,18 @@ def parseCommand(command_line):
                 elif t == "strlist":
                     var, opt = parseVariable(command, options, n, str(options[n]))
                     #print("var", var)
-                    if opt:
+                    if var is not None:
                         options[n] = var
                     Assert(options[n][0] == "[" and options[n][-1] == "]", "Lists must be enclosed with []. Probably not doing what expected!")
                     #print(options[n])
                     options_list_line = options[n][1:-1]
-                    #options_list_line = ",".join(parseText(options_list_line, " "))
+                    options_list_line = ",".join(parseText(options_list_line, " "))
                     lst_old = parseText(options_list_line, ",")
                     lst_new = []
                     #print("lst_old", lst_old)
                     for l_old in lst_old:
                         var, opt = parseVariable(command, options, n, str(l_old))
-                        if opt:
+                        if var is not None:
                             lst_new.append(var)
                         else:
                             if l_old[0] == '"' and l_old[-1] == '"':
@@ -1563,33 +1541,32 @@ def parseCommand(command_line):
                         options[n] = d
                 elif t == "dictlist":
                     var, opt = parseVariable(command, options, n, str(options[n]))
-                    if opt:
+                    if var is not None:
                         options[n] = var
                     Assert(options[n][0] == "{" and options[n][-1] == "}", "Dicts must be enclosed with {}. Probably not doing what expected!")
                     options_list_line = options[n][1:-1]
                     #print("options_list_line", options_list_line)
                     options_list_line = ":".join(parseText(options_list_line, ":"))
-                    #options_list_line = ",".join(parseText(options_list_line, " "))
+                    options_list_line = ",".join(parseText(options_list_line, " "))
                     lst_old = parseText(options_list_line, ",")
                     lst_new = {}
                     #print("lst_old", lst_old)
                     for l_old in lst_old:
-                        #lst = parseText(l_old, ":", do_strip = False)
-                        lst = [l.strip() for l in parseText(l_old, ":", do_strip = False)]
+                        lst = parseText(l_old, ":", do_strip = False)
                         print("lst:", lst)
                         # check if list on any side
                         #print(lst[0].strip().__class__)
                         l, r, ll, rr = None, None, None, None
                         if len(lst) > 1:
-                            #lst[0] = lst[0].strip()
-                            #lst[1] = lst[1].strip()
+                            lst[0] = lst[0].strip()
+                            lst[1] = lst[1].strip()
                             var, opt = parseVariable(command, options, n, str(lst[0]))
-                            if opt:
+                            if var is not None:
                                 lst[0] = var
                             if lst[0][0] == '[' and lst[0][-1] == ']':
                                 #its a list, mrs walker, its a list
                                 left_list_line = lst[0][1:-1]
-                                #left_list_line = ",".join(parseText(left_list_line, " "))
+                                left_list_line = ",".join(parseText(left_list_line, " "))
                                 ll = parseText(left_list_line, ",")
                             elif lst[0][0] == '"' and lst[0][-1] == '"':
                                 l = lst[0].strip('"')
@@ -1598,29 +1575,25 @@ def parseCommand(command_line):
                             else:
                                 l = lst[0]
                             var, opt = parseVariable(command, options, n, str(lst[1]))
-                            if opt:
+                            if var is not None:
                                 lst[1] = var
-                            if lst[1] is not None:
-                                if lst[1][0] == '[' and lst[1][-1] == ']':
-                                    #its a list, mrs walker, its a list
-                                    right_list_line = lst[1][1:-1]
-                                    #right_list_line = ",".join(parseText(right_list_line, " "))
-                                    rr = parseText(right_list_line, ",")
-                                elif len(lst[1]) == 0:
-                                    r = ""
-                                elif lst[1][0] == '"' and lst[1][-1] == '"':
-                                    r = lst[1].strip('"')
-                                elif lst[1][0] == "'" and lst[1][-1] == "'":
-                                    r = lst[1].strip("'")
-                                else:
-                                    r = parseValue(lst[1], variables["$parse_value_type"]["options"]["value"])
-                            if l is not None and rr is None:
+                            if lst[1][0] == '[' and lst[1][-1] == ']':
+                                #its a list, mrs walker, its a list
+                                right_list_line = lst[1][1:-1]
+                                right_list_line = ",".join(parseText(right_list_line, " "))
+                                rr = parseText(right_list_line, ",")
+                            elif len(lst[1]) == 0:
+                                r = ""
+                            elif lst[1][0] == '"' and lst[1][-1] == '"':
+                                r = lst[1].strip('"')
+                            elif lst[1][0] == "'" and lst[1][-1] == "'":
+                                r = lst[1].strip("'")
+                            else:
+                                r = parseValue(lst[1], variables["$parse_value_type"]["options"]["value"])
+                            if l is not None and r is not None:
                                 lst_new[l] = r
-                            if ll is not None and rr is None:
+                            if ll is not None and r is not None:
                                 for l in ll:
-                                    var, opt = parseVariable(command, options, n, str(l))
-                                    if opt:
-                                        l = var
                                     if l[0] == '"' and l[-1] == '"':
                                         l = l.strip('"')
                                     elif l[0] == "'" and l[-1] == "'":
@@ -1631,16 +1604,10 @@ def parseCommand(command_line):
                                 Assert(len(ll) == len(rr), f"Lists {ll}:{rr} in dict '{n}' not of the same size. Check results carefully!!!")
                                 print(list(zip(ll, rr)))
                                 for l, r in zip(ll, rr):
-                                    var, opt = parseVariable(command, options, n, str(l))
-                                    if opt:
-                                        l = var
                                     if l[0] == '"' and l[-1] == '"':
                                         l = l.strip('"')
                                     elif l[0] == "'" and l[-1] == "'":
                                         l = l.strip("'")
-                                    var, opt = parseVariable(command, options, n, str(r))
-                                    if opt:
-                                        r = var
                                     if len(r) == 0:
                                         r = ""
                                     elif r[0] == '"' and r[-1] == '"':
