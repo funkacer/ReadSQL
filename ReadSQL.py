@@ -21,6 +21,16 @@ import random
 
 from importlib.metadata import version
 
+np_mp = False
+try:
+    print("Using numpy version:", version("numpy"))
+    import numpy as np
+    print("Using matplotlib version:", version("matplotlib"))
+    import matplotlib.pyplot as plt
+    np_mp = True
+except Exception as e:
+    traceback.print_exc()
+
 #from okno import zobraz
 
 '''
@@ -167,8 +177,9 @@ colsp = {}
 class_int = type(0)
 class_float = type(0.0)
 
-functions = []
-functions.append("@(")
+functions = set()
+functions.add("@(")
+functions.add("@int(")
 
 def general_function(vartest):
     ret = None
@@ -176,11 +187,25 @@ def general_function(vartest):
     print("general_function", vartest)
     return ret, opt
 
+def int_function(vartest):
+    ret = None
+    opt = None
+    print("int_function", vartest)
+    try:
+        vartest = float(vartest)
+        ret = int(vartest)
+        opt = 1
+    except Exception as e:
+        traceback.print_exc()
+    return ret, opt
+
 def call_function(vartest, f):
     ret = None
     opt = None
     if f == "@(":
         ret, opt = general_function(vartest)
+    if f == "@int(":
+        ret, opt = int_function(vartest)
     return ret, opt
 
 variables["$parse_value_type"] = {}
@@ -586,6 +611,82 @@ command_options["data reset"]["help1"] = "Help for command 'folder'"
 command_options["data reset"]["help2"] = ["Bla1"]
 command_options["data reset"]["alternative"] = ["data", "d"]
 command_options["data reset"]["altoption"] = [["w"]]
+
+command_options["graph boxplot"] = {}
+command_options["graph boxplot"]["name"] = ["what", "columns", "show_fliers", "title"]
+command_options["graph boxplot"]["required"] = [True, False, False, False]
+command_options["graph boxplot"]["type"] = [["boxplot","bp","b"], "strlist", "bool", "str"]
+command_options["graph boxplot"]["default"] = ["boxplot", None, True, None]
+command_options["graph boxplot"]["help1"] = "Help for command 'folder'"
+command_options["graph boxplot"]["help2"] = ["Bla1","Bla2","Bla3","Bla4"]
+command_options["graph boxplot"]["alternative"] = ["graph", "g"]
+command_options["graph boxplot"]["altoption"] = [["w"],["c"],["sf"],["tt"]]
+
+def show_boxplot(colsi, title = 'Box Plot', boxplot_showfliers = True):
+
+    #data_df = self.__data_df
+    #boxplot_showfliers = True
+    #data_np = data_df[column_list].to_numpy()
+    #data_np = np.empty(shape=[len(column_list),len(data_df)])
+
+    #if isinstance(column_list, str): column_list = [column_list]
+
+    np_dict = {}
+
+    for ci in colsi:
+        if colsp[ci]['t'] == "Quantitative":
+            print(colsp[ci]['m'])
+
+        #for i, column in enumerate(column_list):
+        #data_part_np = data_df.iloc[data_df[data_df[column].isnull() == 0].index,data_df.columns.get_loc(column)].to_numpy()
+        #data_part_np = data_df.loc[data_df[data_df[column].isnull() == 0].index, column].to_numpy()
+        data_part_np = np.array(colsp[ci]['m'])
+        #print(data_part_np)
+        #data_np[i] = data_part_np
+        np_dict[colsp[ci]['name']] = data_part_np
+
+    __show_boxplot(np_dict = np_dict, title = title, boxplot_showfliers = boxplot_showfliers)
+
+def __show_boxplot(np_dict = {}, title = 'Box Plot', boxplot_showfliers = True):
+    '''
+    Takes disctionary of labels and np arrays for boxplots
+    '''
+    #data_df = self.__data_df
+    #boxplot_showfliers = True
+
+    bottom = np.inf
+    top = -np.inf
+
+    for key in np_dict.keys():
+        #data_part_np = data_df.iloc[data_df[data_df[column].isnull() == 0].index,data_df.columns.get_loc(column)].to_numpy()
+        #data_part_np = data_df.loc[data_df[data_df[column].isnull() == 0].index, column].to_numpy()
+        #print(data_part_np)
+        #data_np[i] = data_part_np
+        bottom = min(bottom, np_dict[key].min())
+        top = max(top, np_dict[key].max())
+
+    margin = (top - bottom)*0.1
+    if margin == 0: margin = top*0.1 # if top == bottom
+    bottom -= margin
+    top += margin
+
+    fig1, ax1 = plt.subplots()
+    ax1.set_title(title)
+    ax1.boxplot(np_dict.values(), showfliers=boxplot_showfliers, showmeans = True, meanline=True)
+    #ax1.boxplot(np_list, showfliers=True, showmeans = True, meanline=True, conf_intervals = [[None,None],[None,None]], notch = True)
+    #plt.xticks(range(1, len(column_list)+1), [str(c) + ' (n=' + str(len(np_list[i])) + ')' for i, c in enumerate(column_list)], rotation = 90)
+    plt.xticks(range(1, len(np_dict)+1), [str(key) + ' (n=' + str(len(np_dict[key])) + ')' for key in np_dict.keys()], rotation = 90)
+    plt.ylim(bottom, top)
+    #ax1.legend([{'k--':'A simple line'}])
+    #legend
+    ax1.plot([1,1], [1,1], 'darkorange', label='Median')
+    ax1.plot([1,1], [1,1], 'g--', label='Mean')
+    #legend = ax1.legend(loc='upper right', shadow=True, fontsize='x-large')
+    legend = ax1.legend(bbox_to_anchor=(1, 1))
+    # Put a nicer background color on the legend.
+    #legend.get_frame().set_facecolor('C0')
+    plt.tight_layout()
+    plt.show()
 
 
 def colorCode(color):
@@ -2125,7 +2226,17 @@ def do_sql(sql):
                         time.sleep(2)
                     else: break
 
-
+        elif command == "graph boxplot":
+            colss = options["columns"]
+            boxplot_showfliers = options["show_fliers"]
+            title = options.get("title")
+            if colss is not None:
+                colsi = find_columns(colss)
+            else:
+                colsi = [ci for ci in range(1,len(columns)+1) if colsp[ci]['t'] == "Quantitative"]
+            #print(colsi)
+            if np_mp:
+                show_boxplot(colsi, title, boxplot_showfliers)
 
         elif command == "table":
             tablename = options["tablename"]
