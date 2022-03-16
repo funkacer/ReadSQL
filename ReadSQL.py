@@ -23,8 +23,8 @@ from importlib.metadata import version
 
 np_mp = False
 try:
-    print("Using numpy version:", version("numpy"))
-    import numpy as np
+    #print("Using numpy version:", version("numpy"))
+    #import numpy as np
     print("Using matplotlib version:", version("matplotlib"))
     import matplotlib.pyplot as plt
     np_mp = True
@@ -245,6 +245,7 @@ variables["$columns_all"]["data"]["data select"] = {}
 variables["$columns_all"]["data"]["data select easy"] = {}
 variables["$columns_all"]["data"]["data fill"] = {}
 variables["$columns_all"]["data"]["data fill easy"] = {}
+variables["$columns_all"]["data"]["graph boxplot"] = {}
 
 variables["$red"] = {}
 variables["$red"]["shorts"] = ["$r"]
@@ -616,7 +617,7 @@ command_options["graph boxplot"] = {}
 command_options["graph boxplot"]["name"] = ["what", "columns", "show_fliers", "title"]
 command_options["graph boxplot"]["required"] = [True, False, False, False]
 command_options["graph boxplot"]["type"] = [["boxplot","bp","b"], "strlist", "bool", "str"]
-command_options["graph boxplot"]["default"] = ["boxplot", None, True, None]
+command_options["graph boxplot"]["default"] = ["boxplot", "$ca", True, None]
 command_options["graph boxplot"]["help1"] = "Help for command 'folder'"
 command_options["graph boxplot"]["help2"] = ["Bla1","Bla2","Bla3","Bla4"]
 command_options["graph boxplot"]["alternative"] = ["graph", "g"]
@@ -635,15 +636,15 @@ def show_boxplot(colsi, title = 'Box Plot', boxplot_showfliers = True):
 
     for ci in colsi:
         if colsp[ci]['t'] == "Quantitative":
-            print(colsp[ci]['m'])
-
-        #for i, column in enumerate(column_list):
-        #data_part_np = data_df.iloc[data_df[data_df[column].isnull() == 0].index,data_df.columns.get_loc(column)].to_numpy()
-        #data_part_np = data_df.loc[data_df[data_df[column].isnull() == 0].index, column].to_numpy()
-        data_part_np = np.array(colsp[ci]['m'])
-        #print(data_part_np)
-        #data_np[i] = data_part_np
-        np_dict[colsp[ci]['name']] = data_part_np
+            #print(colsp[ci]['m'])
+            #for i, column in enumerate(column_list):
+            #data_part_np = data_df.iloc[data_df[data_df[column].isnull() == 0].index,data_df.columns.get_loc(column)].to_numpy()
+            #data_part_np = data_df.loc[data_df[data_df[column].isnull() == 0].index, column].to_numpy()
+            #data_part_np = np.array(colsp[ci]['m'])
+            data_part_np = colsp[ci]['m']
+            #print(data_part_np)
+            #data_np[i] = data_part_np
+            np_dict[colsp[ci]['name']] = data_part_np
 
     __show_boxplot(np_dict = np_dict, title = title, boxplot_showfliers = boxplot_showfliers)
 
@@ -654,21 +655,21 @@ def __show_boxplot(np_dict = {}, title = 'Box Plot', boxplot_showfliers = True):
     #data_df = self.__data_df
     #boxplot_showfliers = True
 
-    bottom = np.inf
-    top = -np.inf
+    #bottom = np.inf
+    #top = -np.inf
 
-    for key in np_dict.keys():
+    #for key in np_dict.keys():
         #data_part_np = data_df.iloc[data_df[data_df[column].isnull() == 0].index,data_df.columns.get_loc(column)].to_numpy()
         #data_part_np = data_df.loc[data_df[data_df[column].isnull() == 0].index, column].to_numpy()
         #print(data_part_np)
         #data_np[i] = data_part_np
-        bottom = min(bottom, np_dict[key].min())
-        top = max(top, np_dict[key].max())
+        #bottom = min(bottom, np_dict[key].min())
+        #top = max(top, np_dict[key].max())
 
-    margin = (top - bottom)*0.1
-    if margin == 0: margin = top*0.1 # if top == bottom
-    bottom -= margin
-    top += margin
+    #margin = (top - bottom)*0.1
+    #if margin == 0: margin = top*0.1 # if top == bottom
+    #bottom -= margin
+    #top += margin
 
     fig1, ax1 = plt.subplots()
     ax1.set_title(title)
@@ -676,7 +677,7 @@ def __show_boxplot(np_dict = {}, title = 'Box Plot', boxplot_showfliers = True):
     #ax1.boxplot(np_list, showfliers=True, showmeans = True, meanline=True, conf_intervals = [[None,None],[None,None]], notch = True)
     #plt.xticks(range(1, len(column_list)+1), [str(c) + ' (n=' + str(len(np_list[i])) + ')' for i, c in enumerate(column_list)], rotation = 90)
     plt.xticks(range(1, len(np_dict)+1), [str(key) + ' (n=' + str(len(np_dict[key])) + ')' for key in np_dict.keys()], rotation = 90)
-    plt.ylim(bottom, top)
+    #plt.ylim(bottom, top)
     #ax1.legend([{'k--':'A simple line'}])
     #legend
     ax1.plot([1,1], [1,1], 'darkorange', label='Median')
