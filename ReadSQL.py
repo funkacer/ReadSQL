@@ -246,6 +246,7 @@ variables["$columns_all"]["data"]["data select easy"] = {}
 variables["$columns_all"]["data"]["data fill"] = {}
 variables["$columns_all"]["data"]["data fill easy"] = {}
 variables["$columns_all"]["data"]["graph boxplot"] = {}
+variables["$columns_all"]["data"]["graph barchart"] = {}
 
 variables["$red"] = {}
 variables["$red"]["shorts"] = ["$r"]
@@ -616,12 +617,123 @@ command_options["data reset"]["altoption"] = [["w"]]
 command_options["graph boxplot"] = {}
 command_options["graph boxplot"]["name"] = ["what", "columns", "show_fliers", "title"]
 command_options["graph boxplot"]["required"] = [True, False, False, False]
-command_options["graph boxplot"]["type"] = [["boxplot","bp","b"], "strlist", "bool", "str"]
+command_options["graph boxplot"]["type"] = [["boxplot","bo"], "strlist", "bool", "str"]
 command_options["graph boxplot"]["default"] = ["boxplot", "$ca", True, None]
 command_options["graph boxplot"]["help1"] = "Help for command 'folder'"
 command_options["graph boxplot"]["help2"] = ["Bla1","Bla2","Bla3","Bla4"]
 command_options["graph boxplot"]["alternative"] = ["graph", "g"]
 command_options["graph boxplot"]["altoption"] = [["w"],["c"],["sf"],["tt"]]
+
+command_options["graph barchart"] = {}
+command_options["graph barchart"]["name"] = ["what", "columns", "show_fliers", "title"]
+command_options["graph barchart"]["required"] = [True, False, False, False]
+command_options["graph barchart"]["type"] = [["barchart","ba"], "strlist", "bool", "str"]
+command_options["graph barchart"]["default"] = ["barchart", "$ca", True, None]
+command_options["graph barchart"]["help1"] = "Help for command 'folder'"
+command_options["graph barchart"]["help2"] = ["Bla1","Bla2","Bla3","Bla4"]
+command_options["graph barchart"]["alternative"] = ["graph", "g"]
+command_options["graph barchart"]["altoption"] = [["w"],["c"],["sf"],["tt"]]
+
+def __rd(x,y=2):
+    ''' A classical mathematical rounding by Voznica '''
+    try:
+        m = int('1'+'0'*y) # multiplier - how many positions to the right
+        q = x*m # shift to the right by multiplier
+        c = int(q) # new number
+        i = int( (q-c)*10 ) # indicator number on the right
+        if i >= 5:
+            c += 1
+        result = '{num:.{prec}f}'.format(num=c/m,prec=y)
+    except:
+        result = ''
+    return result
+
+def getBarChartI(ci, title='Graf'):
+    '''Tato funkce akceptuje df a nazvy sloupcu, vraci HTML kod vertikalniho grafu'''
+    rotation = 90
+    #sort_values = True
+    #sort_ascending = True
+    precision = 0
+    cols = list(colsp[ci]['c'].keys())
+    width = 0.8/len(cols)
+    fig, ax = plt.subplots(figsize = (10,5))
+    rects = plt.bar(range(len(cols)), [colsp[ci]['c'][col] for col in cols])
+    for rect in rects:
+        ax.annotate(s = __rd(rect.get_height(),precision), xy = (rect.get_x() + rect.get_width()/2, rect.get_height()/2), ha = 'center', va = 'bottom')
+    plt.xticks(range(len(cols)), cols, rotation = rotation)
+    plt.title(title)
+    '''
+    #plt.show()
+    buf = BytesIO()
+    fig.savefig(buf, format="png", bbox_inches='tight')
+    # Embed the result in the html output.
+    data = base64.b64encode(buf.getbuffer()).decode("ascii")
+    return f"<img src='data:image/png;base64,{data}'/>"
+    '''
+    plt.tight_layout()
+    plt.show()
+
+
+def getBarChartV(ci):
+    '''Tato funkce akceptuje df a nazvy sloupcu, vraci HTML kod vertikalniho grafu'''
+    #df, columns, title='Graf', rotation = 45, sort_values = True, sort_ascending = True, limit = 100, precision = 0
+    #df = self.__df
+    #columns = df.columns
+    #if show_columns != '': columns = show_columns
+    title='Graf'
+    rotation = 90
+    #sort_values = True
+    #sort_ascending = True
+    limit = 100
+    precision = 1
+    cols = list(colsp[ci]['c'].keys())
+    print(cols)
+    '''
+    for i, column in enumerate(columns):
+        #raise error if not found
+        cols.append(df.columns.get_loc(column))
+    if sort_values:
+        df.sort_values(by=df.columns[cols[0]], axis = 0, inplace = True, ascending = sort_ascending)
+    else:
+        df.sort_index(inplace = True, ascending = sort_ascending)
+    df = df.head(limit)
+    '''
+    ind = range(len(cols))
+    width = 0.8/len(cols)
+    fig, ax = plt.subplots(figsize = (10,5))
+    rectss = []
+    #bottom=[0 for i in range(len(cols))]
+    # this makes stack
+    for i in range(1):
+        #rectss.append(plt.bar(ind, colsp[ci]['c'][cols[i]], bottom = bottom, label = cols[i]))
+        rectss.append(plt.bar(ind, [colsp[ci]['c'][col] for col in cols]))
+        #bottom += colsp[ci]['c'][cols[i]]
+    #bottom=[0 for i in range(len(cols))]
+    for rects in rectss:
+        #bott = []
+        for i, rect in enumerate(rects):
+            if len(cols) == 1:
+                #ax.annotate(s = self.__rd(rect.get_height(),precision), xy = (rect.get_x() + rect.get_width()/2, rect.get_height() + bottom[i]), ha = 'center', va = 'bottom')
+                ax.annotate(s = __rd(rect.get_height(),precision), xy = (rect.get_x() + rect.get_width()/2, rect.get_height()), ha = 'center', va = 'center')
+            else:
+                #ax.annotate(s = self.__rd(rect.get_height(),precision), xy = (rect.get_x() + rect.get_width()/2, rect.get_height()/2 + bottom[i]), ha = 'center', va = 'center')
+                ax.annotate(s = __rd(rect.get_height(),precision), xy = (rect.get_x() + rect.get_width()/2, rect.get_height()/2), ha = 'center', va = 'center')
+            #bott.append(rect.get_height())
+        #bottom += bott
+    plt.xticks(ind, cols, rotation = rotation)
+    plt.title(title)
+    #ax.legend(loc='upper center', bbox_to_anchor=(1.1, 1),
+    #      ncol=1, fancybox=True, shadow=True)
+    '''
+    #plt.show()
+    buf = BytesIO()
+    fig.savefig(buf, format="png", bbox_inches='tight')
+    # Embed the result in the html output.
+    data = base64.b64encode(buf.getbuffer()).decode("ascii")
+    return f"<img src='data:image/png;base64,{data}'/>"
+    '''
+    plt.show()
+
 
 def show_boxplot(colsi, title = 'Box Plot', boxplot_showfliers = True):
 
@@ -2238,6 +2350,19 @@ def do_sql(sql):
             #print(colsi)
             if np_mp:
                 show_boxplot(colsi, title, boxplot_showfliers)
+
+        elif command == "graph barchart":
+            colss = options["columns"]
+            boxplot_showfliers = options["show_fliers"]
+            title = options.get("title")
+            if colss is not None:
+                colsi = find_columns(colss)
+            else:
+                colsi = [ci for ci in range(1,len(columns)+1) if colsp[ci]['t'] == "Categorical"]
+            #print(colsi)
+            if np_mp:
+                getBarChartI(colsi[0])
+
 
         elif command == "table":
             tablename = options["tablename"]
