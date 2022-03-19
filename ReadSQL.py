@@ -615,24 +615,24 @@ command_options["data reset"]["alternative"] = ["data", "d"]
 command_options["data reset"]["altoption"] = [["w"]]
 
 command_options["graph boxplot"] = {}
-command_options["graph boxplot"]["name"] = ["what", "columns", "show_fliers", "title"]
+command_options["graph boxplot"]["name"] = ["what", "columns", "title", "show_fliers"]
 command_options["graph boxplot"]["required"] = [True, False, False, False]
-command_options["graph boxplot"]["type"] = [["boxplot","bo"], "strlist", "bool", "str"]
-command_options["graph boxplot"]["default"] = ["boxplot", "$ca", True, None]
+command_options["graph boxplot"]["type"] = [["boxplot","bo"], "strlist", "str", "bool"]
+command_options["graph boxplot"]["default"] = ["boxplot", None, None, True]
 command_options["graph boxplot"]["help1"] = "Help for command 'folder'"
 command_options["graph boxplot"]["help2"] = ["Bla1","Bla2","Bla3","Bla4"]
 command_options["graph boxplot"]["alternative"] = ["graph", "g"]
-command_options["graph boxplot"]["altoption"] = [["w"],["c"],["sf"],["tt"]]
+command_options["graph boxplot"]["altoption"] = [["w"],["c"],["tt"],["sf"]]
 
 command_options["graph barchart"] = {}
-command_options["graph barchart"]["name"] = ["what", "columns", "show_fliers", "title"]
-command_options["graph barchart"]["required"] = [True, False, False, False]
-command_options["graph barchart"]["type"] = [["barchart","ba"], "strlist", "bool", "str"]
-command_options["graph barchart"]["default"] = ["barchart", "$ca", True, None]
+command_options["graph barchart"]["name"] = ["what", "columns", "title"]
+command_options["graph barchart"]["required"] = [True, False, False]
+command_options["graph barchart"]["type"] = [["barchart","ba"], "strlist", "str"]
+command_options["graph barchart"]["default"] = ["barchart", None, None]
 command_options["graph barchart"]["help1"] = "Help for command 'folder'"
-command_options["graph barchart"]["help2"] = ["Bla1","Bla2","Bla3","Bla4"]
+command_options["graph barchart"]["help2"] = ["Bla1","Bla2","Bla3"]
 command_options["graph barchart"]["alternative"] = ["graph", "g"]
-command_options["graph barchart"]["altoption"] = [["w"],["c"],["sf"],["tt"]]
+command_options["graph barchart"]["altoption"] = [["w"],["c"],["tt"]]
 
 def __rd(x,y=2):
     ''' A classical mathematical rounding by Voznica '''
@@ -655,7 +655,10 @@ def getBarChartI(ci, title='Graf'):
     #sort_ascending = True
     precision = 0
     cols = list(colsp[ci]['c'].keys())
-    width = 0.8/len(cols)
+    if len(cols) > 0:
+        width = 0.8/len(cols)
+    else:
+        width = 1
     fig, ax = plt.subplots(figsize = (10,5))
     rects = plt.bar(range(len(cols)), [colsp[ci]['c'][col] for col in cols])
     for rect in rects:
@@ -2340,9 +2343,9 @@ def do_sql(sql):
                     else: break
 
         elif command == "graph boxplot":
-            colss = options["columns"]
-            boxplot_showfliers = options["show_fliers"]
+            colss = options.get("columns")
             title = options.get("title")
+            boxplot_showfliers = options.get("show_fliers")
             if colss is not None:
                 colsi = find_columns(colss)
             else:
@@ -2352,8 +2355,7 @@ def do_sql(sql):
                 show_boxplot(colsi, title, boxplot_showfliers)
 
         elif command == "graph barchart":
-            colss = options["columns"]
-            boxplot_showfliers = options["show_fliers"]
+            colss = options.get("columns")
             title = options.get("title")
             if colss is not None:
                 colsi = find_columns(colss)
@@ -2361,7 +2363,12 @@ def do_sql(sql):
                 colsi = [ci for ci in range(1,len(columns)+1) if colsp[ci]['t'] == "Categorical"]
             #print(colsi)
             if np_mp:
-                getBarChartI(colsi[0])
+                for ci in colsi:
+                    if title is not None:
+                        titlee = title + ": " + colsp[ci]["name"]
+                    else:
+                        titlee = colsp[ci]["name"]
+                    getBarChartI(ci, titlee)
 
 
         elif command == "table":
