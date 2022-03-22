@@ -1,0 +1,24 @@
+\cs t.db;
+\r t.txt;
+\dp$a;
+\t t, true;
+\q;
+
+\r t.txt;
+\i t;
+select * from t;
+\dm1;
+\da1;
+\pda, tt = $now;
+select "A A",B,C, Null as D from t;
+\df n = {D:$now};
+\dp$a;
+\pv;
+\sv {"$datetime":'%Y-%m-%d %H:%M:%S.%f'};
+\dp$a;
+\dm2;
+\t t1, true;
+select * from t1;
+\da2;
+\i t1;
+\t t2, true;

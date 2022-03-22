@@ -18,6 +18,7 @@ import time
 import datetime
 #from datetime import timedelta, datetime, date, time
 import random
+import copy
 
 from importlib.metadata import version
 
@@ -174,6 +175,9 @@ default_columns_name = "Column_"
 commands = {}
 variables = {}
 colsp = {}
+data_memory = {}
+columns_memory = {}
+colsp_memory = {}
 class_int = type(0)
 class_float = type(0.0)
 
@@ -212,6 +216,11 @@ variables["$parse_value_type"] = {}
 variables["$parse_value_type"]["shorts"] = []
 variables["$parse_value_type"]["options"] = {}
 variables["$parse_value_type"]["options"]["value"] = "auto"
+
+variables["$sleep"] = {}
+variables["$sleep"]["shorts"] = []
+variables["$sleep"]["options"] = {}
+variables["$sleep"]["options"]["value"] = 1
 
 variables["$all"] = {}
 variables["$all"]["shorts"] = ["$a","$al"]
@@ -304,7 +313,8 @@ variables["$now"]["shorts"] = ["$now"]
 variables["$now"]["user"] = {}
 variables["$now"]["user"]["value"] = lambda x: datetime.datetime.now()
 
-print((variables["$now"]["user"]["value"]))
+print(variables["$now"]["user"]["value"].__class__)
+print(variables["$now"]["user"]["value"](None))
 
 '''
 import datetime
@@ -633,6 +643,47 @@ command_options["graph barchart"]["help1"] = "Help for command 'folder'"
 command_options["graph barchart"]["help2"] = ["Bla1","Bla2","Bla3"]
 command_options["graph barchart"]["alternative"] = ["graph", "g"]
 command_options["graph barchart"]["altoption"] = [["w"],["c"],["tt"]]
+
+command_options["data memory easy"] = {}
+command_options["data memory easy"]["name"] = ["name"]
+command_options["data memory easy"]["required"] = [False]
+command_options["data memory easy"]["type"] = ["str"]
+command_options["data memory easy"]["default"] = ["1"]
+command_options["data memory easy"]["help1"] = "Help for command 'folder'"
+command_options["data memory easy"]["help2"] = ["Bla1"]
+command_options["data memory easy"]["alternative"] = ["data memory", "data mem", "dm"]
+command_options["data memory easy"]["altoption"] = [["n"]]
+
+command_options["data memory"] = {}
+command_options["data memory"]["name"] = ["what", "name"]
+command_options["data memory"]["required"] = [True, False]
+command_options["data memory"]["type"] = [["memory","mem","m"],"str"]
+command_options["data memory"]["default"] = ["memory", "1"]
+command_options["data memory"]["help1"] = "Help for command 'folder'"
+command_options["data memory"]["help2"] = ["Bla1","Bla2"]
+command_options["data memory"]["alternative"] = ["data", "d"]
+command_options["data memory"]["altoption"] = [["w"],["n"]]
+
+command_options["data activate easy"] = {}
+command_options["data activate easy"]["name"] = ["name"]
+command_options["data activate easy"]["required"] = [False]
+command_options["data activate easy"]["type"] = ["str"]
+command_options["data activate easy"]["default"] = ["1"]
+command_options["data activate easy"]["help1"] = "Help for command 'folder'"
+command_options["data activate easy"]["help2"] = ["Bla1"]
+command_options["data activate easy"]["alternative"] = ["data activate", "data act", "da"]
+command_options["data activate easy"]["altoption"] = [["n"]]
+
+command_options["data activate"] = {}
+command_options["data activate"]["name"] = ["what", "name"]
+command_options["data activate"]["required"] = [True, False]
+command_options["data activate"]["type"] = [["activate","act","a"],"str"]
+command_options["data activate"]["default"] = ["memory", "1"]
+command_options["data activate"]["help1"] = "Help for command 'folder'"
+command_options["data activate"]["help2"] = ["Bla1","Bla2"]
+command_options["data activate"]["alternative"] = ["data", "d"]
+command_options["data activate"]["altoption"] = [["w"],["n"]]
+
 
 def __rd(x,y=2):
     ''' A classical mathematical rounding by Voznica '''
@@ -1047,7 +1098,7 @@ def data_profile(rowsi, colsi):
                             colsp[ci]['t'] = "Categorical"
                             if colsp[ci]['fnq'] is None:
                                 colsp[ci]['fnq'] = data[ri-1][ci-1]
-
+                '''
                 if data[ri-1][ci-1] != a:
                     if isinstance(data[ri-1], tuple): data[ri-1] = list(data[ri-1])
                     data[ri-1][ci-1] = a
@@ -1055,7 +1106,7 @@ def data_profile(rowsi, colsi):
                     colsp[ci]['cl'] = type(a)
                 elif colsp[ci]['cl'] is not None:
                     if colsp[ci]['cl'] != type(a): colsp[ci]['cl'] = None
-
+                '''
 
                 if data[ri-1][ci-1] not in colsp[ci]['c']:
                     colsp[ci]['c'][data[ri-1][ci-1]] = 1
@@ -1562,7 +1613,10 @@ def parseVariable(command, options, n, vartest):
                                 opt = 0
                     if opt:
                         if variables[variable][context]["value"] is not None:
-                            ret = str(variables[variable][context]["value"]) # must look like string input from user
+                            if variable == "$now":
+                                ret = str(variables["$now"]["user"]["value"](None))
+                            else:
+                                ret = str(variables[variable][context]["value"]) # must look like string input from user
                         else:
                             ret = None
         elif vartest[0] == "@":
@@ -1937,9 +1991,10 @@ def check_filename(filename):
 def do_sql(sql):
 
     global conn, data, columns, data_old, columns_old, db_filename, folder_exists, folder_name, db_version, db_schema, \
-            fromm, too, stepp, randd, listt, colss, noness, noneso, variables, command_history, colsp
+            fromm, too, stepp, randd, listt, colss, noness, noneso, variables, command_history, colsp, \
+            data_memory, columns_memory, colsp_memory
 
-    #time.sleep(0.1)
+    time.sleep(variables["$sleep"]["options"]["value"])
 
     OK = 1
     if sql.startswith("\\"):
@@ -2341,6 +2396,28 @@ def do_sql(sql):
                         printRed("Elapsed time: " + str(datetime.timedelta(seconds=end-start)))
                         time.sleep(2)
                     else: break
+
+
+        elif command == "data memory" or command == "data memory easy":
+            memory_name = options.get("name")
+            print("data memory", memory_name)
+            if data_memory.get(memory_name) is None and columns_memory.get(memory_name) is None and colsp_memory.get(memory_name) is None:
+                data_memory[memory_name] = copy.deepcopy(data)
+                columns_memory[memory_name] = copy.deepcopy(columns)
+                colsp_memory[memory_name] = copy.deepcopy(colsp)
+
+
+        elif command == "data activate" or command == "data activate easy":
+            print("data activate")
+            memory_name = options.get("name")
+            if data_memory.get(memory_name) is not None and columns_memory.get(memory_name) is not None and colsp_memory.get(memory_name) is not None:
+                data = copy.deepcopy(data_memory.get(memory_name))
+                columns = copy.deepcopy(columns_memory.get(memory_name))
+                colsp = copy.deepcopy(colsp_memory.get(memory_name))
+                data_old = None
+                columns_old = None
+            show_data(data, columns)
+
 
         elif command == "graph boxplot":
             colss = options.get("columns")
@@ -2821,8 +2898,8 @@ def do_sql(sql):
         elif command == "data fill easy" or command == "data fill":
 
             if not data_old and not columns_old:
-                data_old = data.copy()
-                columns_old = columns.copy()
+                data_old = copy.deepcopy(data)
+                columns_old = copy.deepcopy(columns)
 
             fill_formats = options.get("formats")
             fill_nones = options.get("nones")
@@ -2872,15 +2949,15 @@ def do_sql(sql):
 
         elif command == "data reset":
             if data_old and columns_old:
-                data = data_old.copy()
-                columns = columns_old.copy()
+                data = copy.deepcopy(data_old)
+                columns = copy.deepcopy(columns_old)
             show_data(data, columns)
 
         elif command == "data select easy" or command == "data select":
 
             if not data_old and not columns_old:
-                data_old = data.copy()
-                columns_old = columns.copy()
+                data_old = copy.deepcopy(data)
+                columns_old = copy.deepcopy(columns)
 
             fromm = options["from"]
             too = options["to"]
@@ -2961,8 +3038,10 @@ def do_sql(sql):
                 else:
                     print(note)
 
+            # do I need deepcopy?
             data = data_selected.copy()
             columns = columns_selected.copy()
+            colsp = {}
 
             #print(columns, data)
 
@@ -2997,7 +3076,10 @@ def do_sql(sql):
             rows = range(1, nrows + 1)
             '''
 
+            #TODO: option to print only if closp exists
+            colsp = {}
             colsp = data_profile(rowsi, colsi)
+
             profile_data = []
             if print_all:
                 profile_columns = [colsp[ci]["name"] for ci in colsp ] # print all profiled columns

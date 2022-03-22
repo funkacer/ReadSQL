@@ -1,0 +1,3 @@
+delete t.db
+\f test1
+\l #load.txt
