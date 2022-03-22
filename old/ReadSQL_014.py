@@ -910,8 +910,7 @@ def data_profile(rowsi, colsi):
         colsp[ci]['name'] = columns[ci-1]
         colsp[ci]['w'] = 0
         #colsp[columns[ci-1]]['t'] = "Categorical"
-        #colsp[ci]['t'] = "Quantitative"
-        colsp[ci]['t'] = "Integer"
+        colsp[ci]['t'] = "Quantitative"
         #colsp[ci]['qt'] = "Int"
         colsp[ci]['cl'] = None
         colsp[ci]['fnq'] = None
@@ -937,7 +936,7 @@ def data_profile(rowsi, colsi):
                     if colsp[ci]['v'] == 1:
                         colsp[ci]['min'] = a
                         colsp[ci]['max'] = a
-                        colsp[ci]['t'] = "Integer"
+                        colsp[ci]['t'] = "Quantitative"
                         #colsp[ci]['qt'] = "Int"
                     elif a < colsp[ci]['min']:
                         colsp[ci]['min'] = a
@@ -949,7 +948,7 @@ def data_profile(rowsi, colsi):
                     if colsp[ci]['v'] == 1:
                         colsp[ci]['min'] = a
                         colsp[ci]['max'] = a
-                        colsp[ci]['t'] = "Float"
+                        colsp[ci]['t'] = "Quantitative"
                         #colsp[ci]['qt'] = "Float"
                     elif a < colsp[ci]['min']:
                         colsp[ci]['min'] = a
@@ -958,72 +957,59 @@ def data_profile(rowsi, colsi):
                     colsp[ci]['sum'] += a
                     colsp[ci]['m'].append(a)
                 elif isinstance (a, datetime.datetime):
+                    colsp[ci]['t'] = "Datetime"
                     if colsp[ci]['v'] == 1:
                         colsp[ci]['min'] = a
                         colsp[ci]['max'] = a
-                        colsp[ci]['t'] = "Datetime"
                     elif a < colsp[ci]['min']:
                         colsp[ci]['min'] = a
                     elif a > colsp[ci]['max']:
                         colsp[ci]['max'] = a
                 elif isinstance (a, datetime.date):
+                    colsp[ci]['t'] = "Date"
                     if colsp[ci]['v'] == 1:
                         colsp[ci]['min'] = a
                         colsp[ci]['max'] = a
-                        colsp[ci]['t'] = "Date"
                     elif a < colsp[ci]['min']:
                         colsp[ci]['min'] = a
                     elif a > colsp[ci]['max']:
                         colsp[ci]['max'] = a
                 elif isinstance (a, datetime.time):
+                    colsp[ci]['t'] = "Time"
                     if colsp[ci]['v'] == 1:
                         colsp[ci]['min'] = a
                         colsp[ci]['max'] = a
-                        colsp[ci]['t'] = "Time"
                     elif a < colsp[ci]['min']:
                         colsp[ci]['min'] = a
                     elif a > colsp[ci]['max']:
                         colsp[ci]['max'] = a
                 elif isinstance (a, datetime.timedelta):
+                    colsp[ci]['t'] = "Time"
                     a = datetime.datetime.strptime(str(datetime.datetime.min + data[ri-1][ci-1])[11:], variables["$time"]["user"]["value"]).time()
                     if colsp[ci]['v'] == 1:
                         colsp[ci]['min'] = a
                         colsp[ci]['max'] = a
-                        colsp[ci]['t'] = "Time"
                     elif a < colsp[ci]['min']:
                         colsp[ci]['min'] = a
                     elif a > colsp[ci]['max']:
                         colsp[ci]['max'] = a
                 else:
-                    if colsp[ci]['t'] == "Float":
+                    if colsp[ci]['t'] == "Quantitative":
                         try:
                             if variables["$decimal_separator"]["user"]["value"] != ".": a = a.replace(variables["$decimal_separator"]["user"]["value"], '.')
                             if variables["$thousands_separator"]["user"]["value"] in a: a = a.replace(variables["$thousands_separator"]["user"]["value"], '')
                             a = float(a)
-                            if colsp[ci]['v'] == 1:
-                                colsp[ci]['min'] = a
-                                colsp[ci]['max'] = a
-                            elif a < colsp[ci]['min']:
-                                colsp[ci]['min'] = a
-                            elif a > colsp[ci]['max']:
-                                colsp[ci]['max'] = a
-                            colsp[ci]['sum'] += a
-                            colsp[ci]['m'].append(a)
-                        except Exception as e:
-                            traceback.print_exc()
-                            colsp[ci]['t'] = "Categorical"
-                            if colsp[ci]['fnq'] is None:
-                                colsp[ci]['fnq'] = data[ri-1][ci-1]
-                    elif colsp[ci]['t'] == "Integer":
-                        try:
-                            if variables["$decimal_separator"]["user"]["value"] != ".": a = a.replace(variables["$decimal_separator"]["user"]["value"], '.')
-                            if variables["$thousands_separator"]["user"]["value"] in a: a = a.replace(variables["$thousands_separator"]["user"]["value"], '')
-                            a = float(a)
-                            if a == int(a):
-                                a = int(a)  # check other way???
-                            else:
-                                colsp[ci]['t'] = "Float"
+                            if colsp[ci]['cl'] != class_float:
+                                if a == int(a): a = int(a)  # check other way???
                             #print(a)
+                            '''
+                            if colsp[ci]['qt'] == "Int":
+                                b = int(a)
+                                if a != b:
+                                    colsp[ci]['qt'] = "Float"
+                                else:
+                                    a = b
+                            '''
                             if colsp[ci]['v'] == 1:
                                 colsp[ci]['min'] = a
                                 colsp[ci]['max'] = a
@@ -1038,7 +1024,6 @@ def data_profile(rowsi, colsi):
                             colsp[ci]['t'] = "Categorical"
                             if colsp[ci]['fnq'] is None:
                                 colsp[ci]['fnq'] = data[ri-1][ci-1]
-
                     if colsp[ci]['v'] == 1 and colsp[ci]['t'] == "Categorical":
                         # try parse date firsttime
                         try:
@@ -1117,11 +1102,11 @@ def data_profile(rowsi, colsi):
                 if data[ri-1][ci-1] != a:
                     if isinstance(data[ri-1], tuple): data[ri-1] = list(data[ri-1])
                     data[ri-1][ci-1] = a
-                '''
                 if colsp[ci]['v'] == 1:
-                    colsp[ci]['cl'] = type(data[ri-1][ci-1])
+                    colsp[ci]['cl'] = type(a)
                 elif colsp[ci]['cl'] is not None:
-                    if colsp[ci]['cl'] != type(data[ri-1][ci-1]): colsp[ci]['cl'] = None
+                    if colsp[ci]['cl'] != type(a): colsp[ci]['cl'] = None
+                '''
 
                 if data[ri-1][ci-1] not in colsp[ci]['c']:
                     colsp[ci]['c'][data[ri-1][ci-1]] = 1
@@ -1135,7 +1120,7 @@ def data_profile(rowsi, colsi):
         sys.stdout.flush()
 
     for ci in colsi:
-        if colsp[ci]['v'] > 0 and (colsp[ci]['t'] == "Integer" or colsp[ci]['t'] == "Float"):
+        if colsp[ci]['v'] > 0 and colsp[ci]['t'] == "Quantitative":
             colsp[ci]['mean'] = colsp[ci]['sum'] / colsp[ci]['v']
             lenc = len(colsp[ci]['m'])
             if lenc > 0:
