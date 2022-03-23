@@ -595,14 +595,14 @@ command_options["data select"]["alternative"] = ["data", "d"]
 command_options["data select"]["altoption"] = [["w"], ["f"], ["t"], ["s"], ["r"], ["l"], ["c"], ["tt"], ["nt"], ["tc"], ["nc"]]
 
 command_options["data profile easy"] = {}
-command_options["data profile easy"]["name"] = ["from", "to", "step", "random", "list", "columns", "nones", "nones_option", "title", "note", "title_color", "note_color", "print_all"]
-command_options["data profile easy"]["required"] = [False, False, False, False, False, False, False, False, False, False, False, False, False]
-command_options["data profile easy"]["type"] = ["int", "int", "int", "int", "intlist", "strlist", "strlist", ["any","all","none"], "str", "str", "int", "int", "bool"]
-command_options["data profile easy"]["default"] = [0, 0, 1, 0, "[]", "[]", "[]", "all", None, None, None, None, False]
+command_options["data profile easy"]["name"] = ["from", "to", "step", "random", "list", "columns", "nones", "nones_option", "title", "note", "title_color", "note_color", "print_all", "purge"]
+command_options["data profile easy"]["required"] = [False, False, False, False, False, False, False, False, False, False, False, False, False, False]
+command_options["data profile easy"]["type"] = ["int", "int", "int", "int", "intlist", "strlist", "strlist", ["any","all","none"], "str", "str", "int", "int", "bool", "bool"]
+command_options["data profile easy"]["default"] = [0, 0, 1, 0, "[]", "[]", "[]", "all", None, None, None, None, False, False]
 command_options["data profile easy"]["help1"] = "Help for command 'folder'"
-command_options["data profile easy"]["help2"] = ["Bla1","Bla2","Bla3","Bla4","Bla5","Bla6","Bla7","Bla8","Bla9","Bla10","Bla11","Bla12","Bla13"]
+command_options["data profile easy"]["help2"] = ["Bla1","Bla2","Bla3","Bla4","Bla5","Bla6","Bla7","Bla8","Bla9","Bla10","Bla11","Bla12","Bla13","Bla14"]
 command_options["data profile easy"]["alternative"] = ["data profile", "d profile", "d pr", "d p", "dpr", "dp"]
-command_options["data profile easy"]["altoption"] = [["f"], ["t"], ["s"], ["r"], ["l"], ["c"], ["nulls", "ns", "n"], ["no"], ["tt"], ["nt"], ["tc"], ["nc"], ["pa"]]
+command_options["data profile easy"]["altoption"] = [["f"], ["t"], ["s"], ["r"], ["l"], ["c"], ["nulls", "ns", "n"], ["no"], ["tt"], ["nt"], ["tc"], ["nc"], ["pa"], ["pu"]]
 
 command_options["data profile"] = {}
 command_options["data profile"]["name"] = ["what", "from", "to", "step", "random", "list", "columns", "title", "note", "title_color", "note_color"]
@@ -900,7 +900,7 @@ def terminal_resize(colsp):
         #print(col, screen)
 
 
-def data_profile(rowsi, colsi):
+def data_profile(rowsi, colsi, purge = False):
     global variables
     #print("Len rowsi", len(rowsi))
     nrows = len(data)
@@ -1113,11 +1113,11 @@ def data_profile(rowsi, colsi):
                             colsp[ci]['t'] = "Categorical"
                             if colsp[ci]['fnq'] is None:
                                 colsp[ci]['fnq'] = data[ri-1][ci-1]
-                '''
-                if data[ri-1][ci-1] != a:
+
+                if purge and data[ri-1][ci-1] != a:
                     if isinstance(data[ri-1], tuple): data[ri-1] = list(data[ri-1])
                     data[ri-1][ci-1] = a
-                '''
+
                 if colsp[ci]['v'] == 1:
                     colsp[ci]['cl'] = type(data[ri-1][ci-1])
                 elif colsp[ci]['cl'] is not None:
@@ -3075,6 +3075,7 @@ def do_sql(sql):
             title_color = options.get("title_color")
             note_color = options.get("note_color")
             print_all = options.get("print_all")
+            purge = options.get("purge")
             #print("Title:", title)
             #print(fromm, too, stepp)
 
@@ -3093,7 +3094,7 @@ def do_sql(sql):
 
             #TODO: option to print only if closp exists
             colsp = {}
-            colsp = data_profile(rowsi, colsi)
+            colsp = data_profile(rowsi, colsi, purge)
 
             profile_data = []
             if print_all:
