@@ -178,6 +178,7 @@ colsp = {}
 data_memory = {}
 columns_memory = {}
 colsp_memory = {}
+class_str = type("")
 class_int = type(0)
 class_float = type(0.0)
 
@@ -287,6 +288,10 @@ variables["$time"] = {}
 variables["$time"]["shorts"] = ["$t"]
 variables["$time"]["user"] = {}
 variables["$time"]["user"]["value"] = "%H:%M:%S"
+variables["$mstime"] = {}
+variables["$mstime"]["shorts"] = ["$t"]
+variables["$mstime"]["user"] = {}
+variables["$mstime"]["user"]["value"] = "%H:%M:%S.%f0"
 #variables["$time"]["user"]["value"] = "%H:%M:%S.%f0"
 #variables["$time"]["user"]["value"] = "%H:%M:%S.%f"
 variables["$datetime"] = {}
@@ -2490,13 +2495,10 @@ def do_sql(sql):
                         columns_create += f'''"{col}" '''
                     else:
                         columns_create += f''', "{col}" '''
-                    if colsp[ci]["t"] == "Quantitative":
-                        if colsp[ci]["cl"] == class_int:
-                            columns_create += "int"
-                        elif colsp[ci]["cl"] == class_float:
-                            columns_create += "real"
-                        else:
-                            columns_create += "text"
+                    if colsp[ci]["t"] == "Integer":
+                        columns_create += "int"
+                    elif colsp[ci]["t"] == "Float":
+                        columns_create += "real"
                     elif colsp[ci]["t"] == "Datetime":
                         columns_create += "datetime"
                     elif colsp[ci]["t"] == "Date":
@@ -2504,30 +2506,20 @@ def do_sql(sql):
                     elif colsp[ci]["t"] == "Time":
                         # sqlite does not use timedelta for time format, min datetime is 0001-01-01 0:0:0:
                         columns_create += "time"
+                        if colsp[ci]["cl"] is not class_str:
+                            #print("'" + colsp[ci]["name"] + "'", "is not class string - converting...")
+                            for ri in range(1, len(data) + 1):
+                                if data[ri-1][ci-1] is not None and not isinstance(data[ri-1][ci-1], str):
+                                    if isinstance(data[ri-1], tuple): data[ri-1] = list(data[ri-1])
+                                    data[ri-1][ci-1] = str(data[ri-1][ci-1])
+                        '''
                         for ri in range(1, len(data) + 1):
                             if data[ri-1][ci-1] is not None:
                                 if isinstance(data[ri-1], tuple): data[ri-1] = list(data[ri-1])
                                 data[ri-1][ci-1] = str(data[ri-1][ci-1])
                         '''
-                        for ri in range(1, len(data) + 1):
-                            if isinstance(data[ri-1], tuple): data[ri-1] = list(data[ri-1])
-                            if isinstance(data[ri-1][ci-1], datetime.timedelta):
-                                data[ri-1][ci-1] = str(datetime.datetime.min + data[ri-1][ci-1])[11:]    #time without date starting 0/1/2 (02:02:02, not 2:02:02)
-                            elif not isinstance(data[ri-1][ci-1], str):
-                                data[ri-1][ci-1] = str(data[ri-1][ci-1])
-                                #print(data[ri-1][ci-1])
-                        '''
                     else:
                         columns_create += "text"
-                        '''
-                        for ri in range(1, len(data) + 1):
-                            if isinstance(data[ri-1], tuple): data[ri-1] = list(data[ri-1])
-                            if isinstance(data[ri-1][ci-1], datetime.timedelta):
-                                data[ri-1][ci-1] = str(datetime.datetime.min + data[ri-1][ci-1])[11:]    #time without date starting 0/1/2 (02:02:02, not 2:02:02)
-                            elif not isinstance(data[ri-1][ci-1], str):
-                                data[ri-1][ci-1] = str(data[ri-1][ci-1])
-                                #print(data[ri-1][ci-1])
-                        '''
                     if i == 0:
                         #part1 += '''{{0[{}]}}'''.format(str(i))
                         part1 += f"{{0[{str(i)}]}}"
@@ -2552,13 +2544,10 @@ def do_sql(sql):
                         columns_create += f'''`{col}` '''
                     else:
                         columns_create += f''', `{col}` '''
-                    if colsp[ci]["t"] == "Quantitative":
-                        if colsp[ci]["cl"] == class_int:
-                            columns_create += "int"
-                        elif colsp[ci]["cl"] == class_float:
-                            columns_create += "real"
-                        else:
-                            columns_create += "text"
+                    if colsp[ci]["t"] == "Integer":
+                        columns_create += "int"
+                    elif colsp[ci]["t"] == "Float":
+                        columns_create += "real"
                     elif colsp[ci]["t"] == "Datetime":
                         columns_create += "datetime"
                     elif colsp[ci]["t"] == "Date":
@@ -2589,13 +2578,10 @@ def do_sql(sql):
                         columns_create += f'''"{col}" '''
                     else:
                         columns_create += f''', "{col}" '''
-                    if colsp[ci]["t"] == "Quantitative":
-                        if colsp[ci]["cl"] == class_int:
-                            columns_create += "int"
-                        elif colsp[ci]["cl"] == class_float:
-                            columns_create += "real"
-                        else:
-                            columns_create += "text"
+                    if colsp[ci]["t"] == "Integer":
+                        columns_create += "int"
+                    elif colsp[ci]["t"] == "Float":
+                        columns_create += "real"
                     elif colsp[ci]["t"] == "Datetime":
                         columns_create += "timestamp"
                     elif colsp[ci]["t"] == "Date":
@@ -2626,36 +2612,48 @@ def do_sql(sql):
                         columns_create += f'''"{col}" '''
                     else:
                         columns_create += f''', "{col}" '''
-                    if colsp[ci]["t"] == "Quantitative":
-                        if colsp[ci]["cl"] == class_int:
-                            columns_create += "int"
-                        elif colsp[ci]["cl"] == class_float:
-                            columns_create += "real"
-                        else:
-                            columns_create += "ntext"
+                    if colsp[ci]["t"] == "Integer":
+                        columns_create += "int"
+                    elif colsp[ci]["t"] == "Float":
+                        columns_create += "real"   # this format is Approximate numerics
+                        #columns_create += "decimal(10,3)"
                     elif colsp[ci]["t"] == "Datetime":
                         columns_create += "datetime"
-                        for ri in range(1, len(data) + 1):
-                            if data[ri-1][ci-1] is not None:
-                                if isinstance(data[ri-1], tuple): data[ri-1] = list(data[ri-1])
-                                data[ri-1][ci-1] = str(data[ri-1][ci-1])
+                        if colsp[ci]["cl"] is not class_str:
+                            #print("'" + colsp[ci]["name"] + "'", "is not class string - converting...")
+                            for ri in range(1, len(data) + 1):
+                                if data[ri-1][ci-1] is not None and not isinstance(data[ri-1][ci-1], str):
+                                    if isinstance(data[ri-1], tuple): data[ri-1] = list(data[ri-1])
+                                    data[ri-1][ci-1] = str(data[ri-1][ci-1])
                     elif colsp[ci]["t"] == "Date":
                         columns_create += "date"
-                        for ri in range(1, len(data) + 1):
-                            if data[ri-1][ci-1] is not None:
-                                if isinstance(data[ri-1], tuple): data[ri-1] = list(data[ri-1])
-                                data[ri-1][ci-1] = str(data[ri-1][ci-1])
+                        if colsp[ci]["cl"] is not class_str:
+                            #print("'" + colsp[ci]["name"] + "'", "is not class string - converting...")
+                            for ri in range(1, len(data) + 1):
+                                if data[ri-1][ci-1] is not None and not isinstance(data[ri-1][ci-1], str):
+                                    if isinstance(data[ri-1], tuple): data[ri-1] = list(data[ri-1])
+                                    data[ri-1][ci-1] = str(data[ri-1][ci-1])
                     elif colsp[ci]["t"] == "Time":
                         columns_create += "time"
-                        for ri in range(1, len(data) + 1):
-                            if data[ri-1][ci-1] is not None:
-                                if isinstance(data[ri-1], tuple): data[ri-1] = list(data[ri-1])
-                                if isinstance(data[ri-1][ci-1], datetime.timedelta):
-                                    data[ri-1][ci-1] = str(datetime.datetime.min + data[ri-1][ci-1])[11:]    #time without date starting 0/1/2 (02:02:02, not 2:02:02)
-                                elif not isinstance(data[ri-1][ci-1], str):
-                                    data[ri-1][ci-1] = str(data[ri-1][ci-1])
+                        if colsp[ci]["cl"] is not class_str:
+                            #print("'" + colsp[ci]["name"] + "'", "is not class string - converting...")
+                            for ri in range(1, len(data) + 1):
+                                if data[ri-1][ci-1] is not None and not isinstance(data[ri-1][ci-1], str):
+                                    if isinstance(data[ri-1], tuple): data[ri-1] = list(data[ri-1])
+                                    if isinstance(data[ri-1][ci-1], datetime.timedelta):
+                                        data[ri-1][ci-1] = str(datetime.datetime.min + data[ri-1][ci-1])[11:]    #time without date starting 0/1/2 (02:02:02, not 2:02:02)
+                                    else:
+                                        data[ri-1][ci-1] = str(data[ri-1][ci-1])
                     else:
+                        # this leads to crash if instance is not str
                         columns_create += "ntext"
+                        if colsp[ci]["cl"] is not class_str:
+                            #print("'" + colsp[ci]["name"] + "'", "is not class string - converting...")
+                            for ri in range(1, len(data) + 1):
+                                if data[ri-1][ci-1] is not None and not isinstance(data[ri-1][ci-1], str):
+                                    if isinstance(data[ri-1], tuple): data[ri-1] = list(data[ri-1])
+                                    data[ri-1][ci-1] = str(data[ri-1][ci-1])
+
                     if i == 0:
                         part1 += f"{{0[{str(i)}]}}"
                         part2 += "?"
