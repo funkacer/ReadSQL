@@ -718,7 +718,7 @@ def getBarChartI(ci, title='Graf'):
     fig, ax = plt.subplots(figsize = (10,5))
     rects = plt.bar(range(len(cols)), [colsp[ci]['c'][col] for col in cols])
     for rect in rects:
-        ax.annotate(s = __rd(rect.get_height(),precision), xy = (rect.get_x() + rect.get_width()/2, rect.get_height()/2), ha = 'center', va = 'bottom')
+        ax.annotate(text = __rd(rect.get_height(),precision), xy = (rect.get_x() + rect.get_width()/2, rect.get_height()/2), ha = 'center', va = 'bottom')
     plt.xticks(range(len(cols)), cols, rotation = rotation)
     plt.title(title)
     '''
@@ -806,7 +806,7 @@ def show_boxplot(colsi, title = 'Box Plot', boxplot_showfliers = True):
     np_dict = {}
 
     for ci in colsi:
-        if colsp[ci]['t'] == "Quantitative":
+        if colsp[ci]['t'] == "Integer" or colsp[ci]['t'] == "Float":
             #print(colsp[ci]['m'])
             #for i, column in enumerate(column_list):
             #data_part_np = data_df.iloc[data_df[data_df[column].isnull() == 0].index,data_df.columns.get_loc(column)].to_numpy()
@@ -2446,8 +2446,8 @@ def do_sql(sql):
             if colss is not None:
                 colsi = find_columns(colss)
             else:
-                colsi = [ci for ci in range(1,len(columns)+1) if colsp[ci]['t'] == "Quantitative"]
-            #print(colsi)
+                colsi = [ci for ci in range(1,len(columns)+1) if colsp[ci]['t'] == "Integer" or colsp[ci]['t'] == "Float"]
+            #print("Colsi", colsi)
             if np_mp:
                 show_boxplot(colsi, title, boxplot_showfliers)
 
@@ -3115,27 +3115,27 @@ def do_sql(sql):
                             else:
                                 profile_data[i].append("-")
                         elif stat == "ran":
-                            if colsp[ci]["min"] and colsp[ci]["max"] and colsp[ci]["t"] == "Quantitative":
+                            if colsp[ci]["min"] is not None and colsp[ci]["max"] is not None and (colsp[ci]["t"] == "Integer" or colsp[ci]["t"] == "Float"):
                                 profile_data[i].append(round(colsp[ci]["max"] - colsp[ci]["min"], 2))
                             else:
                                 profile_data[i].append("-")
                         elif stat == "iqr":
-                            if colsp[ci]["q3"] and colsp[ci]["q1"]:
+                            if colsp[ci]["q3"] is not None and colsp[ci]["q1"] is not None:
                                 profile_data[i].append(round(colsp[ci]["q3"] - colsp[ci]["q1"], 2))
                             else:
                                 profile_data[i].append("-")
                         elif stat == "var":
-                            if colsp[ci]["smd2"] and colsp[ci]["v"]:
+                            if colsp[ci]["smd2"] is not None and colsp[ci]["v"] > 0:
                                 profile_data[i].append(round(colsp[ci]["smd2"] / colsp[ci]["v"], 2))
                             else:
                                 profile_data[i].append("-")
                         elif stat == "std":
-                            if colsp[ci]["smd2"] and colsp[ci]["v"]:
+                            if colsp[ci]["smd2"] is not None and colsp[ci]["v"] > 0:
                                 profile_data[i].append(round((colsp[ci]["smd2"] / colsp[ci]["v"])**0.5, 2))
                             else:
                                 profile_data[i].append("-")
                         elif stat == "skw":
-                            if colsp[ci]["smd3"] and colsp[ci]["smd2"] and colsp[ci]["v"]:
+                            if colsp[ci]["smd3"] is not None and colsp[ci]["smd2"] > 0 and colsp[ci]["v"] > 0:
                                 profile_data[i].append(round(colsp[ci]["smd3"] / (colsp[ci]["v"] * (colsp[ci]["smd2"] / colsp[ci]["v"])**1.5), 2))
                             else:
                                 profile_data[i].append("-")
@@ -3146,10 +3146,10 @@ def do_sql(sql):
                             else:
                                 profile_data[i].append("-")
                         elif stat == "fnq":
-                            if colsp[ci]["fnq"] is None:
-                                profile_data[i].append("-")
-                            else:
+                            if colsp[ci]["fnq"] is not None:
                                 profile_data[i].append(colsp[ci]["fnq"])
+                            else:
+                                profile_data[i].append("-")
                         else:
                             for c in colsp[ci]:
                                 #print(c, stat)
