@@ -257,6 +257,7 @@ variables["$columns_all"]["data"]["data fill"] = {}
 variables["$columns_all"]["data"]["data fill easy"] = {}
 variables["$columns_all"]["data"]["graph boxplot"] = {}
 variables["$columns_all"]["data"]["graph barchart"] = {}
+variables["$columns_all"]["data"]["graph linechart"] = {}
 
 variables["$red"] = {}
 variables["$red"]["shorts"] = ["$r"]
@@ -649,6 +650,26 @@ command_options["graph barchart"]["help2"] = ["Bla1","Bla2","Bla3"]
 command_options["graph barchart"]["alternative"] = ["graph", "g"]
 command_options["graph barchart"]["altoption"] = [["w"],["c"],["tt"]]
 
+command_options["graph linechart"] = {}
+command_options["graph linechart"]["name"] = ["what", "columns", "title"]
+command_options["graph linechart"]["required"] = [True, False, False]
+command_options["graph linechart"]["type"] = [["linechart","li"], "strlist", "str"]
+command_options["graph linechart"]["default"] = ["linechart", None, None]
+command_options["graph linechart"]["help1"] = "Help for command 'folder'"
+command_options["graph linechart"]["help2"] = ["Bla1","Bla2","Bla3"]
+command_options["graph linechart"]["alternative"] = ["graph", "g"]
+command_options["graph linechart"]["altoption"] = [["w"],["c"],["tt"]]
+
+command_options["graph histogram"] = {}
+command_options["graph histogram"]["name"] = ["what", "columns", "title"]
+command_options["graph histogram"]["required"] = [True, False, False]
+command_options["graph histogram"]["type"] = [["histogram","hi"], "strlist", "str"]
+command_options["graph histogram"]["default"] = ["histogram", None, None]
+command_options["graph histogram"]["help1"] = "Help for command 'folder'"
+command_options["graph histogram"]["help2"] = ["Bla1","Bla2","Bla3"]
+command_options["graph histogram"]["alternative"] = ["graph", "g"]
+command_options["graph histogram"]["altoption"] = [["w"],["c"],["tt"]]
+
 command_options["data memory easy"] = {}
 command_options["data memory easy"]["name"] = ["name"]
 command_options["data memory easy"]["required"] = [False]
@@ -703,6 +724,54 @@ def __rd(x,y=2):
     except:
         result = ''
     return result
+
+def getHistogramI(ci, title='Graf'):
+    '''
+    Takes disctionary of labels and np arrays for boxplots
+    '''
+
+    fig, ax = plt.subplots()
+    n, bins, patches = ax.hist(colsp[ci]['m'], 50, density=True, facecolor='g', alpha=0.75)
+    plt.title(title)
+    plt.tight_layout()
+    plt.show()
+
+
+def getLineChartI(ci, title='Graf'):
+    '''Tato funkce akceptuje df a nazvy sloupcu, vraci HTML kod vertikalniho grafu'''
+    rotation = 90
+    #sort_values = True
+    #sort_ascending = True
+    precision = 0
+    cols = [col for col in sorted(colsp[ci]['c'].keys())]
+    print(len(cols))
+    '''
+    if len(cols) > 0:
+        width = 0.8/len(cols)
+    else:
+        width = 1
+    '''
+    fig, ax = plt.subplots(figsize = (10,5))
+    ax.plot(range(len(cols)), [colsp[ci]['c'][col] for col in cols])
+    '''
+    plt.bar(range(len(cols)), [colsp[ci]['c'][col] for col in cols])
+    rects = plt.bar(range(len(cols)), [colsp[ci]['c'][col] for col in cols])
+    for rect in rects:
+        ax.annotate(text = __rd(rect.get_height(),precision), xy = (rect.get_x() + rect.get_width()/2, rect.get_height()/2), ha = 'center', va = 'bottom')
+    '''
+    plt.xticks(range(len(cols)), cols, rotation = rotation)
+    plt.title(title)
+    '''
+    #plt.show()
+    buf = BytesIO()
+    fig.savefig(buf, format="png", bbox_inches='tight')
+    # Embed the result in the html output.
+    data = base64.b64encode(buf.getbuffer()).decode("ascii")
+    return f"<img src='data:image/png;base64,{data}'/>"
+    '''
+    plt.tight_layout()
+    plt.show()
+
 
 def getBarChartI(ci, title='Graf'):
     '''Tato funkce akceptuje df a nazvy sloupcu, vraci HTML kod vertikalniho grafu'''
@@ -794,32 +863,7 @@ def getBarChartV(ci):
     plt.show()
 
 
-def show_boxplot(colsi, title = 'Box Plot', boxplot_showfliers = True):
-
-    #data_df = self.__data_df
-    #boxplot_showfliers = True
-    #data_np = data_df[column_list].to_numpy()
-    #data_np = np.empty(shape=[len(column_list),len(data_df)])
-
-    #if isinstance(column_list, str): column_list = [column_list]
-
-    np_dict = {}
-
-    for ci in colsi:
-        if colsp[ci]['t'] == "Integer" or colsp[ci]['t'] == "Float":
-            #print(colsp[ci]['m'])
-            #for i, column in enumerate(column_list):
-            #data_part_np = data_df.iloc[data_df[data_df[column].isnull() == 0].index,data_df.columns.get_loc(column)].to_numpy()
-            #data_part_np = data_df.loc[data_df[data_df[column].isnull() == 0].index, column].to_numpy()
-            #data_part_np = np.array(colsp[ci]['m'])
-            data_part_np = colsp[ci]['m']
-            #print(data_part_np)
-            #data_np[i] = data_part_np
-            np_dict[colsp[ci]['name']] = data_part_np
-
-    __show_boxplot(np_dict = np_dict, title = title, boxplot_showfliers = boxplot_showfliers)
-
-def __show_boxplot(np_dict = {}, title = 'Box Plot', boxplot_showfliers = True):
+def getBoxplotI(colsi, title = 'Box Plot', boxplot_showfliers = True):
     '''
     Takes disctionary of labels and np arrays for boxplots
     '''
@@ -841,6 +885,19 @@ def __show_boxplot(np_dict = {}, title = 'Box Plot', boxplot_showfliers = True):
     #if margin == 0: margin = top*0.1 # if top == bottom
     #bottom -= margin
     #top += margin
+
+    np_dict = {}
+
+    for ci in colsi:
+        #print(colsp[ci]['m'])
+        #for i, column in enumerate(column_list):
+        #data_part_np = data_df.iloc[data_df[data_df[column].isnull() == 0].index,data_df.columns.get_loc(column)].to_numpy()
+        #data_part_np = data_df.loc[data_df[data_df[column].isnull() == 0].index, column].to_numpy()
+        #data_part_np = np.array(colsp[ci]['m'])
+        data_part_np = colsp[ci]['m']
+        #print(data_part_np)
+        #data_np[i] = data_part_np
+        np_dict[colsp[ci]['name']] = data_part_np
 
     fig1, ax1 = plt.subplots()
     ax1.set_title(title)
@@ -2439,6 +2496,39 @@ def do_sql(sql):
             show_data(data, columns)
 
 
+        elif command == "graph histogram":
+            colss = options.get("columns")
+            title = options.get("title")
+            if colss is not None:
+                colsi = find_columns(colss)
+            else:
+                colsi = [ci for ci in range(1,len(columns)+1) if colsp[ci]['t'] == "Integer" or colsp[ci]['t'] == "Float"]
+            #print(colsi)
+            if np_mp:
+                for ci in colsi:
+                    if title is not None:
+                        titlee = title + ": " + colsp[ci]["name"]
+                    else:
+                        titlee = colsp[ci]["name"]
+                    getHistogramI(ci, titlee)
+
+        elif command == "graph linechart":
+            colss = options.get("columns")
+            title = options.get("title")
+            if colss is not None:
+                colsi = find_columns(colss)
+            else:
+                colsi = [ci for ci in range(1,len(columns)+1) if colsp[ci]['t'] == "Datetime" or colsp[ci]['t'] == "Date" or colsp[ci]['t'] == "Time"]
+            #print(colsi)
+            if np_mp:
+                for ci in colsi:
+                    if title is not None:
+                        titlee = title + ": " + colsp[ci]["name"]
+                    else:
+                        titlee = colsp[ci]["name"]
+                    getLineChartI(ci, titlee)
+
+
         elif command == "graph boxplot":
             colss = options.get("columns")
             title = options.get("title")
@@ -2449,7 +2539,8 @@ def do_sql(sql):
                 colsi = [ci for ci in range(1,len(columns)+1) if colsp[ci]['t'] == "Integer" or colsp[ci]['t'] == "Float"]
             #print("Colsi", colsi)
             if np_mp:
-                show_boxplot(colsi, title, boxplot_showfliers)
+                getBoxplotI(colsi, title, boxplot_showfliers)
+
 
         elif command == "graph barchart":
             colss = options.get("columns")
