@@ -24,8 +24,8 @@ from importlib.metadata import version
 
 np_mp = False
 try:
-    #print("Using numpy version:", version("numpy"))
-    #import numpy as np
+    print("Using numpy version:", version("numpy"))
+    import numpy as np
     print("Using matplotlib version:", version("matplotlib"))
     import matplotlib.pyplot as plt
     np_mp = True
@@ -710,6 +710,15 @@ command_options["data activate"]["help2"] = ["Bla1","Bla2"]
 command_options["data activate"]["alternative"] = ["data", "d"]
 command_options["data activate"]["altoption"] = [["w"],["n"]]
 
+command_options["split"] = {}
+command_options["split"]["name"] = ["what", "name"]
+command_options["split"]["required"] = [False, False]
+command_options["split"]["type"] = [["memory","mem","m"],"str"]
+command_options["split"]["default"] = ["memory", "1"]
+command_options["split"]["help1"] = "Help for command 'folder'"
+command_options["split"]["help2"] = ["Bla1","Bla2"]
+command_options["split"]["alternative"] = ["split", "s"]
+command_options["split"]["altoption"] = [["w"],["n"]]
 
 def __rd(x,y=2):
     ''' A classical mathematical rounding by Voznica '''
@@ -960,6 +969,17 @@ def terminal_resize(colsp):
             width = first + colsp[col]['w']
         colsp[col]['screen'] = screen
         #print(col, screen)
+
+
+def data_split(colsi):
+    #aaa
+    for coli in colsp:
+        colsp[coli]['a'] = np.array(colsp[coli]['c'])
+        print(colsp[coli]['a'])
+        unique, counts = np.unique(colsp[coli]['a'], return_counts=True)
+        print(np.asarray((unique, counts)).T)
+        for ci in colsi:
+            pass
 
 
 def data_profile(rowsi, colsi, purge = False):
@@ -2473,6 +2493,12 @@ def do_sql(sql):
                         printRed("Elapsed time: " + str(datetime.timedelta(seconds=end-start)))
                         time.sleep(2)
                     else: break
+
+
+        elif command == "split" or command == "split easy":
+            memory_name = options.get("name")
+            print("data memory", memory_name)
+            data_split([1])
 
 
         elif command == "data memory" or command == "data memory easy":
