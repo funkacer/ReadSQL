@@ -22,19 +22,13 @@ import copy
 
 from importlib.metadata import version
 
-is_np = False
+np_mp = False
 try:
     print("Using numpy version:", version("numpy"))
     import numpy as np
-    is_np = True
-except Exception as e:
-    traceback.print_exc()
-
-is_mp = False
-try:
     print("Using matplotlib version:", version("matplotlib"))
     import matplotlib.pyplot as plt
-    is_mp = True
+    np_mp = True
 except Exception as e:
     traceback.print_exc()
 
@@ -667,14 +661,14 @@ command_options["graph linechart"]["alternative"] = ["graph", "g"]
 command_options["graph linechart"]["altoption"] = [["w"],["c"],["tt"]]
 
 command_options["graph histogram"] = {}
-command_options["graph histogram"]["name"] = ["what", "columns", "split", "title"]
-command_options["graph histogram"]["required"] = [True, False, False, False]
-command_options["graph histogram"]["type"] = [["histogram","hi"], "strlist", "strlist", "str"]
-command_options["graph histogram"]["default"] = ["histogram", None, None, None]
+command_options["graph histogram"]["name"] = ["what", "columns", "title"]
+command_options["graph histogram"]["required"] = [True, False, False]
+command_options["graph histogram"]["type"] = [["histogram","hi"], "strlist", "str"]
+command_options["graph histogram"]["default"] = ["histogram", None, None]
 command_options["graph histogram"]["help1"] = "Help for command 'folder'"
-command_options["graph histogram"]["help2"] = ["Bla1","Bla2","Bla3","Bla4"]
+command_options["graph histogram"]["help2"] = ["Bla1","Bla2","Bla3"]
 command_options["graph histogram"]["alternative"] = ["graph", "g"]
-command_options["graph histogram"]["altoption"] = [["w"],["c"],["s"],["tt"]]
+command_options["graph histogram"]["altoption"] = [["w"],["c"],["tt"]]
 
 command_options["data memory easy"] = {}
 command_options["data memory easy"]["name"] = ["name"]
@@ -740,16 +734,13 @@ def __rd(x,y=2):
         result = ''
     return result
 
-def getHistogram(ci, cspi, title='Graf'):
+def getHistogramI(ci, title='Graf'):
     '''
     Takes disctionary of labels and np arrays for boxplots
     '''
-    print(colsp[ci]['split'])
-    print(colsp[cspi]['cats'])
+
     fig, ax = plt.subplots()
-    for cat in colsp[cspi]['cats']:
-        n, bins, patches = ax.hist(colsp[ci]['split'][cspi][cat]['value'], 50, density=True, facecolor='g', alpha=0.75)
-    #n, bins, patches = ax.hist(colsp[ci]['m'], 50, density=True, facecolor='g', alpha=0.75)
+    n, bins, patches = ax.hist(colsp[ci]['m'], 50, density=True, facecolor='g', alpha=0.75)
     plt.title(title)
     plt.tight_layout()
     plt.show()
@@ -980,50 +971,15 @@ def terminal_resize(colsp):
         #print(col, screen)
 
 
-def data_split(colsi, colspi, combine = False, subtotal = False):
-    global colsp
-    enum = 0
-    for cspi in colspi:
-        colsp[cspi]['cats'] = {}
-        for cat in colsp[cspi]['c']:
-            colsp[cspi]['cats'][cat] = []  #find rows for every category
-            #print(cat)
-        for ri in range(1, len(data)+1):
-            for cat in colsp[cspi]['cats']:
-                if data[ri-1][cspi-1] == cat: colsp[cspi]['cats'][cat].append(ri)
-
+def data_split(colsi):
+    #aaa
+    for coli in colsp:
+        colsp[coli]['a'] = np.array(colsp[coli]['c'])
+        print(colsp[coli]['a'])
+        unique, counts = np.unique(colsp[coli]['a'], return_counts=True)
+        print(np.asarray((unique, counts)).T)
         for ci in colsi:
-            #print(colsps)
-            for cat in colsp[cspi]['cats']:
-                #print(cat, colsp[ci]['split'][cspi][cat][:5])
-                ind = 0
-                filterr = []
-                maxx = len(colsp[cspi]['cats'][cat])
-                print(colsp[cspi]['name'], cat, len(colsp[cspi]['cats'][cat]))
-                for i in colsp[ci]['a']:
-                    if i[0] >= colsp[cspi]['cats'][cat][ind]:
-                        while i[0] > colsp[cspi]['cats'][cat][ind]:
-                            ind += 1
-                            if ind >= maxx: break
-                        if ind >= maxx: break
-                        if i[0] == colsp[cspi]['cats'][cat][ind]:
-                            filterr.append(True)
-                        else:
-                            filterr.append(False)
-                        ind += 1
-                    else:
-                        filterr.append(False)
-                    if ind >= maxx: break
-                for i in range(len(colsp[ci]['a'])-len(filterr)):
-                    filterr.append(False)
-                colsp[ci]['split'][cspi] = {}
-                colsp[ci]['split'][cspi][cat] = colsp[ci]['a'][filterr]
-                if colsp[ci]['t'] == "Integer" or colsp[ci]['t'] == "Float":
-                    print(colsp[ci]['name'], cat, colsp[ci]['split'][cspi][cat][:5],round(colsp[ci]['split'][cspi][cat]['value'].mean(),2),round(colsp[ci]['a']['value'].mean(),2))
-                elif colsp[ci]['t'] == "Datetime" or colsp[ci]['t'] == "Date" or colsp[ci]['t'] == "Time":
-                    print(colsp[ci]['name'], cat, colsp[ci]['split'][cspi][cat][:5],colsp[ci]['split'][cspi][cat]['value'].max(),colsp[ci]['a']['value'].max())
-                else:
-                    print(colsp[ci]['name'], cat, colsp[ci]['split'][cspi][cat][:5])
+            pass
 
 
 def data_profile(rowsi, colsi, purge = False):
@@ -1034,7 +990,6 @@ def data_profile(rowsi, colsi, purge = False):
     for ci in colsi:
         colsp[ci] = {}
         colsp[ci]['name'] = columns[ci-1]
-        colsp[ci]['split'] = {}
         colsp[ci]['w'] = 0
         #colsp[columns[ci-1]]['t'] = "Categorical"
         #colsp[ci]['t'] = "Quantitative"
@@ -1046,7 +1001,6 @@ def data_profile(rowsi, colsi, purge = False):
         colsp[ci]['v'] = 0
         colsp[ci]['c'] = {}
         colsp[ci]['sum'] = 0
-        colsp[ci]['r'] = []
         colsp[ci]['m'] = []
         colsp[ci]['q1'] = None
         colsp[ci]['q2'] = None
@@ -1072,7 +1026,7 @@ def data_profile(rowsi, colsi, purge = False):
                     elif a > colsp[ci]['max']:
                         colsp[ci]['max'] = a
                     colsp[ci]['sum'] += a
-                    #colsp[ci]['m'].append(a)
+                    colsp[ci]['m'].append(a)
                 elif isinstance (a, float):
                     if colsp[ci]['v'] == 1:
                         colsp[ci]['min'] = a
@@ -1084,7 +1038,7 @@ def data_profile(rowsi, colsi, purge = False):
                     elif a > colsp[ci]['max']:
                         colsp[ci]['max'] = a
                     colsp[ci]['sum'] += a
-                    #colsp[ci]['m'].append(a)
+                    colsp[ci]['m'].append(a)
                 elif isinstance (a, datetime.datetime):
                     if colsp[ci]['v'] == 1:
                         colsp[ci]['min'] = a
@@ -1136,7 +1090,7 @@ def data_profile(rowsi, colsi, purge = False):
                             elif a > colsp[ci]['max']:
                                 colsp[ci]['max'] = a
                             colsp[ci]['sum'] += a
-                            #colsp[ci]['m'].append(a)
+                            colsp[ci]['m'].append(a)
                         except Exception as e:
                             traceback.print_exc()
                             colsp[ci]['t'] = "Categorical"
@@ -1160,7 +1114,7 @@ def data_profile(rowsi, colsi, purge = False):
                             elif a > colsp[ci]['max']:
                                 colsp[ci]['max'] = a
                             colsp[ci]['sum'] += a
-                            #colsp[ci]['m'].append(a)
+                            colsp[ci]['m'].append(a)
                         except Exception as e:
                             traceback.print_exc()
                             colsp[ci]['t'] = "Categorical"
@@ -1246,9 +1200,6 @@ def data_profile(rowsi, colsi, purge = False):
                     if isinstance(data[ri-1], tuple): data[ri-1] = list(data[ri-1])
                     data[ri-1][ci-1] = a
 
-                colsp[ci]['r'].append(ri)
-                colsp[ci]['m'].append(a)
-
                 if colsp[ci]['v'] == 1:
                     colsp[ci]['cl'] = type(data[ri-1][ci-1])
                 elif colsp[ci]['cl'] is not None:
@@ -1266,11 +1217,6 @@ def data_profile(rowsi, colsi, purge = False):
         sys.stdout.flush()
 
     for ci in colsi:
-        a = np.array(colsp[ci]["r"])
-        b = np.array(colsp[ci]["m"])
-        #colsp[ci]["a"] = rfn.merge_arrays((A, B))
-        colsp[ci]["a"] = np.rec.fromarrays((a, b), names=('key', 'value'))
-        #print(colsp[ci]["a"][:5])
         if colsp[ci]['v'] > 0 and (colsp[ci]['t'] == "Integer" or colsp[ci]['t'] == "Float"):
             colsp[ci]['mean'] = colsp[ci]['sum'] / colsp[ci]['v']
             lenc = len(colsp[ci]['m'])
@@ -2552,7 +2498,7 @@ def do_sql(sql):
         elif command == "split" or command == "split easy":
             memory_name = options.get("name")
             print("data memory", memory_name)
-            data_split([20])
+            data_split([1])
 
 
         elif command == "data memory" or command == "data memory easy":
@@ -2578,49 +2524,19 @@ def do_sql(sql):
 
         elif command == "graph histogram":
             colss = options.get("columns")
-            colssp = options.get("split")
             title = options.get("title")
             if colss is not None:
                 colsi = find_columns(colss)
             else:
-                colsi = [ci for ci in range(1,len(columns)+1)]
-            if colsp is not None:
+                colsi = [ci for ci in range(1,len(columns)+1) if colsp[ci]['t'] == "Integer" or colsp[ci]['t'] == "Float"]
+            #print(colsi)
+            if np_mp:
                 for ci in colsi:
-                    if colsp.get(ci) is None:
-                        data_profile(range(1, len(data) + 1), [ci])
-            else:
-                data_profile(range(1, len(data) + 1), [ci for ci in range(1,len(columns)+1)])
-            colsif = [ci for ci in colsi if colsp[ci]['t'] == "Integer" or colsp[ci]['t'] == "Float"]
-            print("colsif (final colsi):", colsif)
-            if colssp is not None:
-                colspi = find_columns(colssp)
-                # change this to user type = ordinal/nominal
-                for cspi in colspi:
-                    if colsp.get(cspi) is None:
-                        data_profile(range(1, len(data) + 1), [cspi])
-                colspif = [cspi for cspi in colspi if colsp[cspi]['t'] == "Categorical"]
-                if colsp is not None:
-                    for ci in colsif:
-                        for cspi in colspif:
-                            if colsp.get(ci).get("split").get(cspi) is None:
-                                data_split([ci], [cspi], combine = False, subtotal = False)
-                else:
-                    data_split(colsif, colspif,  combine = False, subtotal = False)
-            else:
-                colspi = None
-
-            if is_mp:
-                print("Go to plot window...")
-                for ci in colsif:
                     if title is not None:
                         titlee = title + ": " + colsp[ci]["name"]
                     else:
                         titlee = colsp[ci]["name"]
-                    for cspi in colspif:
-                        getHistogram(ci, cspi, titlee)
-                print("All windows closed...")
-            else:
-                print("Go plot support...")
+                    getHistogramI(ci, titlee)
 
         elif command == "graph linechart":
             colss = options.get("columns")
@@ -2630,7 +2546,7 @@ def do_sql(sql):
             else:
                 colsi = [ci for ci in range(1,len(columns)+1) if colsp[ci]['t'] == "Datetime" or colsp[ci]['t'] == "Date" or colsp[ci]['t'] == "Time"]
             #print(colsi)
-            if is_mp:
+            if np_mp:
                 for ci in colsi:
                     if title is not None:
                         titlee = title + ": " + colsp[ci]["name"]
@@ -2648,7 +2564,7 @@ def do_sql(sql):
             else:
                 colsi = [ci for ci in range(1,len(columns)+1) if colsp[ci]['t'] == "Integer" or colsp[ci]['t'] == "Float"]
             #print("Colsi", colsi)
-            if is_mp:
+            if np_mp:
                 getBoxplotI(colsi, title, boxplot_showfliers)
 
 
@@ -2660,7 +2576,7 @@ def do_sql(sql):
             else:
                 colsi = [ci for ci in range(1,len(columns)+1) if colsp[ci]['t'] == "Categorical"]
             #print(colsi)
-            if is_mp:
+            if np_mp:
                 for ci in colsi:
                     if title is not None:
                         titlee = title + ": " + colsp[ci]["name"]
@@ -3313,41 +3229,6 @@ def do_sql(sql):
                         if stat == "v%":
                             if (colsp[ci]["v"] + colsp[ci]["n"]) > 0:
                                 profile_data[i].append(round(100 * colsp[ci]["v"] / (colsp[ci]["v"] + colsp[ci]["n"]), 2))
-                            else:
-                                profile_data[i].append("-")
-                        elif stat == "sum":
-                            if colsp[ci]["sum"] is not None:
-                                profile_data[i].append(str(round(colsp[ci]["sum"],2)) + "(" + str(round(colsp[ci]["a"]['value'].sum(),2)) + ")")
-                            else:
-                                profile_data[i].append("-")
-                        elif stat == "min":
-                            if colsp[ci]["min"] is not None:
-                                profile_data[i].append(str(colsp[ci]["min"]) + "(" + str(colsp[ci]["a"]['value'].min()) + ")")
-                            else:
-                                profile_data[i].append("-")
-                        elif stat == "max":
-                            if colsp[ci]["max"] is not None:
-                                profile_data[i].append(str(colsp[ci]["max"]) + "(" + str(colsp[ci]["a"]['value'].max()) + ")")
-                            else:
-                                profile_data[i].append("-")
-                        elif stat == "mean":
-                            if colsp[ci]["mean"] is not None:
-                                profile_data[i].append(str(round(colsp[ci]["mean"],2)) + "(" + str(round(colsp[ci]["a"]['value'].mean(),2)) + ")")
-                            else:
-                                profile_data[i].append("-")
-                        elif stat == "q1":
-                            if colsp[ci]["q1"] is not None:
-                                profile_data[i].append(str(round(colsp[ci]["q1"],2)) + "(" + str(round(np.percentile(colsp[ci]["a"]['value'],25,interpolation='midpoint'),2)) + ")")
-                            else:
-                                profile_data[i].append("-")
-                        elif stat == "q2":
-                            if colsp[ci]["q2"] is not None:
-                                profile_data[i].append(str(round(colsp[ci]["q2"],2)) + "(" + str(round(np.median(colsp[ci]["a"]['value']),2)) + ")")
-                            else:
-                                profile_data[i].append("-")
-                        elif stat == "q3":
-                            if colsp[ci]["q3"] is not None:
-                                profile_data[i].append(str(round(colsp[ci]["q3"],2)) + "(" + str(round(np.percentile(colsp[ci]["a"]['value'],75,interpolation='linear'),2)) + ")")
                             else:
                                 profile_data[i].append("-")
                         elif stat == "ran":
