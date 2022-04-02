@@ -744,15 +744,24 @@ def getHistogram(ci, cspi, title='Graf'):
     '''
     Takes disctionary of labels and np arrays for boxplots
     '''
-    print(colsp[ci]['split'])
-    print(colsp[cspi]['cats'])
-    fig, ax = plt.subplots()
-    for cat in colsp[cspi]['cats']:
-        n, bins, patches = ax.hist(colsp[ci]['split'][cspi][cat]['value'], 50, density=True, facecolor='g', alpha=0.75)
-    #n, bins, patches = ax.hist(colsp[ci]['m'], 50, density=True, facecolor='g', alpha=0.75)
-    plt.title(title)
-    plt.tight_layout()
-    plt.show()
+    print("Split:", colsp[ci]['split'])
+    if cspi is None:
+        fig, ax = plt.subplots()
+        n, bins, patches = ax.hist(colsp[ci]['m'], 50, density=True, facecolor='g', alpha=0.75)
+        plt.title(title)
+        plt.tight_layout()
+        plt.show()
+    else:
+        print("Cats:", colsp[cspi]['cats'])
+        fig, ax = plt.subplots()
+        bins = np.linspace(20, 100, 100)
+        for i, cat in enumerate(colsp[cspi]['cats']):
+            n, bins, patches = ax.hist(colsp[ci]['split'][cspi][cat]['value'], bins, alpha=0.5, label=cat)
+        #n, bins, patches = ax.hist(colsp[ci]['m'], 50, density=True, facecolor='g', alpha=0.75)
+        ax.legend(loc='upper right')
+        plt.title(title)
+        plt.tight_layout()
+        plt.show()
 
 
 def getLineChartI(ci, title='Graf'):
@@ -994,6 +1003,7 @@ def data_split(colsi, colspi, combine = False, subtotal = False):
 
         for ci in colsi:
             #print(colsps)
+            colsp[ci]['split'][cspi] = {}
             for cat in colsp[cspi]['cats']:
                 #print(cat, colsp[ci]['split'][cspi][cat][:5])
                 ind = 0
@@ -1016,7 +1026,6 @@ def data_split(colsi, colspi, combine = False, subtotal = False):
                     if ind >= maxx: break
                 for i in range(len(colsp[ci]['a'])-len(filterr)):
                     filterr.append(False)
-                colsp[ci]['split'][cspi] = {}
                 colsp[ci]['split'][cspi][cat] = colsp[ci]['a'][filterr]
                 if colsp[ci]['t'] == "Integer" or colsp[ci]['t'] == "Float":
                     print(colsp[ci]['name'], cat, colsp[ci]['split'][cspi][cat][:5],round(colsp[ci]['split'][cspi][cat]['value'].mean(),2),round(colsp[ci]['a']['value'].mean(),2))
@@ -2599,15 +2608,12 @@ def do_sql(sql):
                     if colsp.get(cspi) is None:
                         data_profile(range(1, len(data) + 1), [cspi])
                 colspif = [cspi for cspi in colspi if colsp[cspi]['t'] == "Categorical"]
-                if colsp is not None:
-                    for ci in colsif:
-                        for cspi in colspif:
-                            if colsp.get(ci).get("split").get(cspi) is None:
-                                data_split([ci], [cspi], combine = False, subtotal = False)
-                else:
-                    data_split(colsif, colspif,  combine = False, subtotal = False)
+                for ci in colsif:
+                    for cspi in colspif:
+                        if colsp.get(ci).get("split").get(cspi) is None:
+                            data_split([ci], [cspi], combine = False, subtotal = False)
             else:
-                colspi = None
+                colspif = None
 
             if is_mp:
                 print("Go to plot window...")
@@ -2616,8 +2622,11 @@ def do_sql(sql):
                         titlee = title + ": " + colsp[ci]["name"]
                     else:
                         titlee = colsp[ci]["name"]
-                    for cspi in colspif:
-                        getHistogram(ci, cspi, titlee)
+                    if colspif is None:
+                        getHistogram(ci, None, titlee)
+                    else:
+                        for cspi in colspif:
+                            getHistogram(ci, cspi, titlee)
                 print("All windows closed...")
             else:
                 print("Go plot support...")
