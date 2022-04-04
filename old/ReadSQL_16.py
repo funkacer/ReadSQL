@@ -752,15 +752,11 @@ def getHistogram(ci, cspi, title='Graf'):
         plt.tight_layout()
         plt.show()
     else:
-        cspis = str(cspi)
         print("Cats:", colsp[cspi]['cats'])
         fig, ax = plt.subplots()
         bins = np.linspace(20, 100, 100)
-        for cspiss in colsp[ci]['split']:
-            if cspis in cspiss:
-                print(cspiss)
-                for cat in colsp[ci]['split'][cspiss]:
-                    n, bins, patches = ax.hist(colsp[ci]['split'][cspiss][cat]['value'], bins, alpha=0.5, label=cat)
+        for i, cat in enumerate(colsp[cspi]['cats']):
+            n, bins, patches = ax.hist(colsp[ci]['split'][cspi][cat]['value'], bins, alpha=0.5, label=cat)
         #n, bins, patches = ax.hist(colsp[ci]['m'], 50, density=True, facecolor='g', alpha=0.75)
         ax.legend(loc='upper right')
         plt.title(title)
@@ -993,7 +989,7 @@ def terminal_resize(colsp):
         #print(col, screen)
 
 
-def data_split(colsi, colspi, combine = True):
+def data_split(colsi, colspi, combine = False, subtotal = False):
     global colsp
     enum = 0
     for cspi in colspi:
@@ -1005,50 +1001,11 @@ def data_split(colsi, colspi, combine = True):
             for cat in colsp[cspi]['cats']:
                 if data[ri-1][cspi-1] == cat: colsp[cspi]['cats'][cat].append(ri)
 
-    if not combine:
-        for cspi in colspi:
-            cspis = str(cspi)   #level 0 (level 1 will be "cspi1,cspi2", and so on)
-            for ci in colsi:
-                #print(colsps)
-                colsp[ci]['split'][cspis] = {}
-                for cat in colsp[cspi]['cats']:
-                    #print(cat, colsp[ci]['split'][cspis][cat][:5])
-                    ind = 0
-                    filterr = []
-                    maxx = len(colsp[cspi]['cats'][cat])
-                    print(colsp[cspi]['name'], cat, len(colsp[cspi]['cats'][cat]))
-                    for i in colsp[ci]['a']:
-                        if i[0] >= colsp[cspi]['cats'][cat][ind]:
-                            while i[0] > colsp[cspi]['cats'][cat][ind]:
-                                ind += 1
-                                if ind >= maxx: break
-                            if ind >= maxx: break
-                            if i[0] == colsp[cspi]['cats'][cat][ind]:
-                                filterr.append(True)
-                            else:
-                                filterr.append(False)
-                            ind += 1
-                        else:
-                            filterr.append(False)
-                        if ind >= maxx: break
-                    for i in range(len(colsp[ci]['a'])-len(filterr)):
-                        filterr.append(False)
-                    #colsp[ci]['split'][cspi][cat] = colsp[ci]['a'][filterr]
-                    colsp[ci]['split'][cspis][cat] = colsp[ci]['a'][filterr]
-                    if colsp[ci]['t'] == "Integer" or colsp[ci]['t'] == "Float":
-                        print(colsp[ci]['name'], cat, colsp[ci]['split'][cspis][cat][:5],round(colsp[ci]['split'][cspis][cat]['value'].mean(),2),round(colsp[ci]['a']['value'].mean(),2))
-                    elif colsp[ci]['t'] == "Datetime" or colsp[ci]['t'] == "Date" or colsp[ci]['t'] == "Time":
-                        print(colsp[ci]['name'], cat, colsp[ci]['split'][cspis][cat][:5],colsp[ci]['split'][cspis][cat]['value'].max(),colsp[ci]['a']['value'].max())
-                    else:
-                        print(colsp[ci]['name'], cat, colsp[ci]['split'][cspis][cat][:5])
-    else:
-        cspi = colspi[0]
-        cspis = str(cspi)   #level 0 (level 1 will be "cspi1,cspi2", and so on)
         for ci in colsi:
             #print(colsps)
-            colsp[ci]['split'][cspis] = {}
+            colsp[ci]['split'][cspi] = {}
             for cat in colsp[cspi]['cats']:
-                #print(cat, colsp[ci]['split'][cspis][cat][:5])
+                #print(cat, colsp[ci]['split'][cspi][cat][:5])
                 ind = 0
                 filterr = []
                 maxx = len(colsp[cspi]['cats'][cat])
@@ -1069,64 +1026,13 @@ def data_split(colsi, colspi, combine = True):
                     if ind >= maxx: break
                 for i in range(len(colsp[ci]['a'])-len(filterr)):
                     filterr.append(False)
-                #colsp[ci]['split'][cspi][cat] = colsp[ci]['a'][filterr]
-                colsp[ci]['split'][cspis][cat] = colsp[ci]['a'][filterr]
+                colsp[ci]['split'][cspi][cat] = colsp[ci]['a'][filterr]
                 if colsp[ci]['t'] == "Integer" or colsp[ci]['t'] == "Float":
-                    print(colsp[ci]['name'], cat, colsp[ci]['split'][cspis][cat][:5],round(colsp[ci]['split'][cspis][cat]['value'].mean(),2),round(colsp[ci]['a']['value'].mean(),2))
+                    print(colsp[ci]['name'], cat, colsp[ci]['split'][cspi][cat][:5],round(colsp[ci]['split'][cspi][cat]['value'].mean(),2),round(colsp[ci]['a']['value'].mean(),2))
                 elif colsp[ci]['t'] == "Datetime" or colsp[ci]['t'] == "Date" or colsp[ci]['t'] == "Time":
-                    print(colsp[ci]['name'], cat, colsp[ci]['split'][cspis][cat][:5],colsp[ci]['split'][cspis][cat]['value'].max(),colsp[ci]['a']['value'].max())
+                    print(colsp[ci]['name'], cat, colsp[ci]['split'][cspi][cat][:5],colsp[ci]['split'][cspi][cat]['value'].max(),colsp[ci]['a']['value'].max())
                 else:
-                    print(colsp[ci]['name'], cat, colsp[ci]['split'][cspis][cat][:5])
-
-            if len(colspi) > 1:
-                # do levels of split from 1 on (0 is done)
-                for level in range(1, len(colspi)):
-                    print("level", level)
-                    cspis = ",".join([str(colspi[l]) for l in range(level+1)])
-                    print("cspis", cspis)
-                    cspisp = ",".join([str(colspi[l]) for l in range(level)])
-                    print("cspisp", cspisp)
-
-                    cspi = colspi[level]
-
-                    #print(colsps)
-                    colsp[ci]['split'][cspis] = {}
-                    for cat in colsp[cspi]['cats']:
-                        #print(cat, colsp[ci]['split'][cspis][cat][:5])
-                        maxx = len(colsp[cspi]['cats'][cat])
-                        print("col, cat, len", colsp[cspi]['name'], cat, len(colsp[cspi]['cats'][cat]))
-                        for catp in colsp[ci]['split'][cspisp]:
-                            ind = 0
-                            filterr = []
-                            print("catp, len", catp, len(colsp[ci]['split'][cspisp][catp]))
-                            for i in colsp[ci]['split'][cspisp][catp]:
-                                if i[0] >= colsp[cspi]['cats'][cat][ind]:
-                                    while i[0] > colsp[cspi]['cats'][cat][ind]:
-                                        ind += 1
-                                        if ind >= maxx: break
-                                    if ind >= maxx: break
-                                    if i[0] == colsp[cspi]['cats'][cat][ind]:
-                                        filterr.append(True)
-                                    else:
-                                        filterr.append(False)
-                                    ind += 1
-                                else:
-                                    filterr.append(False)
-                                if ind >= maxx: break
-                            for i in range(len(colsp[ci]['split'][cspisp][catp])-len(filterr)):
-                                filterr.append(False)
-                            #colsp[ci]['split'][cspi][cat] = colsp[ci]['a'][filterr]
-                            catn = catp + " - " + cat   # change " - " to user option
-                            print("cspis", cspis, "catn", catn)
-                            colsp[ci]['split'][cspis][catn] = colsp[ci]['split'][cspisp][catp][filterr]
-                            '''
-                            if colsp[ci]['t'] == "Integer" or colsp[ci]['t'] == "Float":
-                                print(colsp[ci]['name'], cat, colsp[ci]['split'][cspis][cat][:5],round(colsp[ci]['split'][cspis][cat]['value'].mean(),2),round(colsp[ci]['a']['value'].mean(),2))
-                            elif colsp[ci]['t'] == "Datetime" or colsp[ci]['t'] == "Date" or colsp[ci]['t'] == "Time":
-                                print(colsp[ci]['name'], cat, colsp[ci]['split'][cspis][cat][:5],colsp[ci]['split'][cspis][cat]['value'].max(),colsp[ci]['a']['value'].max())
-                            else:
-                                print(colsp[ci]['name'], cat, colsp[ci]['split'][cspis][cat][:5])
-                            '''
+                    print(colsp[ci]['name'], cat, colsp[ci]['split'][cspi][cat][:5])
 
 
 def data_profile(rowsi, colsi, purge = False):
@@ -2687,15 +2593,27 @@ def do_sql(sql):
                 colsi = find_columns(colss)
             else:
                 colsi = [ci for ci in range(1,len(columns)+1)]
-            colsai = colsi
-            if colssp is not None:
-                colspi = find_columns(colssp)
-            colsai = colsi + colspi
-            data_profile(range(1, len(data) + 1), colsai)
+            if colsp is not None:
+                for ci in colsi:
+                    if colsp.get(ci) is None:
+                        data_profile(range(1, len(data) + 1), [ci])
+            else:
+                data_profile(range(1, len(data) + 1), [ci for ci in range(1,len(columns)+1)])
             colsif = [ci for ci in colsi if colsp[ci]['t'] == "Integer" or colsp[ci]['t'] == "Float"]
             print("colsif (final colsi):", colsif)
-            colspif = [cspi for cspi in colspi if colsp[cspi]['t'] == "Categorical"]
-            data_split(colsif, colspif, True)
+            if colssp is not None:
+                colspi = find_columns(colssp)
+                # change this to user type = ordinal/nominal
+                for cspi in colspi:
+                    if colsp.get(cspi) is None:
+                        data_profile(range(1, len(data) + 1), [cspi])
+                colspif = [cspi for cspi in colspi if colsp[cspi]['t'] == "Categorical"]
+                for ci in colsif:
+                    for cspi in colspif:
+                        if colsp.get(ci).get("split").get(cspi) is None:
+                            data_split([ci], [cspi], combine = False, subtotal = False)
+            else:
+                colspif = None
 
             if is_mp:
                 print("Go to plot window...")
