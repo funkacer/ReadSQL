@@ -2142,50 +2142,6 @@ def do_sql(sql):
             #data_split0(colspiff)
             #data_split(colsif, colspif, True)
 
-            split_data = []
-            split_rows = []
-            #split_rows = ["Type", "Class", "Valids", "Nones", "Valid %", "Sum", "Min", "Max", "Mean", "Q1", "Median", "Q3", "Range", "IQR", "Variance", "STD", "Skew", "Unique", "FirstCat"]
-            split_rows_label = ' - '.join([colsp[cspi]['name'] for cspi in colspif])    #TODO: user split variable
-            #stats = ["t", "cl", "v", "n", "v%", "sum", "min", "max", "mean", "q1", "q2", "q3", "ran", "iqr", "var", "std", "skw","uni", "fnq"]
-            stats = ["t","v","n"]
-            split_columns = [colsp[ci[0]]['name']+ci[1] for ci in [(colsif[i],stats[j]) for i in range(len(colsif)) for j in range(len(stats))]]
-            print(split_columns)
-
-            maxc = 0
-            cif = colsif[0] #are categories the same in all variables???
-            for cspis in colsp[cif]['split']:
-                for cat in colsp[cif]['split'][cspis]:
-                    split_data.append([])
-                    split_rows.append(cat)
-                    for ci in [(colsif[i],stats[j]) for i in range(len(colsif)) for j in range(len(stats))]:
-                        #print('ci', colsp[ci[0]]['split'][cspis][cat]['value'])
-                        if len(colsp[ci[0]]['split'][cspis][cat]['value'])>0:
-                            split_data[-1].append(len(colsp[ci[0]]['split'][cspis][cat]['value']))
-                        else:
-                            split_data[-1].append("-")
-                        '''
-                        #if ci > 0:  # rows_label, all profiled columns
-                        if ci > 0 and (ci in colsi or print_all):  # rows_label, all or last profiled columns
-                            if stat == "v%":
-                                if (colsp[ci]["v"] + colsp[ci]["n"]) > 0:
-                                    split_data[i].append(round(100 * colsp[ci]["v"] / (colsp[ci]["v"] + colsp[ci]["n"]), 2))
-                                else:
-                                    split_data[i].append("-")
-                        '''
-
-            nrows = len(split_data)
-            ncols = len(split_columns)
-
-            colsi = range(1, ncols + 1)
-            rowsi = range(1, nrows + 1)
-
-            print("ncols", ncols)
-
-            print()
-            print()
-            
-            print_data(rowsi, colsi, split_data, split_columns, split_rows, split_rows_label)
-
 
         elif command == "data memory" or command == "data memory easy":
             memory_name = options.get("name")
