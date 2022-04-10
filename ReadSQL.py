@@ -1747,9 +1747,9 @@ def do_sql(sql):
                 db_filename = options["filename"]
                 file_exists, full_filename = check_filename(db_filename)
                 if file_exists:
-                    print("Using database '{}'.".format(full_filename))
+                    printInvGreen("Using database '{}'.".format(full_filename))
                 else:
-                    print("Creating database '{}'.".format(full_filename))
+                    printInvGreen("Creating database '{}'.".format(full_filename))
                 try:
                     #conn = sqlite3.connect(full_filename, isolation_level=None)
                     if parse_formats:
@@ -2183,7 +2183,7 @@ def do_sql(sql):
 
             print()
             print()
-            
+
             print_data(rowsi, colsi, split_data, split_columns, split_rows, split_rows_label)
 
 

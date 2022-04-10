@@ -1,0 +1,7 @@
+\f výlety;
+\cs Výlety.db;
+insert into Výlety (id) VALUES (Null);
+select * from Výlety;
+update Výlety SET Zdroj = "aaa" WHERE Zdroj IS Null;
+select * from Výlety;
+\q;
