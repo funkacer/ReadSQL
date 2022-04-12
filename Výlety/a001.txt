@@ -2,6 +2,7 @@
 \cs Výlety.db;
 insert into Výlety (id) VALUES (Null);
 select * from Výlety;
-update Výlety SET Zdroj = "aaa" WHERE Zdroj IS Null;
+update Výlety SET Cíl = "Divoká Šárka" WHERE Cíl IS Null;
+update Výlety SET Zdroj = "https://www.kudyznudy.cz/aktivity/divoka-sarka-oaza-v-ruchu-velkomesta" WHERE Zdroj IS Null;
 select * from Výlety;
 \q;

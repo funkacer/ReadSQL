@@ -2,7 +2,7 @@
 \cs Výlety.db;
 create table Výlety (id INTEGER PRIMARY KEY AUTOINCREMENT);
 select * from Výlety;
-alter table Výlety add column Kam text;
+alter table Výlety add column Cíl text;
 select * from Výlety;
 alter table Výlety add column Kdy date;
 select * from Výlety;
@@ -13,6 +13,6 @@ alter table Výlety add column Poznámka text;
 select * from Výlety;
 insert into Výlety (id) VALUES (Null);
 select * from Výlety;
-update Výlety SET Zdroj = "https://www.stream.cz/gebrian-plus-minus/vydech-ze-strahovskeho-tunelu-o-kasne-a-fantasticke-vyhlidce-vi-malokdo-kdo-by-je-tu-taky-cekal-64334060" WHERE id = 1;
+update Výlety SET Cíl = "Strahov", Zdroj = "https://www.stream.cz/gebrian-plus-minus/vydech-ze-strahovskeho-tunelu-o-kasne-a-fantasticke-vyhlidce-vi-malokdo-kdo-by-je-tu-taky-cekal-64334060" WHERE id = 1;
 select * from Výlety;
 \q;

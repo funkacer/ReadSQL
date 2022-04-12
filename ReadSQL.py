@@ -3204,7 +3204,7 @@ def main(argv):
             fromm, too, stepp, randd, listt, colss, noness, noneso, variables, command_history, colsp, \
             data_memory, columns_memory, colsp_memory, sqls, command_options, printYellow, printInvGreen, Assert, \
             printInvRed, printCom, printBlue, printRed, show_cases, rows_label, row_format_l, profile_max_categorical, \
-            is_np, is_mpl, np, plt, do_mp
+            is_np, is_mpl, np, plt, do_mp, profile_show_categorical
 
     do_mp = True
 
