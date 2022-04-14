@@ -586,7 +586,7 @@ def data_split(colsi, colspi, combine = True):
 
 def data_profile_mp(inn):
 
-    data, rowsi, colsi, purge, variables, order = inn[0], inn[1], inn[2], inn[3], inn[4], inn[5]
+    data, rowsi, colsi, variables, order, maxorder = inn[0], inn[1], inn[2], inn[3], inn[4], inn[5]
     #global variables
     #print("Len rowsi", len(rowsi))
     colsp = {}
@@ -691,26 +691,29 @@ def data_profile_mp(inn):
                             #traceback.print_exc()
                             colsp[ci]["t"] = "Categorical"
 
+                '''
                 if purge and data[ri][ci-1] != a:
                     if isinstance(data[ri], tuple): data[ri] = list(data[ri])
                     data[ri][ci-1] = a
-
-                colsp[ci]["rv"].append(row)
-                colsp[ci]["mv"].append(a)
+                '''
 
                 if len(colsp[ci]["rv"]) == 0:
                     colsp[ci]["cl"] = type(data[ri][ci-1])
                 elif colsp[ci]["cl"] is not None:
                     if colsp[ci]["cl"] != type(data[ri][ci-1]): colsp[ci]["cl"] = None
 
+                colsp[ci]["rv"].append(row)
+                colsp[ci]["mv"].append(a)
+
             else:
                 #count None
                 colsp[ci]["rn"].append(row)
                 #colsp[ci]['n'] += 1
 
-        proc = int(ri/len(rowsi)*90)
-        sys.stdout.write(u"\u001b[1000D" +  "Processed: " + str(proc) + "% ")
-        sys.stdout.flush()
+        if order == maxorder:
+            proc = int(ri/len(rowsi)*90)
+            sys.stdout.write(u"\u001b[1000D" +  "Processed: " + str(proc) + "% ")
+            sys.stdout.flush()
 
         ''' Do later
         a = np.array(rv)
@@ -3072,16 +3075,55 @@ def do_sql(sql):
                     print("order", order)
                     print("rowsin", rowsin)
                     inndata = [data[ri-1] for ri in rowsin]
-                    inn.append([inndata, rowsin, colsi, purge, varins, order])
+                    inn.append([inndata, rowsin, colsi, varins, order, spli-1])
                 pool = mp.Pool()
                 returns = pool.map(data_profile_mp, inn)
                 #print(returns)
                 pool.close()
-                for order in range(len(rowsins)):
-                    for ret in returns:
-                        #colsp[ret[0]]['cats'] = ret[1]
-                        if ret[1] == order:
-                            print(order)
+                colspnew = {}
+                for ci in colsi:
+                    colspnew[ci] = {}
+                    nonone = False
+                    for order in range(len(rowsins)):
+                        for ret in returns:
+                            #colsp[ret[0]]['cats'] = ret[1]
+                            if ret[1] == order:
+                                #print(order)
+                                if order == 0:
+                                    rv = ret[0][ci]["rv"]
+                                    mv = ret[0][ci]["mv"]
+                                    rn = ret[0][ci]["rn"]
+                                    if len(rv) > 0:
+                                        t = ret[0][ci]["t"]
+                                        nonone = True
+                                    else:
+                                        # ret[0][ci]["t"] == "Integer"
+                                        t = None
+                                    cl = ret[0][ci]["cl"]
+                                else:
+                                    rv += ret[0][ci]["rv"]
+                                    mv += ret[0][ci]["mv"]
+                                    rn += ret[0][ci]["rn"]
+                                    if len(rv) > 0:
+                                        if t != ret[0][ci]["t"] and nonone:
+                                            t = None
+                                        else:
+                                            t = ret[0][ci]["t"]
+                                        if cl != ret[0][ci]["cl"] and nonone:
+                                            cl = None
+                                        else:
+                                            cl = ret[0][ci]["cl"]
+                                        nonone = True
+                    a = np.array(rv)
+                    b = np.array(mv)
+                    #colsp[ci]["av"] = rfn.merge_arrays((A, B))
+                    colspnew[ci]["av"] = np.rec.fromarrays((a, b), names=('row', 'value'))
+                    colspnew[ci]["t"] = t
+                    colspnew[ci]["cl"] = cl
+                    colspnew[ci]["name"] = columns[ci-1]
+                    if len(colspnew[ci]["av"]) == 0: colspnew[ci]["t"] = None   #"Categorical"???
+                    print(colspnew[ci]["name"], len(colspnew[ci]["av"]), colspnew[ci]["t"], colspnew[ci]["cl"])
+
             else:
                 colsp = {}
                 colsp = data_profile(rowsi, colsi, purge)
