@@ -589,46 +589,49 @@ def data_profile_mp(inn):
     data, rowsi, colsi, purge, variables, order = inn[0], inn[1], inn[2], inn[3], inn[4], inn[5]
     #global variables
     #print("Len rowsi", len(rowsi))
-
+    colsp = {}
     for ci in colsi:
-        rv = []
-        mv = []
-        rn = []
-        t = "Integer"
-        cl = None
-        for ri, row in enumerate(rowsi):
+        colsp[ci] = {}
+        colsp[ci]["rv"] = []
+        colsp[ci]["mv"] = []
+        colsp[ci]["rn"] = []
+        colsp[ci]["t"] = "Integer"
+        colsp[ci]["cl"] = None
+
+    for ri, row in enumerate(rowsi):
+        for ci in colsi:
             if data[ri][ci-1] is not None:
                 a = data[ri][ci-1]
                 #if colsp[ci]['v'] == 1: print(colsp[ci]['name'], a, a.__class__)
                 if isinstance (a, int):
-                    if len(rv) == 0:
-                        t = "Integer"
+                    if len(colsp[ci]["rv"]) == 0:
+                        colsp[ci]["t"] = "Integer"
                 elif isinstance (a, float):
-                    if len(rv) == 0:
-                        t = "Float"
+                    if len(colsp[ci]["rv"]) == 0:
+                        colsp[ci]["t"] = "Float"
                 elif isinstance (a, datetime.datetime):
-                    if len(rv) == 0:
-                        t = "Datetime"
+                    if len(colsp[ci]["rv"]) == 0:
+                        colsp[ci]["t"] = "Datetime"
                 elif isinstance (a, datetime.date):
-                    if len(rv) == 0:
-                        t = "Date"
+                    if len(colsp[ci]["rv"]) == 0:
+                        colsp[ci]["t"] = "Date"
                 elif isinstance (a, datetime.time):
-                    if len(rv) == 0:
-                        t = "Time"
+                    if len(colsp[ci]["rv"]) == 0:
+                        colsp[ci]["t"] = "Time"
                 elif isinstance (a, datetime.timedelta):
                     a = datetime.datetime.strptime(str(datetime.datetime.min + data[ri][ci-1])[11:], variables["$time"]["user"]["value"]).time()
-                    if len(rv) == 0:
-                        t = "Time"
+                    if len(colsp[ci]["rv"]) == 0:
+                        colsp[ci]["t"] = "Time"
                 else:
-                    if t == "Float":
+                    if colsp[ci]["t"] == "Float":
                         try:
                             if variables["$decimal_separator"]["user"]["value"] != ".": a = a.replace(variables["$decimal_separator"]["user"]["value"], '.')
                             if variables["$thousands_separator"]["user"]["value"] in a: a = a.replace(variables["$thousands_separator"]["user"]["value"], '')
                             a = float(a)
                         except Exception as e:
                             #traceback.print_exc()
-                            t = "Categorical"
-                    elif t == "Integer":
+                            colsp[ci]["t"] = "Categorical"
+                    elif colsp[ci]["t"] == "Integer":
                         try:
                             if variables["$decimal_separator"]["user"]["value"] != ".": a = a.replace(variables["$decimal_separator"]["user"]["value"], '.')
                             if variables["$thousands_separator"]["user"]["value"] in a: a = a.replace(variables["$thousands_separator"]["user"]["value"], '')
@@ -636,49 +639,49 @@ def data_profile_mp(inn):
                             if a == int(a):
                                 a = int(a)  # check other way???
                             else:
-                                t = "Float"
+                                colsp[ci]["t"] = "Float"
                         except Exception as e:
                             #traceback.print_exc()
-                            t = "Categorical"
+                            colsp[ci]["t"] = "Categorical"
 
-                    if len(rv) == 0 and t == "Categorical":
+                    if len(colsp[ci]["rv"]) == 0 and colsp[ci]["t"] == "Categorical":
                         # try parse date firsttime
                         try:
                             a = datetime.datetime.strptime(data[ri][ci-1], variables["$datetime"]["user"]["value"])
                             #print("Datime firsttime:", a)
-                            t = "Datetime"
+                            colsp[ci]["t"] = "Datetime"
                         except Exception as e:
                             #traceback.print_exc()
                             try:
                                 a = datetime.datetime.strptime(data[ri][ci-1], variables["$date"]["user"]["value"]).date()
                                 #print("Datime firsttime:", a)
-                                t = "Date"
+                                colsp[ci]["t"] = "Date"
                             except Exception as e:
                                 #traceback.print_exc()
                                 try:
                                     a = datetime.datetime.strptime(data[ri][ci-1], variables["$time"]["user"]["value"]).time()
                                     #print("Datime firsttime:", a.hour, a.minute, a.second)
                                     #a = datetime.timedelta(days = 0, hours = a.hour, minutes = a.minute, seconds = a.second)
-                                    t = "Time"
+                                    colsp[ci]["t"] = "Time"
                                 except Exception as e:
                                     #traceback.print_exc()
                                     pass
 
-                    if len(rv) > 0 and t == "Datetime":
+                    if len(colsp[ci]["rv"]) > 0 and colsp[ci]["t"] == "Datetime":
                         #datetime
                         try:
                             a = datetime.datetime.strptime(data[ri][ci-1], variables["$datetime"]["user"]["value"])
                         except Exception as e:
                             #traceback.print_exc()
-                            t = "Categorical"
-                    elif len(rv) > 0 and t == "Date":
+                            colsp[ci]["t"] = "Categorical"
+                    elif len(colsp[ci]["rv"]) > 0 and colsp[ci]["t"] == "Date":
                         #datetime
                         try:
                             a = datetime.datetime.strptime(data[ri][ci-1], variables["$date"]["user"]["value"]).date()
                         except Exception as e:
                             #traceback.print_exc()
-                            t = "Categorical"
-                    elif len(rv) > 0 and t == "Time":
+                            colsp[ci]["t"] = "Categorical"
+                    elif len(colsp[ci]["rv"]) > 0 and colsp[ci]["t"] == "Time":
                         #datetime
                         try:
                             a = datetime.datetime.strptime(data[ri][ci-1], variables["$time"]["user"]["value"]).time()
@@ -686,27 +689,28 @@ def data_profile_mp(inn):
                             #a = datetime.timedelta(days = 0, hours = a.hour, minutes = a.minute, seconds = a.second)
                         except Exception as e:
                             #traceback.print_exc()
-                            t = "Categorical"
+                            colsp[ci]["t"] = "Categorical"
 
                 if purge and data[ri][ci-1] != a:
                     if isinstance(data[ri], tuple): data[ri] = list(data[ri])
                     data[ri][ci-1] = a
 
-                rv.append(row)
-                mv.append(a)
+                colsp[ci]["rv"].append(row)
+                colsp[ci]["mv"].append(a)
 
-                if len(rv) == 0:
-                    cl = type(data[ri][ci-1])
-                elif cl is not None:
-                    if cl != type(data[ri][ci-1]): cl = None
+                if len(colsp[ci]["rv"]) == 0:
+                    colsp[ci]["cl"] = type(data[ri][ci-1])
+                elif colsp[ci]["cl"] is not None:
+                    if colsp[ci]["cl"] != type(data[ri][ci-1]): colsp[ci]["cl"] = None
 
             else:
                 #count None
-                rn.append(row)
+                colsp[ci]["rn"].append(row)
                 #colsp[ci]['n'] += 1
-            proc = int(ri/len(rowsi)*90)
-            sys.stdout.write(u"\u001b[1000D" +  "Processed: " + str(proc) + "% ")
-            sys.stdout.flush()
+
+        proc = int(ri/len(rowsi)*90)
+        sys.stdout.write(u"\u001b[1000D" +  "Processed: " + str(proc) + "% ")
+        sys.stdout.flush()
 
         ''' Do later
         a = np.array(rv)
@@ -717,7 +721,7 @@ def data_profile_mp(inn):
         '''
 
     #print(colsp)
-    return data, rv, mv, rn, t, cl, order
+    return colsp, order
 
 
 
@@ -3076,7 +3080,7 @@ def do_sql(sql):
                 for order in range(len(rowsins)):
                     for ret in returns:
                         #colsp[ret[0]]['cats'] = ret[1]
-                        if ret[6] == order:
+                        if ret[1] == order:
                             print(order)
             else:
                 colsp = {}
@@ -3379,7 +3383,7 @@ def main(argv):
             printInvRed, printCom, printBlue, printRed, show_cases, rows_label, row_format_l, profile_max_categorical, \
             is_np, is_mpl, np, plt, do_mp, profile_show_categorical
 
-    do_mp = False
+    do_mp = True
 
     is_np = False
     try:
