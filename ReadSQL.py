@@ -24,6 +24,8 @@ from importlib.metadata import version
 
 import multiprocessing as mp
 
+#from Scipy.stats import skew
+
 
 def __rd(x,y=2):
     ''' A classical mathematical rounding by Voznica '''
@@ -580,6 +582,143 @@ def data_split(colsi, colspi, combine = True):
                             else:
                                 print(colsp[ci]['name'], cat, colsp[ci]['split'][cspis][cat][:5])
                             '''
+
+
+def data_profile_mp(inn):
+
+    data, rowsi, colsi, purge, variables, order = inn[0], inn[1], inn[2], inn[3], inn[4], inn[5]
+    #global variables
+    #print("Len rowsi", len(rowsi))
+
+    for ci in colsi:
+        rv = []
+        mv = []
+        rn = []
+        t = "Integer"
+        cl = None
+        for ri, row in enumerate(rowsi):
+            if data[ri][ci-1] is not None:
+                a = data[ri][ci-1]
+                #if colsp[ci]['v'] == 1: print(colsp[ci]['name'], a, a.__class__)
+                if isinstance (a, int):
+                    if len(rv) == 0:
+                        t = "Integer"
+                elif isinstance (a, float):
+                    if len(rv) == 0:
+                        t = "Float"
+                elif isinstance (a, datetime.datetime):
+                    if len(rv) == 0:
+                        t = "Datetime"
+                elif isinstance (a, datetime.date):
+                    if len(rv) == 0:
+                        t = "Date"
+                elif isinstance (a, datetime.time):
+                    if len(rv) == 0:
+                        t = "Time"
+                elif isinstance (a, datetime.timedelta):
+                    a = datetime.datetime.strptime(str(datetime.datetime.min + data[ri][ci-1])[11:], variables["$time"]["user"]["value"]).time()
+                    if len(rv) == 0:
+                        t = "Time"
+                else:
+                    if t == "Float":
+                        try:
+                            if variables["$decimal_separator"]["user"]["value"] != ".": a = a.replace(variables["$decimal_separator"]["user"]["value"], '.')
+                            if variables["$thousands_separator"]["user"]["value"] in a: a = a.replace(variables["$thousands_separator"]["user"]["value"], '')
+                            a = float(a)
+                        except Exception as e:
+                            #traceback.print_exc()
+                            t = "Categorical"
+                    elif t == "Integer":
+                        try:
+                            if variables["$decimal_separator"]["user"]["value"] != ".": a = a.replace(variables["$decimal_separator"]["user"]["value"], '.')
+                            if variables["$thousands_separator"]["user"]["value"] in a: a = a.replace(variables["$thousands_separator"]["user"]["value"], '')
+                            a = float(a)
+                            if a == int(a):
+                                a = int(a)  # check other way???
+                            else:
+                                t = "Float"
+                        except Exception as e:
+                            #traceback.print_exc()
+                            t = "Categorical"
+
+                    if len(rv) == 0 and t == "Categorical":
+                        # try parse date firsttime
+                        try:
+                            a = datetime.datetime.strptime(data[ri][ci-1], variables["$datetime"]["user"]["value"])
+                            #print("Datime firsttime:", a)
+                            t = "Datetime"
+                        except Exception as e:
+                            #traceback.print_exc()
+                            try:
+                                a = datetime.datetime.strptime(data[ri][ci-1], variables["$date"]["user"]["value"]).date()
+                                #print("Datime firsttime:", a)
+                                t = "Date"
+                            except Exception as e:
+                                #traceback.print_exc()
+                                try:
+                                    a = datetime.datetime.strptime(data[ri][ci-1], variables["$time"]["user"]["value"]).time()
+                                    #print("Datime firsttime:", a.hour, a.minute, a.second)
+                                    #a = datetime.timedelta(days = 0, hours = a.hour, minutes = a.minute, seconds = a.second)
+                                    t = "Time"
+                                except Exception as e:
+                                    #traceback.print_exc()
+                                    pass
+
+                    if len(rv) > 0 and t == "Datetime":
+                        #datetime
+                        try:
+                            a = datetime.datetime.strptime(data[ri][ci-1], variables["$datetime"]["user"]["value"])
+                        except Exception as e:
+                            #traceback.print_exc()
+                            t = "Categorical"
+                    elif len(rv) > 0 and t == "Date":
+                        #datetime
+                        try:
+                            a = datetime.datetime.strptime(data[ri][ci-1], variables["$date"]["user"]["value"]).date()
+                        except Exception as e:
+                            #traceback.print_exc()
+                            t = "Categorical"
+                    elif len(rv) > 0 and t == "Time":
+                        #datetime
+                        try:
+                            a = datetime.datetime.strptime(data[ri][ci-1], variables["$time"]["user"]["value"]).time()
+                            #print("Datime:", a)
+                            #a = datetime.timedelta(days = 0, hours = a.hour, minutes = a.minute, seconds = a.second)
+                        except Exception as e:
+                            #traceback.print_exc()
+                            t = "Categorical"
+
+                if purge and data[ri][ci-1] != a:
+                    if isinstance(data[ri], tuple): data[ri] = list(data[ri])
+                    data[ri][ci-1] = a
+
+                rv.append(row)
+                mv.append(a)
+
+                if len(rv) == 0:
+                    cl = type(data[ri][ci-1])
+                elif cl is not None:
+                    if cl != type(data[ri][ci-1]): cl = None
+
+            else:
+                #count None
+                rn.append(row)
+                #colsp[ci]['n'] += 1
+            proc = int(ri/len(rowsi)*90)
+            sys.stdout.write(u"\u001b[1000D" +  "Processed: " + str(proc) + "% ")
+            sys.stdout.flush()
+
+        ''' Do later
+        a = np.array(rv)
+        b = np.array(mv)
+        #colsp[ci]["av"] = rfn.merge_arrays((A, B))
+        av = np.rec.fromarrays((a, b), names=('row', 'value'))
+        #print(colsp[ci]["av"][:5])
+        '''
+
+    #print(colsp)
+    return data, rv, mv, rn, t, cl, order
+
 
 
 def data_profile(rowsi, colsi, purge = False):
@@ -1747,9 +1886,9 @@ def do_sql(sql):
                 db_filename = options["filename"]
                 file_exists, full_filename = check_filename(db_filename)
                 if file_exists:
-                    printInvGreen("Using database '{}'.".format(full_filename))
+                    print("Using database '{}'.".format(full_filename))
                 else:
-                    printInvGreen("Creating database '{}'.".format(full_filename))
+                    print("Creating database '{}'.".format(full_filename))
                 try:
                     #conn = sqlite3.connect(full_filename, isolation_level=None)
                     if parse_formats:
@@ -2912,8 +3051,36 @@ def do_sql(sql):
             '''
 
             #TODO: option to print only if closp exists
-            colsp = {}
-            colsp = data_profile(rowsi, colsi, purge)
+            if do_mp:
+                inn = []
+                spli = 4
+                splr = int(len(rowsi)/spli)
+                rowsins = []
+                for i in range(spli):
+                    if i < spli-1:
+                        rowsins.append(rowsi[i*splr:(i+1)*splr])
+                    else:
+                        rowsins.append(rowsi[i*splr:])
+                varins = {}
+                for var in variables:
+                    if var != "$now": varins[var] = variables[var]
+                for order, rowsin in enumerate(rowsins):
+                    print("order", order)
+                    print("rowsin", rowsin)
+                    inndata = [data[ri-1] for ri in rowsin]
+                    inn.append([inndata, rowsin, colsi, purge, varins, order])
+                pool = mp.Pool()
+                returns = pool.map(data_profile_mp, inn)
+                #print(returns)
+                pool.close()
+                for order in range(len(rowsins)):
+                    for ret in returns:
+                        #colsp[ret[0]]['cats'] = ret[1]
+                        if ret[6] == order:
+                            print(order)
+            else:
+                colsp = {}
+                colsp = data_profile(rowsi, colsi, purge)
 
             profile_data = []
             if print_all:
@@ -2972,32 +3139,38 @@ def do_sql(sql):
                                 profile_data[i].append("-")
                         elif stat == "ran":
                             if colsp[ci]["min"] is not None and colsp[ci]["max"] is not None and (colsp[ci]["t"] == "Integer" or colsp[ci]["t"] == "Float"):
-                                profile_data[i].append(round(colsp[ci]["max"] - colsp[ci]["min"], 2))
+                                profile_data[i].append(str(round(colsp[ci]["max"] - colsp[ci]["min"], 2)) + "(" + str(round(colsp[ci]["av"]['value'].max() - colsp[ci]["av"]['value'].min(),2)) + ")")
                             else:
                                 profile_data[i].append("-")
                         elif stat == "iqr":
                             if colsp[ci]["q3"] is not None and colsp[ci]["q1"] is not None:
-                                profile_data[i].append(round(colsp[ci]["q3"] - colsp[ci]["q1"], 2))
+                                profile_data[i].append(str(round(colsp[ci]["q3"] - colsp[ci]["q1"], 2)) + "(" + str(round(np.percentile(colsp[ci]["av"]['value'],75,interpolation='midpoint') - np.percentile(colsp[ci]["av"]['value'],25,interpolation='midpoint'),2)) + ")")
                             else:
                                 profile_data[i].append("-")
                         elif stat == "var":
-                            if colsp[ci]["smd2"] is not None and colsp[ci]["v"] > 0:
-                                profile_data[i].append(round(colsp[ci]["smd2"] / colsp[ci]["v"], 2))
+                            if colsp[ci]["smd2"] is not None and colsp[ci]["v"] > 0 and (colsp[ci]["t"] == "Integer" or colsp[ci]["t"] == "Float"):
+                                profile_data[i].append(str(round(colsp[ci]["smd2"] / colsp[ci]["v"], 2)) + "(" + str(round(np.var(colsp[ci]["av"]['value']),2)) + ")")
                             else:
                                 profile_data[i].append("-")
                         elif stat == "std":
-                            if colsp[ci]["smd2"] is not None and colsp[ci]["v"] > 0:
-                                profile_data[i].append(round((colsp[ci]["smd2"] / colsp[ci]["v"])**0.5, 2))
+                            if colsp[ci]["smd2"] is not None and colsp[ci]["v"] > 0 and (colsp[ci]["t"] == "Integer" or colsp[ci]["t"] == "Float"):
+                                profile_data[i].append(str(round((colsp[ci]["smd2"] / colsp[ci]["v"])**0.5, 2)) + "(" + str(round(np.std(colsp[ci]["av"]['value']),2)) + ")")
                             else:
                                 profile_data[i].append("-")
                         elif stat == "skw":
-                            if colsp[ci]["smd3"] is not None and colsp[ci]["smd2"] > 0 and colsp[ci]["v"] > 0:
-                                profile_data[i].append(round(colsp[ci]["smd3"] / (colsp[ci]["v"] * (colsp[ci]["smd2"] / colsp[ci]["v"])**1.5), 2))
+                            if colsp[ci]["smd3"] is not None and colsp[ci]["smd2"] > 0 and colsp[ci]["v"] > 0 and (colsp[ci]["t"] == "Integer" or colsp[ci]["t"] == "Float"):
+                                #colsp[ci]['smd2'] += (i - colsp[ci]['mean'])**2
+                                #colsp[ci]['smd3'] += (i - colsp[ci]['mean'])**3
+                                m = colsp[ci]["av"]['value'].mean()
+                                smd2 = sum([(i-m)**2 for i in colsp[ci]["av"]['value']])
+                                smd3 = sum([(i-m)**3 for i in colsp[ci]["av"]['value']])
+                                print(colsp[ci]['name'], smd2, colsp[ci]["smd2"], smd3, colsp[ci]["smd3"])
+                                profile_data[i].append(str(round(colsp[ci]["smd3"] / (colsp[ci]["v"] * (colsp[ci]["smd2"] / colsp[ci]["v"])**1.5), 2)) + "(" + str(round(smd3 / (colsp[ci]["v"] * (smd2 / colsp[ci]["v"])**1.5),2)) + ")")
                             else:
                                 profile_data[i].append("-")
                         elif stat == "uni":
                             if len(colsp[ci]["c"]) < profile_max_categorical:
-                                profile_data[i].append(len(colsp[ci]["c"]))
+                                profile_data[i].append(str(len(colsp[ci]["c"])) + "(" + str(len(np.unique(colsp[ci]["av"]['value']))) + ")")
                                 if len(colsp[ci]["c"]) > maxc: maxc = len(colsp[ci]["c"])
                             else:
                                 profile_data[i].append("-")
@@ -3206,7 +3379,7 @@ def main(argv):
             printInvRed, printCom, printBlue, printRed, show_cases, rows_label, row_format_l, profile_max_categorical, \
             is_np, is_mpl, np, plt, do_mp, profile_show_categorical
 
-    do_mp = True
+    do_mp = False
 
     is_np = False
     try:
