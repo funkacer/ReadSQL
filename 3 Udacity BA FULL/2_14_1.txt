@@ -1,0 +1,7 @@
+	Investment 1	Investment 2
+Year 1	5%	12%
+Year 2	5%	-2%
+Year 3	5%	10%
+Year 4	5%	0%
+Year 5	5%	7%
+Year 6	5%	3%
