@@ -854,10 +854,10 @@ def data_profile(rowsi, colsi, purge = False):
                 colsp[ci]["rn"].append(row)
                 #colsp[ci]['n'] += 1
 
-        if order == maxorder:
-            proc = int(ri/len(rowsi)*90)
-            sys.stdout.write(u"\u001b[1000D" +  "Processed: " + str(proc) + "% ")
-            sys.stdout.flush()
+        #if order == maxorder:
+        proc = int(ri/len(rowsi)*90)
+        sys.stdout.write(u"\u001b[1000D" +  "Processed: " + str(proc) + "% ")
+        sys.stdout.flush()
 
     #print(colsp)
     return colsp, 0
@@ -3215,6 +3215,7 @@ def do_sql(sql):
                 returns = []
                 returns.append(data_profile(rowsi, colsi, purge))
 
+
             colsp = {}
             for ci in colsi:
                 colsp[ci] = {}
@@ -3267,7 +3268,55 @@ def do_sql(sql):
                 if len(colsp[ci]["av"]) == 0: colsp[ci]["t"] = None   #"Categorical"???
                 print(colsp[ci]["name"], len(colsp[ci]["av"]), colsp[ci]["t"], colsp[ci]["cl"])
 
-            profile_data = []
+                v = len(colsp[ci]["av"])
+                n = len(colsp[ci]["an"])
+                c = len(np.unique(colsp[ci]["av"]['value']))
+                uv, uc = np.unique(colsp[ci]["av"]['value'], return_counts=True)
+                #count_sort_ind = np.argsort(-count)
+                #u[count_sort_ind]
+                cc = np.flip(np.sort(np.rec.fromarrays((uv, uc), names=('value', 'count')), order = "count"))
+                #print(cc)
+                min = None
+                max = None
+                sum = None
+                mean = None
+                q1 = None
+                q2 = None
+                q3 = None
+                smd2 = None
+                smd3 = None
+                if colsp[ci]["t"] == "Integer" or colsp[ci]["t"] == "Float" or colsp[ci]["t"] == "Datetime" or colsp[ci]["t"] == "Date" or colsp[ci]["t"] == "Time":
+                    min = colsp[ci]["av"]['value'].min()
+                    max = colsp[ci]["av"]['value'].max()
+                if colsp[ci]["t"] == "Integer" or colsp[ci]["t"] == "Float":
+                    sum = colsp[ci]["av"]['value'].sum()
+                    mean = colsp[ci]['av']['value'].mean()
+                    lenc = len(colsp[ci]['av'])
+                    if lenc > 0:
+                        #print(ci, sorted(colsp[ci]['m']))
+                        m = sorted(colsp[ci]['av']["value"])
+                        if lenc >= 1 and lenc % 2:
+                            q2 = m[int((lenc+1)/2)-1]
+                        if lenc >= 2 and (lenc % 2) == 0:
+                            q2 = (m[int(lenc/2)-1] + m[int(lenc/2)])/2    #mean of mid cases
+                    lenc = int(len(m)/2)
+                    if lenc > 0:
+                        #print(ci, sorted(colsp[ci]['m']))
+                        #colsp[ci]['m'] = sorted(colsp[ci]['m'])
+                        if lenc >= 1 and lenc % 2:
+                            q1 = m[int((lenc+1)/2)-1]
+                        if lenc >= 2 and (lenc % 2) == 0:
+                            q1 = (m[int(lenc/2)-1] + m[int(lenc/2)])/2    #mean of mid cases
+                        if lenc >= 1 and lenc % 2:
+                            q3 = m[-1*int((lenc+1)/2)]
+                        if lenc >= 2 and (lenc % 2) == 0:
+                            q3 = (m[-1*int(lenc/2)] + m[-1*(int(lenc/2))-1])/2    #mean of mid cases
+                    smd2 = 0
+                    smd3 = 0
+                    for mi in m:
+                        smd2 += (mi - mean)**2
+                        smd3 += (mi - mean)**3
+
             if print_all:
                 profile_columns = [colsp[ci]["name"] for ci in colsp ] # print all profiled columns
             else:
@@ -3286,55 +3335,6 @@ def do_sql(sql):
             for i, stat in enumerate(stats):
                 profile_data.append([])
                 for ci in colsp:
-                    v = len(colsp[ci]["av"])
-                    n = len(colsp[ci]["an"])
-                    c = len(np.unique(colsp[ci]["av"]['value']))
-                    uv, uc = np.unique(colsp[ci]["av"]['value'], return_counts=True)
-                    #count_sort_ind = np.argsort(-count)
-                    #u[count_sort_ind]
-                    cc = np.flip(np.sort(np.rec.fromarrays((uv, uc), names=('value', 'count')), order = "count"))
-                    #print(cc)
-                    min = None
-                    max = None
-                    sum = None
-                    mean = None
-                    q1 = None
-                    q2 = None
-                    q3 = None
-                    smd2 = None
-                    smd3 = None
-                    if colsp[ci]["t"] == "Integer" or colsp[ci]["t"] == "Float" or colsp[ci]["t"] == "Datetime" or colsp[ci]["t"] == "Date" or colsp[ci]["t"] == "Time":
-                        min = colsp[ci]["av"]['value'].min()
-                        max = colsp[ci]["av"]['value'].max()
-                    if colsp[ci]["t"] == "Integer" or colsp[ci]["t"] == "Float":
-                        sum = colsp[ci]["av"]['value'].sum()
-                        mean = colsp[ci]['av']['value'].mean()
-                        lenc = len(colsp[ci]['av'])
-                        if lenc > 0:
-                            #print(ci, sorted(colsp[ci]['m']))
-                            m = sorted(colsp[ci]['av']["value"])
-                            if lenc >= 1 and lenc % 2:
-                                q2 = m[int((lenc+1)/2)-1]
-                            if lenc >= 2 and (lenc % 2) == 0:
-                                q2 = (m[int(lenc/2)-1] + m[int(lenc/2)])/2    #mean of mid cases
-                        lenc = int(len(m)/2)
-                        if lenc > 0:
-                            #print(ci, sorted(colsp[ci]['m']))
-                            #colsp[ci]['m'] = sorted(colsp[ci]['m'])
-                            if lenc >= 1 and lenc % 2:
-                                q1 = m[int((lenc+1)/2)-1]
-                            if lenc >= 2 and (lenc % 2) == 0:
-                                q1 = (m[int(lenc/2)-1] + m[int(lenc/2)])/2    #mean of mid cases
-                            if lenc >= 1 and lenc % 2:
-                                q3 = m[-1*int((lenc+1)/2)]
-                            if lenc >= 2 and (lenc % 2) == 0:
-                                q3 = (m[-1*int(lenc/2)] + m[-1*(int(lenc/2))-1])/2    #mean of mid cases
-                        smd2 = 0
-                        smd3 = 0
-                        for mi in m:
-                            smd2 += (mi - mean)**2
-                            smd3 += (mi - mean)**3
-
                     #if ci > 0:  # rows_label, all profiled columns
                     if ci > 0 and (ci in colsi or print_all):  # rows_label, all or last profiled columns
                         if stat == "t":
@@ -3974,7 +3974,7 @@ def main(argv):
             is_np, is_mpl, np, plt, do_mp, profile_show_categorical, default_columns_name, \
             printColor, RED, YELLOW, GREEN, BLUE, COM, INVGREEN, INVRED, END
 
-    do_mp = False
+    do_mp = True
 
     is_np = False
     try:
