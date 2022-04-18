@@ -1,3 +1,5 @@
+\#\l "0 SQL Basics\Total Sum of Orders\1_2_fruit_stand_analyse.sql";
+
 \f "0 SQL Basics\Total Sum of Orders";
 \cs "1_1_fruit_stand.db";
 

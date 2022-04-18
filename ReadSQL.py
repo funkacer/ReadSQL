@@ -726,7 +726,7 @@ def data_profile_mp(inn):
 
 
 def data_profile(rowsi, colsi, purge = False):
-    global variables
+    global data, variables
 
     #print("Len rowsi", len(rowsi))
     colsp = {}
@@ -860,7 +860,7 @@ def data_profile(rowsi, colsi, purge = False):
             sys.stdout.flush()
 
     #print(colsp)
-    return colsp
+    return colsp, 0
 
 
 def data_profile_old(rowsi, colsi, purge = False):
@@ -3208,61 +3208,64 @@ def do_sql(sql):
                 returns = pool.map(data_profile_mp, inn)
                 #print(returns)
                 pool.close()
-                colsp = {}
-                for ci in colsi:
-                    colsp[ci] = {}
-                    nonone = False
-                    for order in range(len(rowsins)):
-                        for ret in returns:
-                            #colsp[ret[0]]['cats'] = ret[1]
-                            if ret[1] == order:
-                                #print(order)
-                                if order == 0:
-                                    rv = ret[0][ci]["rv"]
-                                    mv = ret[0][ci]["mv"]
-                                    rn = ret[0][ci]["rn"]
-                                    fnq = ret[0][ci]["fnq"]
-                                    if len(rv) > 0:
-                                        t = ret[0][ci]["t"]
-                                        nonone = True
-                                    else:
-                                        # ret[0][ci]["t"] == "Integer"
-                                        t = None
-                                    cl = ret[0][ci]["cl"]
-                                else:
-                                    rv += ret[0][ci]["rv"]
-                                    mv += ret[0][ci]["mv"]
-                                    rn += ret[0][ci]["rn"]
-                                    if fnq is None:
-                                        fnq = ret[0][ci]["fnq"]
-                                    if len(rv) > 0:
-                                        if t != ret[0][ci]["t"] and nonone:
-                                            t = None
-                                        else:
-                                            t = ret[0][ci]["t"]
-                                        if cl != ret[0][ci]["cl"] and nonone:
-                                            cl = None
-                                        else:
-                                            cl = ret[0][ci]["cl"]
-                                        nonone = True
-                    a = np.array(rv)
-                    b = np.array(mv)
-                    c = np.array(rn)
-                    d = np.empty(len(rn))
-                    #colsp[ci]["av"] = rfn.merge_arrays((A, B))
-                    colsp[ci]["av"] = np.rec.fromarrays((a, b), names=('row', 'value'))
-                    colsp[ci]["an"] = np.rec.fromarrays((c, d), names=('row', 'value'))
-                    if fnq is None: fnq = "None"
-                    colsp[ci]["fnq"] = fnq
-                    colsp[ci]["t"] = t
-                    colsp[ci]["cl"] = cl
-                    colsp[ci]["name"] = columns[ci-1]
-                    if len(colsp[ci]["av"]) == 0: colsp[ci]["t"] = None   #"Categorical"???
-                    print(colsp[ci]["name"], len(colsp[ci]["av"]), colsp[ci]["t"], colsp[ci]["cl"])
 
             else:
-                colsp = {}
-                colsp = data_profile(rowsi, colsi, purge)
+                rowsins = []
+                rowsins.append(rowsi)
+                returns = []
+                returns.append(data_profile(rowsi, colsi, purge))
+
+            colsp = {}
+            for ci in colsi:
+                colsp[ci] = {}
+                nonone = False
+                for order in range(len(rowsins)):
+                    for ret in returns:
+                        #colsp[ret[0]]['cats'] = ret[1]
+                        if ret[1] == order:
+                            #print(order)
+                            if order == 0:
+                                rv = ret[0][ci]["rv"]
+                                mv = ret[0][ci]["mv"]
+                                rn = ret[0][ci]["rn"]
+                                fnq = ret[0][ci]["fnq"]
+                                if len(rv) > 0:
+                                    t = ret[0][ci]["t"]
+                                    nonone = True
+                                else:
+                                    # ret[0][ci]["t"] == "Integer"
+                                    t = None
+                                cl = ret[0][ci]["cl"]
+                            else:
+                                rv += ret[0][ci]["rv"]
+                                mv += ret[0][ci]["mv"]
+                                rn += ret[0][ci]["rn"]
+                                if fnq is None:
+                                    fnq = ret[0][ci]["fnq"]
+                                if len(rv) > 0:
+                                    if t != ret[0][ci]["t"] and nonone:
+                                        t = None
+                                    else:
+                                        t = ret[0][ci]["t"]
+                                    if cl != ret[0][ci]["cl"] and nonone:
+                                        cl = None
+                                    else:
+                                        cl = ret[0][ci]["cl"]
+                                    nonone = True
+                a = np.array(rv)
+                b = np.array(mv)
+                c = np.array(rn)
+                d = np.empty(len(rn))
+                #colsp[ci]["av"] = rfn.merge_arrays((A, B))
+                colsp[ci]["av"] = np.rec.fromarrays((a, b), names=('row', 'value'))
+                colsp[ci]["an"] = np.rec.fromarrays((c, d), names=('row', 'value'))
+                if fnq is None: fnq = "None"
+                colsp[ci]["fnq"] = fnq
+                colsp[ci]["t"] = t
+                colsp[ci]["cl"] = cl
+                colsp[ci]["name"] = columns[ci-1]
+                if len(colsp[ci]["av"]) == 0: colsp[ci]["t"] = None   #"Categorical"???
+                print(colsp[ci]["name"], len(colsp[ci]["av"]), colsp[ci]["t"], colsp[ci]["cl"])
 
             profile_data = []
             if print_all:
@@ -3291,6 +3294,15 @@ def do_sql(sql):
                     #u[count_sort_ind]
                     cc = np.flip(np.sort(np.rec.fromarrays((uv, uc), names=('value', 'count')), order = "count"))
                     #print(cc)
+                    min = None
+                    max = None
+                    sum = None
+                    mean = None
+                    q1 = None
+                    q2 = None
+                    q3 = None
+                    smd2 = None
+                    smd3 = None
                     if colsp[ci]["t"] == "Integer" or colsp[ci]["t"] == "Float" or colsp[ci]["t"] == "Datetime" or colsp[ci]["t"] == "Date" or colsp[ci]["t"] == "Time":
                         min = colsp[ci]["av"]['value'].min()
                         max = colsp[ci]["av"]['value'].max()
@@ -3962,7 +3974,7 @@ def main(argv):
             is_np, is_mpl, np, plt, do_mp, profile_show_categorical, default_columns_name, \
             printColor, RED, YELLOW, GREEN, BLUE, COM, INVGREEN, INVRED, END
 
-    do_mp = True
+    do_mp = False
 
     is_np = False
     try:
