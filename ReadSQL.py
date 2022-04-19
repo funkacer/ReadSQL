@@ -3216,7 +3216,6 @@ def do_sql(sql):
                 returns.append(data_profile(rowsi, colsi, purge))
 
 
-            colsp = {}
             for ci in colsi:
                 colsp[ci] = {}
                 nonone = False
@@ -3258,177 +3257,197 @@ def do_sql(sql):
                 c = np.array(rn)
                 d = np.empty(len(rn))
                 #colsp[ci]["av"] = rfn.merge_arrays((A, B))
-                colsp[ci]["av"] = np.rec.fromarrays((a, b), names=('row', 'value'))
-                colsp[ci]["an"] = np.rec.fromarrays((c, d), names=('row', 'value'))
-                if fnq is None: fnq = "None"
+                colsp[ci]["array_valids"] = np.rec.fromarrays((a, b), names=('row', 'value'))
+                colsp[ci]["array_nones"] = np.rec.fromarrays((c, d), names=('row', 'value'))
                 colsp[ci]["fnq"] = fnq
-                colsp[ci]["t"] = t
-                colsp[ci]["cl"] = cl
+                colsp[ci]["type"] = t
+                colsp[ci]["class"] = cl
                 colsp[ci]["name"] = columns[ci-1]
-                if len(colsp[ci]["av"]) == 0: colsp[ci]["t"] = None   #"Categorical"???
-                print(colsp[ci]["name"], len(colsp[ci]["av"]), colsp[ci]["t"], colsp[ci]["cl"])
+                if len(colsp[ci]["array_valids"]) == 0: colsp[ci]["type"] = None   #"Categorical"???
+                print(colsp[ci]["name"], len(colsp[ci]["array_valids"]), colsp[ci]["type"], colsp[ci]["class"])
 
-                v = len(colsp[ci]["av"])
-                n = len(colsp[ci]["an"])
-                c = len(np.unique(colsp[ci]["av"]['value']))
-                uv, uc = np.unique(colsp[ci]["av"]['value'], return_counts=True)
+                colsp[ci]["all"] = len(colsp[ci]["array_valids"]) + len(colsp[ci]["array_nones"])
+                colsp[ci]["valid"] = len(colsp[ci]["array_valids"])
+                colsp[ci]["none"] = len(colsp[ci]["array_nones"])
+                uv, uc = np.unique(colsp[ci]["array_valids"]['value'], return_counts=True)
+                colsp[ci]["unique"] = len(uv)
+                if colsp[ci]["unique"] > profile_max_categorical:
+                    colsp[ci]["unique"] = None
+                    colsp[ci]["categ_counts"] = None
+                else:
+                    colsp[ci]["categ_counts"] = np.flip(np.sort(np.rec.fromarrays((uv, uc), names=('value', 'count')), order = "count"))[:profile_max_categorical]
                 #count_sort_ind = np.argsort(-count)
                 #u[count_sort_ind]
-                cc = np.flip(np.sort(np.rec.fromarrays((uv, uc), names=('value', 'count')), order = "count"))
                 #print(cc)
-                min = None
-                max = None
-                sum = None
-                mean = None
-                q1 = None
-                q2 = None
-                q3 = None
-                smd2 = None
-                smd3 = None
-                if colsp[ci]["t"] == "Integer" or colsp[ci]["t"] == "Float" or colsp[ci]["t"] == "Datetime" or colsp[ci]["t"] == "Date" or colsp[ci]["t"] == "Time":
-                    min = colsp[ci]["av"]['value'].min()
-                    max = colsp[ci]["av"]['value'].max()
-                if colsp[ci]["t"] == "Integer" or colsp[ci]["t"] == "Float":
-                    sum = colsp[ci]["av"]['value'].sum()
-                    mean = colsp[ci]['av']['value'].mean()
-                    lenc = len(colsp[ci]['av'])
+                colsp[ci]["min"] = None
+                colsp[ci]["max"] = None
+                colsp[ci]["range"] = None
+                colsp[ci]["sum"] = None
+                colsp[ci]["mean"] = None
+                colsp[ci]["q1"] = None
+                colsp[ci]["q2"] = None
+                colsp[ci]["q3"] = None
+                colsp[ci]["iqr"] = None
+                colsp[ci]["smd2"] = None
+                colsp[ci]["smd3"] = None
+                colsp[ci]["var"] = None
+                colsp[ci]["std"] = None
+                colsp[ci]["skew"] = None
+                if colsp[ci]["type"] == "Integer" or colsp[ci]["type"] == "Float" or colsp[ci]["type"] == "Datetime" or colsp[ci]["type"] == "Date" or colsp[ci]["type"] == "Time":
+                    colsp[ci]["min"] = colsp[ci]["array_valids"]['value'].min()
+                    colsp[ci]["max"] = colsp[ci]["array_valids"]['value'].max()
+                if colsp[ci]["type"] == "Integer" or colsp[ci]["type"] == "Float":
+                    colsp[ci]["range"] = colsp[ci]["max"] - colsp[ci]["min"]
+                    colsp[ci]["sum"] = colsp[ci]["array_valids"]['value'].sum()
+                    colsp[ci]["mean"] = colsp[ci]['array_valids']['value'].mean()
+                    lenc = len(colsp[ci]['array_valids'])
                     if lenc > 0:
                         #print(ci, sorted(colsp[ci]['m']))
-                        m = sorted(colsp[ci]['av']["value"])
+                        m = sorted(colsp[ci]['array_valids']["value"])
                         if lenc >= 1 and lenc % 2:
-                            q2 = m[int((lenc+1)/2)-1]
+                            colsp[ci]["q2"] = m[int((lenc+1)/2)-1]
                         if lenc >= 2 and (lenc % 2) == 0:
-                            q2 = (m[int(lenc/2)-1] + m[int(lenc/2)])/2    #mean of mid cases
+                            colsp[ci]["q2"] = (m[int(lenc/2)-1] + m[int(lenc/2)])/2    #mean of mid cases
                     lenc = int(len(m)/2)
                     if lenc > 0:
                         #print(ci, sorted(colsp[ci]['m']))
                         #colsp[ci]['m'] = sorted(colsp[ci]['m'])
                         if lenc >= 1 and lenc % 2:
-                            q1 = m[int((lenc+1)/2)-1]
+                            colsp[ci]["q1"] = m[int((lenc+1)/2)-1]
                         if lenc >= 2 and (lenc % 2) == 0:
-                            q1 = (m[int(lenc/2)-1] + m[int(lenc/2)])/2    #mean of mid cases
+                            colsp[ci]["q1"] = (m[int(lenc/2)-1] + m[int(lenc/2)])/2    #mean of mid cases
                         if lenc >= 1 and lenc % 2:
-                            q3 = m[-1*int((lenc+1)/2)]
+                            colsp[ci]["q3"] = m[-1*int((lenc+1)/2)]
                         if lenc >= 2 and (lenc % 2) == 0:
-                            q3 = (m[-1*int(lenc/2)] + m[-1*(int(lenc/2))-1])/2    #mean of mid cases
-                    smd2 = 0
-                    smd3 = 0
+                            colsp[ci]["q3"] = (m[-1*int(lenc/2)] + m[-1*(int(lenc/2))-1])/2    #mean of mid cases
+                    colsp[ci]["iqr"] = colsp[ci]["q3"] - colsp[ci]["q1"]
+                    colsp[ci]["smd2"] = 0
+                    colsp[ci]["smd3"] = 0
                     for mi in m:
-                        smd2 += (mi - mean)**2
-                        smd3 += (mi - mean)**3
+                        colsp[ci]["smd2"] += (mi - colsp[ci]["mean"])**2
+                        colsp[ci]["smd3"] += (mi - colsp[ci]["mean"])**3
+                    colsp[ci]["var"] = None
+                    colsp[ci]["std"] = None
+                    if colsp[ci]["valid"] > 0:
+                        colsp[ci]["var"] = colsp[ci]["smd2"] / colsp[ci]["valid"]
+                        colsp[ci]["std"] = (colsp[ci]["smd2"] / colsp[ci]["valid"])**0.5
+                    colsp[ci]["skew"] = None
+                    if colsp[ci]["valid"] > 0 and colsp[ci]["smd2"] > 0:
+                        colsp[ci]["skew"] = colsp[ci]["smd3"] / (colsp[ci]["valid"] * (colsp[ci]["smd2"] / colsp[ci]["valid"])**1.5)
 
             if print_all:
                 profile_columns = [colsp[ci]["name"] for ci in colsp ] # print all profiled columns
             else:
                 profile_columns = [colsp[ci]["name"] for ci in colsp if ci in colsi] # print last profiled columns
-            profile_rows = ["Type", "Class", "Valids", "Nones", "Valid %", "Sum", "Min", "Max", "Mean", "Q1", "Median", "Q3", "Range", "IQR", "Variance", "STD", "Skew", "Unique", "FirstCat"]
+            profile_rows = ["Type", "Class", "Valids", "Nones", "Valid %", "Sum", "Min", "Max", "Range", "Mean", "Q1", "Median", "Q3", "IQR", "Variance", "STD", "Skew", "Unique", "FirstCat"]
             profile_rows_label = '(Stat)'
-            stats = ["t", "cl", "v", "n", "v%", "sum", "min", "max", "mean", "q1", "q2", "q3", "ran", "iqr", "var", "std", "skw", "uni", "fnq"]
+            stats = ["type", "class", "valid", "none", "valid%", "sum", "min", "max", "range", "mean", "q1", "q2", "q3", "iqr", "var", "std", "skew", "unique", "fnq"]
 
             for i in range(profile_show_categorical):
                 for j in range(3):
                     if j == 0: profile_rows.append("Cat" + str(i + 1) + " (v)")
                     elif j == 1: profile_rows.append("Cat" + str(i + 1) + " (n)")
                     elif j == 2: profile_rows.append("Cat" + str(i + 1) + " (%)")
-                    stats.append("c_" + str(i) + "_" + str(j))
+                    stats.append("cat_" + str(i) + "_" + str(j))
+
+            profile_data = []
 
             for i, stat in enumerate(stats):
                 profile_data.append([])
                 for ci in colsp:
                     #if ci > 0:  # rows_label, all profiled columns
                     if ci > 0 and (ci in colsi or print_all):  # rows_label, all or last profiled columns
-                        if stat == "t":
-                            if isinstance(colsp[ci]["t"], str):
-                                profile_data[i].append(colsp[ci]["t"][:5])    # Quant, Categ
+                        if stat == "type":
+                            if isinstance(colsp[ci]["type"], str):
+                                profile_data[i].append(colsp[ci]["type"][:5])    # Quant, Categ
                             else:
                                 profile_data[i].append("-")
-                        elif stat == "cl":
-                            if isinstance(colsp[ci]["cl"], type):
-                                cla = str(colsp[ci]["cl"])[8:-2]
+                        elif stat == "class":
+                            if isinstance(colsp[ci]["class"], type):
+                                cla = str(colsp[ci]["class"])[8:-2]
                                 if cla.startswith("datetime."): cla = cla[9:]
                                 profile_data[i].append(cla)    # <class 'xxx'>
                             else:
                                 profile_data[i].append("-")
-                        elif stat == "v":
-                            if v is not None:
-                                profile_data[i].append(str(v))
+                        elif stat == "valid":
+                            if colsp[ci]["valid"] is not None:
+                                profile_data[i].append(colsp[ci]["valid"])
                             else:
                                 profile_data[i].append("0")
-                        elif stat == "n":
-                            if n is not None:
-                                profile_data[i].append(str(n))
+                        elif stat == "none":
+                            if colsp[ci]["none"] is not None:
+                                profile_data[i].append(colsp[ci]["none"])
                             else:
                                 profile_data[i].append("-")
-                        elif stat == "v%":
-                            if (v + n) > 0:
-                                profile_data[i].append(str(round(100 * v / (v + n), 2)))
+                        elif stat == "valid%":
+                            if colsp[ci]["valid"] is not None and colsp[ci]["all"] > 0:
+                                profile_data[i].append(round(100 * colsp[ci]["valid"] / colsp[ci]["all"], 2))
                             else:
                                 profile_data[i].append("-")
                         elif stat == "sum":
-                            if sum is not None:
-                                profile_data[i].append(str(round(sum,2)))
+                            if colsp[ci]["sum"] is not None:
+                                profile_data[i].append(round(colsp[ci]["sum"],2))
                             else:
                                 profile_data[i].append("-")
                         elif stat == "min":
-                            if min is not None:
-                                profile_data[i].append(str(min))
+                            if colsp[ci]["min"] is not None:
+                                profile_data[i].append(colsp[ci]["min"])
                             else:
                                 profile_data[i].append("-")
                         elif stat == "max":
-                            if max is not None:
-                                profile_data[i].append(str(max))
+                            if colsp[ci]["max"] is not None:
+                                profile_data[i].append(colsp[ci]["max"])
+                            else:
+                                profile_data[i].append("-")
+                        elif stat == "range":
+                            if colsp[ci]["range"] is not None:
+                                profile_data[i].append(colsp[ci]["range"])
                             else:
                                 profile_data[i].append("-")
                         elif stat == "mean":
-                            if mean is not None:
-                                profile_data[i].append(str(round(mean,2)))
+                            if colsp[ci]["mean"] is not None:
+                                profile_data[i].append(round(colsp[ci]["mean"],2))
                             else:
                                 profile_data[i].append("-")
                         elif stat == "q1":
-                            if q1 is not None:
+                            if colsp[ci]["q1"] is not None:
                                 #np.percentile(colsp[ci]["av"]['value'],25,interpolation='midpoint'
-                                profile_data[i].append(str(round(q1,2)))
+                                profile_data[i].append(round(colsp[ci]["q1"],2))
                             else:
                                 profile_data[i].append("-")
                         elif stat == "q2":
-                            if q2 is not None:
-                                profile_data[i].append(str(round(q2,2)))
+                            if colsp[ci]["q2"] is not None:
+                                profile_data[i].append(round(colsp[ci]["q2"],2))
                             else:
                                 profile_data[i].append("-")
                         elif stat == "q3":
-                            if q3 is not None:
-                                profile_data[i].append(str(round(q3,2)))
-                            else:
-                                profile_data[i].append("-")
-                        elif stat == "ran":
-                            if min is not None and max is not None and (colsp[ci]["t"] == "Integer" or colsp[ci]["t"] == "Float"):
-                                profile_data[i].append(str(round(max - min,2)))
+                            if colsp[ci]["q3"] is not None:
+                                profile_data[i].append(round(colsp[ci]["q3"],2))
                             else:
                                 profile_data[i].append("-")
                         elif stat == "iqr":
-                            if q3 is not None and q1 is not None:
-                                profile_data[i].append(str(round(q3 - q1,2)))
+                            if colsp[ci]["iqr"] is not None:
+                                profile_data[i].append(round(colsp[ci]["iqr"],2))
                             else:
                                 profile_data[i].append("-")
                         elif stat == "var":
-                            if smd2 is not None and v > 0 and (colsp[ci]["t"] == "Integer" or colsp[ci]["t"] == "Float"):
-                                profile_data[i].append(str(round(smd2 / v,2)))
+                            if colsp[ci]["var"] is not None:
+                                profile_data[i].append(round(colsp[ci]["var"],2))
                             else:
                                 profile_data[i].append("-")
                         elif stat == "std":
-                            if smd2 is not None and v > 0 and (colsp[ci]["t"] == "Integer" or colsp[ci]["t"] == "Float"):
-                                profile_data[i].append(str(round((smd2 / v)**0.5,2)))
+                            if colsp[ci]["std"] is not None:
+                                profile_data[i].append(round(colsp[ci]["std"],2))
                             else:
                                 profile_data[i].append("-")
-                        elif stat == "skw":
-                            if smd3 is not None and smd2 > 0 and v > 0 and (colsp[ci]["t"] == "Integer" or colsp[ci]["t"] == "Float"):
-                                profile_data[i].append(str(round(smd3 / (v * (smd2 / v)**1.5),2)))
+                        elif stat == "skew":
+                            if colsp[ci]["skew"] is not None:
+                                profile_data[i].append(round(colsp[ci]["skew"],2))
                             else:
                                 profile_data[i].append("-")
-                        elif stat == "uni":
-                            if c < profile_max_categorical:
-                                profile_data[i].append(str(c))
-                                #if len(colsp[ci]["c"]) > maxc: maxc = len(colsp[ci]["c"])
+                        elif stat == "unique":
+                            if colsp[ci]["unique"] is not None:
+                                profile_data[i].append(colsp[ci]["unique"])
                             else:
                                 profile_data[i].append("-")
                         elif stat == "fnq":
@@ -3436,21 +3455,24 @@ def do_sql(sql):
                                 profile_data[i].append(colsp[ci]["fnq"])
                             else:
                                 profile_data[i].append("-")
-                        elif stat[0] == "c":
+                        elif stat[:3] == "cat":
                             ii = stat[stat.find("_")+1:-2]
                             try:
                                 ii = int(ii)
-                                if ii < c:
-                                    if stat[-1] == "0":
-                                        profile_data[i].append(str(cc[ii][0]))
-                                    elif stat[-1] == "1":
-                                        profile_data[i].append(str(cc[ii][1]))
-                                    elif stat[-1] == "2":
-                                        profile_data[i].append(str(round(100*cc[ii][1]/v,2)))
+                                if colsp[ci]["unique"] is not None:
+                                    if ii < colsp[ci]["unique"]:
+                                        if stat[-1] == "0":
+                                            profile_data[i].append(colsp[ci]["categ_counts"][ii][0])
+                                        elif stat[-1] == "1":
+                                            profile_data[i].append(colsp[ci]["categ_counts"][ii][1])
+                                        elif stat[-1] == "2" and colsp[ci]["valid"] > 0:
+                                            profile_data[i].append(round(100*colsp[ci]["categ_counts"][ii][1]/colsp[ci]["valid"],2))
+                                        else:
+                                            profile_data[i].append("-")
                                     else:
                                         profile_data[i].append("-")
                                 else:
-                                    profile_data[i].append("-")
+                                        profile_data[i].append("-")
                             except Exception as e:
                                 traceback.print_exc()
                                 profile_data[i].append("-")
@@ -3975,6 +3997,7 @@ def main(argv):
             printColor, RED, YELLOW, GREEN, BLUE, COM, INVGREEN, INVRED, END
 
     do_mp = True
+    #do_mp = False
 
     is_np = False
     try:
