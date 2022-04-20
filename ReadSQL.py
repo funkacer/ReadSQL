@@ -1505,6 +1505,11 @@ def parseArgv(argument_list):
     feature_parser.add_argument("--no-interactive", dest="interactive", action="store_false")
     parser.set_defaults(interactive="")
 
+    feature_parser1 = parser.add_mutually_exclusive_group(required=False)
+    feature_parser1.add_argument("--mp", dest="do_mp", action="store_true")
+    feature_parser1.add_argument("--no-mp", dest="do_mp", action="store_false")
+    parser.set_defaults(do_mp="")
+
     return parser.parse_args(argument_list)
 
 
@@ -3298,7 +3303,10 @@ def do_sql(sql):
                     colsp[ci]["max"] = colsp[ci]["array_valids"]['value'].max()
                 if colsp[ci]["type"] == "Integer" or colsp[ci]["type"] == "Float":
                     colsp[ci]["range"] = colsp[ci]["max"] - colsp[ci]["min"]
-                    colsp[ci]["sum"] = colsp[ci]["array_valids"]['value'].sum()
+                    if colsp[ci]["type"] == "Integer":
+                        colsp[ci]["sum"] = colsp[ci]["array_valids"]['value'].sum(dtype=np.int64)
+                    else:
+                        colsp[ci]["sum"] = colsp[ci]["array_valids"]['value'].sum(dtype=np.float64)
                     colsp[ci]["mean"] = colsp[ci]['array_valids']['value'].mean()
                     lenc = len(colsp[ci]['array_valids'])
                     if lenc > 0:
@@ -3996,7 +4004,7 @@ def main(argv):
             is_np, is_mpl, np, plt, do_mp, profile_show_categorical, default_columns_name, \
             printColor, RED, YELLOW, GREEN, BLUE, COM, INVGREEN, INVRED, END
 
-    do_mp = True
+    #do_mp = True
     #do_mp = False
 
     is_np = False
@@ -4623,6 +4631,13 @@ but {len(command_options[key1][key2])} '{key2}'.'''
     for k,v in vars(namespace).items():
         print(k, v)
     """
+
+    do_mp = False
+    if isinstance(vars(namespace)["do_mp"], bool):
+        do_mp = vars(namespace)["do_mp"]
+
+    print("Multiprocessing", do_mp)
+
 
     if len(vars(namespace)["sql_files"]) > 0:
         sqls = get_sql_queries_dict(vars(namespace)["sql_files"])
