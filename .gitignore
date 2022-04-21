@@ -2,6 +2,7 @@
 *.csvx
 *.txtx
 *.dbx
+*.html
 /__pycache__/
 /.pytest_cache/
 /.ipynb_checkpoints/
