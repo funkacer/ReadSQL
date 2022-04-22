@@ -737,16 +737,17 @@ def data_profile(rowsi, colsi, purge = False):
 
         if len(colsp[ci]["array_valids"]) == 0: colsp[ci]["type"] = None   #"Categorical"???
 
+        # same as in data_profile_mp, can copy be
         colsp[ci]["all"] = len(colsp[ci]["array_valids"]) + len(colsp[ci]["array_nones"])
         colsp[ci]["valid"] = len(colsp[ci]["array_valids"])
         colsp[ci]["none"] = len(colsp[ci]["array_nones"])
         uv, uc = np.unique(colsp[ci]["array_valids"]['value'], return_counts=True)
         colsp[ci]["unique"] = len(uv)
-        if colsp[ci]["unique"] > profile_max_categorical:
-            colsp[ci]["unique"] = None
-            colsp[ci]["categ_counts"] = None
-        else:
-            colsp[ci]["categ_counts"] = np.flip(np.sort(np.rec.fromarrays((uv, uc), names=('value', 'count')), order = "count"))[:profile_max_categorical]
+        # if 0 cats or max count is the same as min count, there are no modes
+        colsp[ci]["categ_counts"] = None
+        if colsp[ci]["unique"] > 0:
+            if uc.max() > uc.min():
+                colsp[ci]["categ_counts"] = np.flip(np.sort(np.rec.fromarrays((uv, uc), names=('value', 'count')), order = "count"))[:profile_max_categorical]
         #count_sort_ind = np.argsort(-count)
         #u[count_sort_ind]
         #print(cc)
@@ -821,6 +822,7 @@ def data_profile(rowsi, colsi, purge = False):
 
 def data_profile_prep_mp(inn):
 
+    #not direct copy from data_profile!!! only part colsp, final is constructed later
     data, rowsi, colsi, variables, order, maxorder = inn[0], inn[1], inn[2], inn[3], inn[4], inn[5]
     #global variables
     #print("Len rowsi", len(rowsi))
@@ -952,91 +954,103 @@ def data_profile_prep_mp(inn):
                 #colsp[ci]['n'] += 1
 
         if order == maxorder:
-            proc = int(ri/len(rowsi)*90)
-            sys.stdout.write(u"\u001b[1000D" +  "Processed: " + str(proc) + "% ")
+            proc = int(ri/len(rowsi)*100)
+            sys.stdout.write(u"\u001b[1000D" +  "Data prepare processed: " + str(proc) + "% ")
             sys.stdout.flush()
+
+    if order == maxorder:
+        proc = 100
+        sys.stdout.write(u"\u001b[1000D" +  "Data prepare processed: " + str(proc) + "% ")
+        sys.stdout.flush()
 
     #print(colsp)
     return colsp, order
 
 
 def data_profile_mp(inn):
-    colsp, ci, profile_max_categorical = inn[0], inn[1], inn[2]
+    colsp = {}
+    ci = 0
+    colsp[ci], cir, profile_max_categorical, i, imax = inn[0], inn[1], inn[2], inn[3], inn[4]
     import numpy as np
 
-    colsp["all"] = len(colsp["array_valids"]) + len(colsp["array_nones"])
-    colsp["valid"] = len(colsp["array_valids"])
-    colsp["none"] = len(colsp["array_nones"])
-    uv, uc = np.unique(colsp["array_valids"]['value'], return_counts=True)
-    colsp["unique"] = len(uv)
-    if colsp["unique"] > profile_max_categorical:
-        colsp["unique"] = None
-        colsp["categ_counts"] = None
-    else:
-        colsp["categ_counts"] = np.flip(np.sort(np.rec.fromarrays((uv, uc), names=('value', 'count')), order = "count"))[:profile_max_categorical]
+    # copied from data_profile
+    colsp[ci]["all"] = len(colsp[ci]["array_valids"]) + len(colsp[ci]["array_nones"])
+    colsp[ci]["valid"] = len(colsp[ci]["array_valids"])
+    colsp[ci]["none"] = len(colsp[ci]["array_nones"])
+    uv, uc = np.unique(colsp[ci]["array_valids"]['value'], return_counts=True)
+    colsp[ci]["unique"] = len(uv)
+    # if 0 cats or max count is the same as min count, there are no modes
+    colsp[ci]["categ_counts"] = None
+    if colsp[ci]["unique"] > 0:
+        if uc.max() > uc.min():
+            colsp[ci]["categ_counts"] = np.flip(np.sort(np.rec.fromarrays((uv, uc), names=('value', 'count')), order = "count"))[:profile_max_categorical]
     #count_sort_ind = np.argsort(-count)
     #u[count_sort_ind]
     #print(cc)
-    colsp["min"] = None
-    colsp["max"] = None
-    colsp["range"] = None
-    colsp["sum"] = None
-    colsp["mean"] = None
-    colsp["q1"] = None
-    colsp["q2"] = None
-    colsp["q3"] = None
-    colsp["iqr"] = None
-    colsp["smd2"] = None
-    colsp["smd3"] = None
-    colsp["var"] = None
-    colsp["std"] = None
-    colsp["skew"] = None
-    if colsp["type"] == "Integer" or colsp["type"] == "Float" or colsp["type"] == "Datetime" or colsp["type"] == "Date" or colsp["type"] == "Time":
-        colsp["min"] = colsp["array_valids"]['value'].min()
-        colsp["max"] = colsp["array_valids"]['value'].max()
-    if colsp["type"] == "Integer" or colsp["type"] == "Float":
-        colsp["range"] = colsp["max"] - colsp["min"]
-        if colsp["type"] == "Integer":
-            colsp["sum"] = colsp["array_valids"]['value'].sum(dtype=np.int64)
+    colsp[ci]["min"] = None
+    colsp[ci]["max"] = None
+    colsp[ci]["range"] = None
+    colsp[ci]["sum"] = None
+    colsp[ci]["mean"] = None
+    colsp[ci]["q1"] = None
+    colsp[ci]["q2"] = None
+    colsp[ci]["q3"] = None
+    colsp[ci]["iqr"] = None
+    colsp[ci]["smd2"] = None
+    colsp[ci]["smd3"] = None
+    colsp[ci]["var"] = None
+    colsp[ci]["std"] = None
+    colsp[ci]["skew"] = None
+    if colsp[ci]["type"] == "Integer" or colsp[ci]["type"] == "Float" or colsp[ci]["type"] == "Datetime" or colsp[ci]["type"] == "Date" or colsp[ci]["type"] == "Time":
+        colsp[ci]["min"] = colsp[ci]["array_valids"]['value'].min()
+        colsp[ci]["max"] = colsp[ci]["array_valids"]['value'].max()
+    if colsp[ci]["type"] == "Integer" or colsp[ci]["type"] == "Float":
+        colsp[ci]["range"] = colsp[ci]["max"] - colsp[ci]["min"]
+        if colsp[ci]["type"] == "Integer":
+            colsp[ci]["sum"] = colsp[ci]["array_valids"]['value'].sum(dtype=np.int64)
         else:
-            colsp["sum"] = colsp["array_valids"]['value'].sum(dtype=np.float64)
-        colsp["mean"] = colsp['array_valids']['value'].mean()
-        lenc = len(colsp['array_valids'])
+            colsp[ci]["sum"] = colsp[ci]["array_valids"]['value'].sum(dtype=np.float64)
+        colsp[ci]["mean"] = colsp[ci]['array_valids']['value'].mean()
+        lenc = len(colsp[ci]['array_valids'])
         if lenc > 0:
-            #print(ci, sorted(colsp['m']))
-            m = sorted(colsp['array_valids']["value"])
+            #print(ci, sorted(colsp[ci]['m']))
+            m = sorted(colsp[ci]['array_valids']["value"])
             if lenc >= 1 and lenc % 2:
-                colsp["q2"] = m[int((lenc+1)/2)-1]
+                colsp[ci]["q2"] = m[int((lenc+1)/2)-1]
             if lenc >= 2 and (lenc % 2) == 0:
-                colsp["q2"] = (m[int(lenc/2)-1] + m[int(lenc/2)])/2    #mean of mid cases
+                colsp[ci]["q2"] = (m[int(lenc/2)-1] + m[int(lenc/2)])/2    #mean of mid cases
         lenc = int(len(m)/2)
         if lenc > 0:
-            #print(ci, sorted(colsp['m']))
-            #colsp['m'] = sorted(colsp['m'])
+            #print(ci, sorted(colsp[ci]['m']))
+            #colsp[ci]['m'] = sorted(colsp[ci]['m'])
             if lenc >= 1 and lenc % 2:
-                colsp["q1"] = m[int((lenc+1)/2)-1]
+                colsp[ci]["q1"] = m[int((lenc+1)/2)-1]
             if lenc >= 2 and (lenc % 2) == 0:
-                colsp["q1"] = (m[int(lenc/2)-1] + m[int(lenc/2)])/2    #mean of mid cases
+                colsp[ci]["q1"] = (m[int(lenc/2)-1] + m[int(lenc/2)])/2    #mean of mid cases
             if lenc >= 1 and lenc % 2:
-                colsp["q3"] = m[-1*int((lenc+1)/2)]
+                colsp[ci]["q3"] = m[-1*int((lenc+1)/2)]
             if lenc >= 2 and (lenc % 2) == 0:
-                colsp["q3"] = (m[-1*int(lenc/2)] + m[-1*(int(lenc/2))-1])/2    #mean of mid cases
-        colsp["iqr"] = colsp["q3"] - colsp["q1"]
-        colsp["smd2"] = 0
-        colsp["smd3"] = 0
+                colsp[ci]["q3"] = (m[-1*int(lenc/2)] + m[-1*(int(lenc/2))-1])/2    #mean of mid cases
+        colsp[ci]["iqr"] = colsp[ci]["q3"] - colsp[ci]["q1"]
+        colsp[ci]["smd2"] = 0
+        colsp[ci]["smd3"] = 0
         for mi in m:
-            colsp["smd2"] += (mi - colsp["mean"])**2
-            colsp["smd3"] += (mi - colsp["mean"])**3
-        colsp["var"] = None
-        colsp["std"] = None
-        if colsp["valid"] > 0:
-            colsp["var"] = colsp["smd2"] / colsp["valid"]
-            colsp["std"] = (colsp["smd2"] / colsp["valid"])**0.5
-        colsp["skew"] = None
-        if colsp["valid"] > 0 and colsp["smd2"] > 0:
-            colsp["skew"] = colsp["smd3"] / (colsp["valid"] * (colsp["smd2"] / colsp["valid"])**1.5)
+            colsp[ci]["smd2"] += (mi - colsp[ci]["mean"])**2
+            colsp[ci]["smd3"] += (mi - colsp[ci]["mean"])**3
+        colsp[ci]["var"] = None
+        colsp[ci]["std"] = None
+        if colsp[ci]["valid"] > 0:
+            colsp[ci]["var"] = colsp[ci]["smd2"] / colsp[ci]["valid"]
+            colsp[ci]["std"] = (colsp[ci]["smd2"] / colsp[ci]["valid"])**0.5
+        colsp[ci]["skew"] = None
+        if colsp[ci]["valid"] > 0 and colsp[ci]["smd2"] > 0:
+            colsp[ci]["skew"] = colsp[ci]["smd3"] / (colsp[ci]["valid"] * (colsp[ci]["smd2"] / colsp[ci]["valid"])**1.5)
 
-    return colsp, ci
+    proc = int(i/imax*100)
+    sys.stdout.write(u"\u001b[1000D" +  "Data profile processed: " + str(proc) + "% ")
+    sys.stdout.flush()
+
+    return colsp[ci], cir
 
 
 def data_profile_old(rowsi, colsi, purge = False):
@@ -3392,7 +3406,7 @@ def do_sql(sql):
                 #print(returns)
                 pool.close()
 
-                for ci in colsi:
+                for i, ci in enumerate(colsi):
                     colsp[ci] = {}
                     nonone = False
                     for order in range(len(rowsins)):
@@ -3440,18 +3454,28 @@ def do_sql(sql):
                     colsp[ci]["class"] = cl
                     colsp[ci]["name"] = columns[ci-1]
                     if len(colsp[ci]["array_valids"]) == 0: colsp[ci]["type"] = None   #"Categorical"???
-                    print(colsp[ci]["name"], len(colsp[ci]["array_valids"]), colsp[ci]["type"], colsp[ci]["class"])
-            else:
-                data_profile(rowsi, colsi, purge)
+                    #print(colsp[ci]["name"], len(colsp[ci]["array_valids"]), colsp[ci]["type"], colsp[ci]["class"])
+                    proc = int(i/len(colsp)*100)
+                    sys.stdout.write(u"\u001b[1000D" +  "Data concat processed: " + str(proc) + "% ")
+                    sys.stdout.flush()
+                proc = 100
+                sys.stdout.write(u"\u001b[1000D" +  "Data concat processed: " + str(proc) + "% ")
+                sys.stdout.flush()
 
-            if do_mp:
-                inn = [(colsp[ci], ci, profile_max_categorical) for ci in colsp]
+                inn = [(colsp[ci], ci, profile_max_categorical, i, len(colsp)) for i, ci in enumerate(colsp)]
                 pool = mp.Pool(processes = spli)
                 returns = pool.map(data_profile_mp, inn)
                 #print(returns)
                 pool.close()
+                # it is not necessary copy colsp[ci] incl av, an, fnq, type, name
+                # TODO: optimize
                 for ret in returns:
                     colsp[ret[1]] = ret[0]
+                proc = 100
+                sys.stdout.write(u"\u001b[1000D" +  "Data profile processed: " + str(proc) + "% ")
+                sys.stdout.flush()
+            else:
+                data_profile(rowsi, colsi, purge)
 
             if print_all:
                 profile_columns = [colsp[ci]["name"] for ci in colsp ] # print all profiled columns
@@ -3592,7 +3616,7 @@ def do_sql(sql):
                                 else:
                                         profile_data[i].append("-")
                             except Exception as e:
-                                traceback.print_exc()
+                                #traceback.print_exc()
                                 profile_data[i].append("-")
                         else:
                             profile_data[i].append("-")
