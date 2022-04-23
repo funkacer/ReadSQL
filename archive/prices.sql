@@ -1,3 +1,5 @@
 \f archive;
-\r prices.csv, d = ",";
+\r prices.csvx, d = ",";
 \dp$a;
+\cs archive.dbx;
+\t prices;

@@ -744,21 +744,36 @@ def data_profile(rowsi, colsi, purge = False):
         colsp[ci]["all"] = len(colsp[ci]["array_valids"]) + len(colsp[ci]["array_nones"])
         colsp[ci]["valid"] = len(colsp[ci]["array_valids"])
         colsp[ci]["none"] = len(colsp[ci]["array_nones"])
+
         colsp[ci]["unique"] = None
         colsp[ci]["categ_counts"] = None
         try:
             uv, uc = np.unique(colsp[ci]["array_valids"]['value'], return_counts=True)
+        except Exception as e:
+            #traceback.print_exc()
+            #TypeError: '<' not supported between instances of 'str' and 'datetime.date'
+            printRed(f'''Mixed format detected in '{colsp[ci]["name"]}'. Check results carefully!''')
+            uvd = {}    # calculate unique value dict with string cats only
+            for val in colsp[ci]["array_valids"]['value']:
+                if uvd.get(str(val)) is not None:
+                    uvd[str(val)] += 1
+                else:
+                    uvd[val] = 1
+            uv = np.array(list(uvd.keys()))
+            uc = np.array(list(uvd.values()))
+            #print(uv, uc)
+        finally:
             colsp[ci]["unique"] = len(uv)
+            uv = uv[uc != min(uc)]
+            uc = uc[uc != min(uc)]
             # if 0 cats or max count is the same as min count, there are no modes
             colsp[ci]["categ_counts"] = None
-            if colsp[ci]["unique"] > 0:
-                if uc.max() > uc.min():
-                    colsp[ci]["categ_counts"] = np.flip(np.sort(np.rec.fromarrays((uv, uc), names=('value', 'count')), order = "count"))[:profile_max_categorical]
+            if len(uv) > 0:
+                colsp[ci]["categ_counts"] = np.flip(np.sort(np.rec.fromarrays((uv, uc), names=('value', 'count')), order = "count"))[:profile_max_categorical]
             #count_sort_ind = np.argsort(-count)
             #u[count_sort_ind]
             #print(cc)
-        except Exception as e:
-            traceback.print_exc()
+
         colsp[ci]["min"] = None
         colsp[ci]["max"] = None
         colsp[ci]["range"] = None
@@ -984,28 +999,43 @@ def data_profile_mp(inn):
     colsp[ci], cir, profile_max_categorical, i, imax = inn[0], inn[1], inn[2], inn[3], inn[4]
     import numpy as np
 
+    RED, END = '\033[91m', '\033[0m'
+    printRed = lambda sTxt: print(RED + sTxt + END)
+
     # copied from data_profile
     colsp[ci]["all"] = len(colsp[ci]["array_valids"]) + len(colsp[ci]["array_nones"])
     colsp[ci]["valid"] = len(colsp[ci]["array_valids"])
     colsp[ci]["none"] = len(colsp[ci]["array_nones"])
+
     colsp[ci]["unique"] = None
     colsp[ci]["categ_counts"] = None
     try:
         uv, uc = np.unique(colsp[ci]["array_valids"]['value'], return_counts=True)
+    except Exception as e:
+        #traceback.print_exc()
+        #TypeError: '<' not supported between instances of 'str' and 'datetime.date'
+        printRed(f'''Mixed format detected in '{colsp[ci]["name"]}'. Check results carefully!''')
+        uvd = {}    # calculate unique value dict with string cats only
+        for val in colsp[ci]["array_valids"]['value']:
+            if uvd.get(str(val)) is not None:
+                uvd[str(val)] += 1
+            else:
+                uvd[val] = 1
+        uv = np.array(list(uvd.keys()))
+        uc = np.array(list(uvd.values()))
+        #print(uv, uc)
+    finally:
         colsp[ci]["unique"] = len(uv)
+        uv = uv[uc != min(uc)]
+        uc = uc[uc != min(uc)]
         # if 0 cats or max count is the same as min count, there are no modes
         colsp[ci]["categ_counts"] = None
-        if colsp[ci]["unique"] > 0:
-            if uc.max() > uc.min():
-                colsp[ci]["categ_counts"] = np.flip(np.sort(np.rec.fromarrays((uv, uc), names=('value', 'count')), order = "count"))[:profile_max_categorical]
+        if len(uv) > 0:
+            colsp[ci]["categ_counts"] = np.flip(np.sort(np.rec.fromarrays((uv, uc), names=('value', 'count')), order = "count"))[:profile_max_categorical]
         #count_sort_ind = np.argsort(-count)
         #u[count_sort_ind]
         #print(cc)
-    except Exception as e:
-        traceback.print_exc()
-    #count_sort_ind = np.argsort(-count)
-    #u[count_sort_ind]
-    #print(cc)
+
     colsp[ci]["min"] = None
     colsp[ci]["max"] = None
     colsp[ci]["range"] = None
@@ -2811,18 +2841,18 @@ def do_sql(sql):
                         columns_create += f'''"{col}" '''
                     else:
                         columns_create += f''', "{col}" '''
-                    if colsp[ci]["t"] == "Integer":
+                    if colsp[ci]["type"] == "Integer":
                         columns_create += "int"
-                    elif colsp[ci]["t"] == "Float":
+                    elif colsp[ci]["type"] == "Float":
                         columns_create += "real"
-                    elif colsp[ci]["t"] == "Datetime":
+                    elif colsp[ci]["type"] == "Datetime":
                         columns_create += "datetime"
-                    elif colsp[ci]["t"] == "Date":
+                    elif colsp[ci]["type"] == "Date":
                         columns_create += "date"
-                    elif colsp[ci]["t"] == "Time":
+                    elif colsp[ci]["type"] == "Time":
                         # sqlite does not use timedelta for time format, min datetime is 0001-01-01 0:0:0:
                         columns_create += "time"
-                        if colsp[ci]["cl"] is not class_str:
+                        if colsp[ci]["class"] is not class_str:
                             #print("'" + colsp[ci]["name"] + "'", "is not class string - converting...")
                             for ri in range(1, len(data) + 1):
                                 if data[ri-1][ci-1] is not None and not isinstance(data[ri-1][ci-1], str):
@@ -2860,15 +2890,15 @@ def do_sql(sql):
                         columns_create += f'''`{col}` '''
                     else:
                         columns_create += f''', `{col}` '''
-                    if colsp[ci]["t"] == "Integer":
+                    if colsp[ci]["type"] == "Integer":
                         columns_create += "int"
-                    elif colsp[ci]["t"] == "Float":
+                    elif colsp[ci]["type"] == "Float":
                         columns_create += "real"
-                    elif colsp[ci]["t"] == "Datetime":
+                    elif colsp[ci]["type"] == "Datetime":
                         columns_create += "datetime"
-                    elif colsp[ci]["t"] == "Date":
+                    elif colsp[ci]["type"] == "Date":
                         columns_create += "date"
-                    elif colsp[ci]["t"] == "Time":
+                    elif colsp[ci]["type"] == "Time":
                         columns_create += "time"
                     else:
                         columns_create += "text"
@@ -2894,15 +2924,15 @@ def do_sql(sql):
                         columns_create += f'''"{col}" '''
                     else:
                         columns_create += f''', "{col}" '''
-                    if colsp[ci]["t"] == "Integer":
+                    if colsp[ci]["type"] == "Integer":
                         columns_create += "int"
-                    elif colsp[ci]["t"] == "Float":
+                    elif colsp[ci]["type"] == "Float":
                         columns_create += "real"
-                    elif colsp[ci]["t"] == "Datetime":
+                    elif colsp[ci]["type"] == "Datetime":
                         columns_create += "timestamp"
-                    elif colsp[ci]["t"] == "Date":
+                    elif colsp[ci]["type"] == "Date":
                         columns_create += "date"
-                    elif colsp[ci]["t"] == "Time":
+                    elif colsp[ci]["type"] == "Time":
                         columns_create += "time"
                     else:
                         columns_create += "text"
@@ -2928,30 +2958,30 @@ def do_sql(sql):
                         columns_create += f'''"{col}" '''
                     else:
                         columns_create += f''', "{col}" '''
-                    if colsp[ci]["t"] == "Integer":
+                    if colsp[ci]["type"] == "Integer":
                         columns_create += "int"
-                    elif colsp[ci]["t"] == "Float":
+                    elif colsp[ci]["type"] == "Float":
                         columns_create += "real"   # this format is Approximate numerics
                         #columns_create += "decimal(10,3)"
-                    elif colsp[ci]["t"] == "Datetime":
+                    elif colsp[ci]["type"] == "Datetime":
                         columns_create += "datetime"
-                        if colsp[ci]["cl"] is not class_str:
+                        if colsp[ci]["class"] is not class_str:
                             #print("'" + colsp[ci]["name"] + "'", "is not class string - converting...")
                             for ri in range(1, len(data) + 1):
                                 if data[ri-1][ci-1] is not None and not isinstance(data[ri-1][ci-1], str):
                                     if isinstance(data[ri-1], tuple): data[ri-1] = list(data[ri-1])
                                     data[ri-1][ci-1] = str(data[ri-1][ci-1])
-                    elif colsp[ci]["t"] == "Date":
+                    elif colsp[ci]["type"] == "Date":
                         columns_create += "date"
-                        if colsp[ci]["cl"] is not class_str:
+                        if colsp[ci]["class"] is not class_str:
                             #print("'" + colsp[ci]["name"] + "'", "is not class string - converting...")
                             for ri in range(1, len(data) + 1):
                                 if data[ri-1][ci-1] is not None and not isinstance(data[ri-1][ci-1], str):
                                     if isinstance(data[ri-1], tuple): data[ri-1] = list(data[ri-1])
                                     data[ri-1][ci-1] = str(data[ri-1][ci-1])
-                    elif colsp[ci]["t"] == "Time":
+                    elif colsp[ci]["type"] == "Time":
                         columns_create += "time"
-                        if colsp[ci]["cl"] is not class_str:
+                        if colsp[ci]["class"] is not class_str:
                             #print("'" + colsp[ci]["name"] + "'", "is not class string - converting...")
                             for ri in range(1, len(data) + 1):
                                 if data[ri-1][ci-1] is not None and not isinstance(data[ri-1][ci-1], str):
@@ -2963,7 +2993,7 @@ def do_sql(sql):
                     else:
                         # this leads to crash if instance is not str
                         columns_create += "ntext"
-                        if colsp[ci]["cl"] is not class_str:
+                        if colsp[ci]["class"] is not class_str:
                             #print("'" + colsp[ci]["name"] + "'", "is not class string - converting...")
                             for ri in range(1, len(data) + 1):
                                 if data[ri-1][ci-1] is not None and not isinstance(data[ri-1][ci-1], str):
