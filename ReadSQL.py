@@ -656,12 +656,14 @@ def data_profile(rowsi, colsi, purge = False):
                             a = datetime.datetime.strptime(data[ri][ci-1], variables["$datetime"]["user"]["value"])
                             #print("Datime firsttime:", a)
                             colsp[ci]["type"] = "Datetime"
+                            colsp[ci]['fnq'] = None
                         except Exception as e:
                             #traceback.print_exc()
                             try:
                                 a = datetime.datetime.strptime(data[ri][ci-1], variables["$date"]["user"]["value"]).date()
                                 #print("Datime firsttime:", a)
                                 colsp[ci]["type"] = "Date"
+                                colsp[ci]['fnq'] = None
                             except Exception as e:
                                 #traceback.print_exc()
                                 try:
@@ -669,6 +671,7 @@ def data_profile(rowsi, colsi, purge = False):
                                     #print("Datime firsttime:", a.hour, a.minute, a.second)
                                     #a = datetime.timedelta(days = 0, hours = a.hour, minutes = a.minute, seconds = a.second)
                                     colsp[ci]["type"] = "Time"
+                                    colsp[ci]['fnq'] = None
                                 except Exception as e:
                                     #traceback.print_exc()
                                     pass
@@ -741,16 +744,21 @@ def data_profile(rowsi, colsi, purge = False):
         colsp[ci]["all"] = len(colsp[ci]["array_valids"]) + len(colsp[ci]["array_nones"])
         colsp[ci]["valid"] = len(colsp[ci]["array_valids"])
         colsp[ci]["none"] = len(colsp[ci]["array_nones"])
-        uv, uc = np.unique(colsp[ci]["array_valids"]['value'], return_counts=True)
-        colsp[ci]["unique"] = len(uv)
-        # if 0 cats or max count is the same as min count, there are no modes
+        colsp[ci]["unique"] = None
         colsp[ci]["categ_counts"] = None
-        if colsp[ci]["unique"] > 0:
-            if uc.max() > uc.min():
-                colsp[ci]["categ_counts"] = np.flip(np.sort(np.rec.fromarrays((uv, uc), names=('value', 'count')), order = "count"))[:profile_max_categorical]
-        #count_sort_ind = np.argsort(-count)
-        #u[count_sort_ind]
-        #print(cc)
+        try:
+            uv, uc = np.unique(colsp[ci]["array_valids"]['value'], return_counts=True)
+            colsp[ci]["unique"] = len(uv)
+            # if 0 cats or max count is the same as min count, there are no modes
+            colsp[ci]["categ_counts"] = None
+            if colsp[ci]["unique"] > 0:
+                if uc.max() > uc.min():
+                    colsp[ci]["categ_counts"] = np.flip(np.sort(np.rec.fromarrays((uv, uc), names=('value', 'count')), order = "count"))[:profile_max_categorical]
+            #count_sort_ind = np.argsort(-count)
+            #u[count_sort_ind]
+            #print(cc)
+        except Exception as e:
+            traceback.print_exc()
         colsp[ci]["min"] = None
         colsp[ci]["max"] = None
         colsp[ci]["range"] = None
@@ -890,12 +898,14 @@ def data_profile_prep_mp(inn):
                             a = datetime.datetime.strptime(data[ri][ci-1], variables["$datetime"]["user"]["value"])
                             #print("Datime firsttime:", a)
                             colsp[ci]["t"] = "Datetime"
+                            colsp[ci]['fnq'] = None
                         except Exception as e:
                             #traceback.print_exc()
                             try:
                                 a = datetime.datetime.strptime(data[ri][ci-1], variables["$date"]["user"]["value"]).date()
                                 #print("Datime firsttime:", a)
                                 colsp[ci]["t"] = "Date"
+                                colsp[ci]['fnq'] = None
                             except Exception as e:
                                 #traceback.print_exc()
                                 try:
@@ -903,6 +913,7 @@ def data_profile_prep_mp(inn):
                                     #print("Datime firsttime:", a.hour, a.minute, a.second)
                                     #a = datetime.timedelta(days = 0, hours = a.hour, minutes = a.minute, seconds = a.second)
                                     colsp[ci]["t"] = "Time"
+                                    colsp[ci]['fnq'] = None
                                 except Exception as e:
                                     #traceback.print_exc()
                                     pass
@@ -977,13 +988,21 @@ def data_profile_mp(inn):
     colsp[ci]["all"] = len(colsp[ci]["array_valids"]) + len(colsp[ci]["array_nones"])
     colsp[ci]["valid"] = len(colsp[ci]["array_valids"])
     colsp[ci]["none"] = len(colsp[ci]["array_nones"])
-    uv, uc = np.unique(colsp[ci]["array_valids"]['value'], return_counts=True)
-    colsp[ci]["unique"] = len(uv)
-    # if 0 cats or max count is the same as min count, there are no modes
+    colsp[ci]["unique"] = None
     colsp[ci]["categ_counts"] = None
-    if colsp[ci]["unique"] > 0:
-        if uc.max() > uc.min():
-            colsp[ci]["categ_counts"] = np.flip(np.sort(np.rec.fromarrays((uv, uc), names=('value', 'count')), order = "count"))[:profile_max_categorical]
+    try:
+        uv, uc = np.unique(colsp[ci]["array_valids"]['value'], return_counts=True)
+        colsp[ci]["unique"] = len(uv)
+        # if 0 cats or max count is the same as min count, there are no modes
+        colsp[ci]["categ_counts"] = None
+        if colsp[ci]["unique"] > 0:
+            if uc.max() > uc.min():
+                colsp[ci]["categ_counts"] = np.flip(np.sort(np.rec.fromarrays((uv, uc), names=('value', 'count')), order = "count"))[:profile_max_categorical]
+        #count_sort_ind = np.argsort(-count)
+        #u[count_sort_ind]
+        #print(cc)
+    except Exception as e:
+        traceback.print_exc()
     #count_sort_ind = np.argsort(-count)
     #u[count_sort_ind]
     #print(cc)
