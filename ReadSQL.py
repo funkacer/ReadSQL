@@ -758,18 +758,25 @@ def data_profile(rowsi, colsi, purge = False):
                 if uvd.get(str(val)) is not None:
                     uvd[str(val)] += 1
                 else:
-                    uvd[val] = 1
+                    uvd[str(val)] = 1
             uv = np.array(list(uvd.keys()))
             uc = np.array(list(uvd.values()))
             #print(uv, uc)
         finally:
             colsp[ci]["unique"] = len(uv)
-            uv = uv[uc != min(uc)]
-            uc = uc[uc != min(uc)]
-            # if 0 cats or max count is the same as min count, there are no modes
+            #print(colsp[ci]["name"])
             colsp[ci]["categ_counts"] = None
-            if len(uv) > 0:
-                colsp[ci]["categ_counts"] = np.flip(np.sort(np.rec.fromarrays((uv, uc), names=('value', 'count')), order = "count"))[:profile_max_categorical]
+            if colsp[ci]["unique"] > 0:
+                # only one category us minimal => probably bonominal ditribution, keep all cats
+                uvp = uv[uc != min(uc)]
+                if colsp[ci]["unique"] > profile_show_categorical:
+                    ucp = uc[uc != min(uc)]
+                else:
+                    uvp = uv
+                    ucp = uc
+                # if 0 cats or max count is the same as min count, there are no modes
+                if len(uvp) > 0:
+                    colsp[ci]["categ_counts"] = np.flip(np.sort(np.rec.fromarrays((uvp, ucp), names=('value', 'count')), order = "count"))[:profile_show_categorical]
             #count_sort_ind = np.argsort(-count)
             #u[count_sort_ind]
             #print(cc)
@@ -996,7 +1003,7 @@ def data_profile_prep_mp(inn):
 def data_profile_mp(inn):
     colsp = {}
     ci = 0
-    colsp[ci], cir, profile_max_categorical, i, imax = inn[0], inn[1], inn[2], inn[3], inn[4]
+    colsp[ci], cir, profile_show_categorical, i, imax = inn[0], inn[1], inn[2], inn[3], inn[4]
     import numpy as np
 
     RED, END = '\033[91m', '\033[0m'
@@ -1020,18 +1027,25 @@ def data_profile_mp(inn):
             if uvd.get(str(val)) is not None:
                 uvd[str(val)] += 1
             else:
-                uvd[val] = 1
+                uvd[str(val)] = 1
         uv = np.array(list(uvd.keys()))
         uc = np.array(list(uvd.values()))
         #print(uv, uc)
     finally:
         colsp[ci]["unique"] = len(uv)
-        uv = uv[uc != min(uc)]
-        uc = uc[uc != min(uc)]
-        # if 0 cats or max count is the same as min count, there are no modes
+        #print(colsp[ci]["name"])
         colsp[ci]["categ_counts"] = None
-        if len(uv) > 0:
-            colsp[ci]["categ_counts"] = np.flip(np.sort(np.rec.fromarrays((uv, uc), names=('value', 'count')), order = "count"))[:profile_max_categorical]
+        if colsp[ci]["unique"] > 0:
+            # only one category us minimal => probably bonominal ditribution, keep all cats
+            uvp = uv[uc != min(uc)]
+            if colsp[ci]["unique"] > profile_show_categorical:
+                ucp = uc[uc != min(uc)]
+            else:
+                uvp = uv
+                ucp = uc
+            # if 0 cats or max count is the same as min count, there are no modes
+            if len(uvp) > 0:
+                colsp[ci]["categ_counts"] = np.flip(np.sort(np.rec.fromarrays((uvp, ucp), names=('value', 'count')), order = "count"))[:profile_show_categorical]
         #count_sort_ind = np.argsort(-count)
         #u[count_sort_ind]
         #print(cc)
@@ -3511,7 +3525,7 @@ def do_sql(sql):
                 sys.stdout.write(u"\u001b[1000D" +  "Data concat processed: " + str(proc) + "% ")
                 sys.stdout.flush()
 
-                inn = [(colsp[ci], ci, profile_max_categorical, i, len(colsp)) for i, ci in enumerate(colsp)]
+                inn = [(colsp[ci], ci, profile_show_categorical, i, len(colsp)) for i, ci in enumerate(colsp)]
                 pool = mp.Pool(processes = spli)
                 returns = pool.map(data_profile_mp, inn)
                 #print(returns)
