@@ -1759,12 +1759,11 @@ def parseArgv(argument_list):
     parser.set_defaults(interactive="")
 
     feature_parser1 = parser.add_mutually_exclusive_group(required=False)
-    feature_parser1.add_argument("--mp", dest="do_mp", action="store_true")
-    feature_parser1.add_argument("--no-mp", dest="do_mp", action="store_false")
+    feature_parser1.add_argument("--multiprocessing", dest="do_mp", action="store_true")
+    feature_parser1.add_argument("--no-multiprocessing", dest="do_mp", action="store_false")
     parser.set_defaults(do_mp="")
 
     return parser.parse_args(argument_list)
-
 
 
 def parseText(myText, delimiter, text_qualifiers = ['"', "'", "[", "{"], do_strip = True):
@@ -2234,10 +2233,40 @@ def check_filename(filename):
     #print(full_filename)
     return file_exists, full_filename
 
+def printGlobals():
+    print()
+    print("conn", conn.__class__, conn)
+    print("data", data.__class__)
+    print("columns", columns.__class__)
+    print("data_old", data_old.__class__)
+    print("columns_old", columns_old.__class__)
+    print("folder_exists", folder_exists.__class__, folder_exists)
+    print("folder_name", folder_name.__class__, folder_name)
+    print("db_version", db_version.__class__, db_version)
 
 def do_sql(sql):
 
-    global conn, data, columns, data_old, columns_old, db_filename, folder_exists, folder_name, db_version, db_schema, \
+    '''
+    Perform sql query or user command
+    Inputs:
+    sql - string - (sql) querry or command (starting with "\")
+
+    global variable description:
+    conn: Connection variable (conn = sqlite3.connect(":memory:"), c = conn.cursor(), c.execute(f"{sql}"))
+    data: tuple or list of data rows
+    columns: tuple or list of data columns
+    data_old: tuple or list of data rows (shallow or deep copy)
+    columns_old: tuple or list of columns (shallow or deep copy)
+    db_full_filename: filename incl folder of sqlite3 db (Using Sqlite3 filename "{db_full_filename}". Use \connect sqlite3 filename' for change)
+    folder_exists: bool (folder_exists = os.path.isdir(foldername))
+    folder_name: string (f"Using folder '{folder_name}'.")
+    db_version: string prompting user with db name (db_version = f"Sqlite3 ({db_full_filename}): ")
+    db_schema, \
+            fromm, too, stepp, randd, listt, colss, noness, noneso, variables, command_history, colsp, \
+            data_memory, columns_memory, colsp_memory
+    '''
+
+    global conn, data, columns, data_old, columns_old, folder_exists, folder_name, db_version, \
             fromm, too, stepp, randd, listt, colss, noness, noneso, variables, command_history, colsp, \
             data_memory, columns_memory, colsp_memory
 
@@ -2270,11 +2299,12 @@ def do_sql(sql):
                 else:
                     print(note)
 
-        elif command == "connect sqlite3":
+        elif command == "connect sqlite3 easy" or command == "connect sqlite3":
             # , isolation_level=None == autocommit
+            db_filename = options["filename"]
             parse_formats = options.get("parse_formats")
-            if options["filename"] == ":memory:":
-                print("\n" + "Using database in memory. Save or loose!")
+            if db_filename == ":memory:":
+                printInvGreen("Using database in memory. Save or loose!")
                 try:
                     if parse_formats:
                         conn = sqlite3.connect(":memory:", detect_types=sqlite3.PARSE_DECLTYPES)
@@ -2284,19 +2314,19 @@ def do_sql(sql):
                 except Exception as e:
                     traceback.print_exc()
             else:
-                db_filename = options["filename"]
                 file_exists, full_filename = check_filename(db_filename)
+                db_full_filename = os.path.join(folder_name, full_filename)
                 if file_exists:
-                    print("Using database '{}'.".format(full_filename))
+                    printInvGreen(f"Using database '{db_full_filename}'.")
                 else:
-                    print("Creating database '{}'.".format(full_filename))
+                    printInvGreen(f"Creating database '{db_full_filename}'.")
                 try:
                     #conn = sqlite3.connect(full_filename, isolation_level=None)
                     if parse_formats:
                         conn = sqlite3.connect(full_filename, detect_types=sqlite3.PARSE_DECLTYPES)
                     else:
                         conn = sqlite3.connect(full_filename)
-                    db_version = f"Sqlite3 ({full_filename}): "
+                    db_version = f"Sqlite3 ({db_full_filename}): "
                 except Exception as e:
                     traceback.print_exc()
 
@@ -3329,8 +3359,10 @@ def do_sql(sql):
         elif command == "data select easy" or command == "data select":
 
             if not data_old and not columns_old:
-                data_old = copy.deepcopy(data)
-                columns_old = copy.deepcopy(columns)
+                data_old = data.copy()
+                columns_old = columns.copy()
+                #data_old = copy.deepcopy(data)
+                #columns_old = copy.deepcopy(columns)
 
             fromm = options["from"]
             too = options["to"]
@@ -4194,7 +4226,7 @@ def do_sql(sql):
 
 def main(argv):
 
-    global conn, data, columns, data_old, columns_old, db_filename, folder_exists, folder_name, db_version, db_schema, \
+    global conn, data, columns, data_old, columns_old, db_full_filename, folder_exists, folder_name, db_version, db_schema, \
             fromm, too, stepp, randd, listt, colss, noness, noneso, variables, command_history, colsp, \
             data_memory, columns_memory, colsp_memory, sqls, command_options, printYellow, printInvGreen, Assert, \
             printInvRed, printCom, printBlue, printRed, show_cases, rows_label, row_format_l, profile_max_categorical, \
@@ -4248,8 +4280,8 @@ def main(argv):
     columns = None
     data_old = None
     columns_old = None
-    folder_exists = None
-    folder_name = None
+    folder_exists = False
+    folder_name = ""
     db_version = "None: "
     show_cases = 5
     print_max_default = 10
@@ -4471,14 +4503,24 @@ def main(argv):
     command_options["set variable"]["altoption"] = [["w"], ["n"]]
 
     command_options["connect sqlite3"] = {}
-    command_options["connect sqlite3"]["name"] = ["filename", "parse_formats"]
-    command_options["connect sqlite3"]["required"] = [False, False]
-    command_options["connect sqlite3"]["type"] = ["str", "bool"]
-    command_options["connect sqlite3"]["default"] = [":memory:", True]
+    command_options["connect sqlite3"]["name"] = ["what", "filename", "parse_formats"]
+    command_options["connect sqlite3"]["required"] = [True, False, False]
+    command_options["connect sqlite3"]["type"] = [["sqlite3", "sqlite", "sql3", "sql", "s"], "str", "bool"]
+    command_options["connect sqlite3"]["default"] = [None, ":memory:", True]
     command_options["connect sqlite3"]["help1"] = "Help for command 'connect'"
-    command_options["connect sqlite3"]["help2"] = ["Blabla1","Blabla2"]
-    command_options["connect sqlite3"]["alternative"] = ["connect sqlite3", "connect sqlite", "connect sql3", "connect sql", "connect s", "c sqlite3", "c sqlite", "c sql3", "c sql", "c s",  "csqlite3", "csqlite", "csql3", "csql", "cs"]
-    command_options["connect sqlite3"]["altoption"] = [["fn","f"], ["pf","p"]]
+    command_options["connect sqlite3"]["help2"] = ["Blabla1","Blabla2","Blabla3"]
+    command_options["connect sqlite3"]["alternative"] = ["connect", "c"]
+    command_options["connect sqlite3"]["altoption"] = [["w"], ["fn","f"], ["pf","p"]]
+
+    command_options["connect sqlite3 easy"] = {}
+    command_options["connect sqlite3 easy"]["name"] = ["filename", "parse_formats"]
+    command_options["connect sqlite3 easy"]["required"] = [False, False]
+    command_options["connect sqlite3 easy"]["type"] = ["str", "bool"]
+    command_options["connect sqlite3 easy"]["default"] = [":memory:", True]
+    command_options["connect sqlite3 easy"]["help1"] = "Help for command 'connect'"
+    command_options["connect sqlite3 easy"]["help2"] = ["Blabla1","Blabla2"]
+    command_options["connect sqlite3 easy"]["alternative"] = ["connect sqlite3", "connect sqlite", "connect sql3", "connect sql", "connect s", "c sqlite3", "c sqlite", "c sql3", "c sql", "c s",  "csqlite3", "csqlite", "csql3", "csql", "cs"]
+    command_options["connect sqlite3 easy"]["altoption"] = [["fn","f"], ["pf","p"]]
 
     command_options["connect mysql"] = {}
     command_options["connect mysql"]["name"] = ["database", "user", "password", "host", "port"]
@@ -4833,8 +4875,10 @@ but {len(command_options[key1][key2])} '{key2}'.'''
     if isinstance(vars(namespace)["do_mp"], bool):
         do_mp = vars(namespace)["do_mp"]
 
-    print("Multiprocessing:", do_mp, f"(using {mp.cpu_count()} processes)")
-
+    if do_mp:
+        print("Multiprocessing:", do_mp, f"(using {mp.cpu_count()} processes)")
+    else:
+        print("Multiprocessing:", do_mp)
 
     if len(vars(namespace)["sql_files"]) > 0:
         sqls = get_sql_queries_dict(vars(namespace)["sql_files"])
@@ -4862,23 +4906,23 @@ but {len(command_options[key1][key2])} '{key2}'.'''
 
         if conn:
             if db_version[:7] == "Sqlite3":
-                print(f'''Using Sqlite3 filename "{db_filename}". Use \sqlite3 filename' for change.''')
+                print(f'''Using Sqlite3 filename "{db_full_filename}". Use \connect sqlite3 filename' for change.''')
             elif db_version[:5] == "MySQL":
-                print(f'''Using MySQL database `{db_schema}`. Use '\mysql database' for change.''')
+                print(f'''Using MySQL database `{db_schema}`. Use '\connect mysql database' for change.''')
             elif db_version[:5] == "MsSQL":
-                print(f'''Using MsSQL database "{db_schema}". Use '\mssql database' for change.''')
+                print(f'''Using MsSQL database "{db_schema}". Use '\connect mssql database' for change.''')
             elif db_version[:10] == "PostgreSQL":
-                print(f'''Using PostgreSQL database "{db_schema}". Use '\mysql database' for change.''')
+                print(f'''Using PostgreSQL database "{db_schema}". Use '\connect mysql database' for change.''')
             else:
                 printRed("Sorry, no db_version.")
         else:
             print("Database is not specified. Please use '\sqlite3 filename' for example.")
 
         if folder_exists:
-            print("Using folder '{}'.".format(folder_name))
+            print(f"Using folder '{folder_name}'.")
         else:
             folder_name = os.getcwd()
-            print("Folder is not specified. Using working directory '{}'.".format(folder_name))
+            print(f"Folder is not specified. Using working directory '{folder_name}'.")
         print()
 
         interactive_pass = 0
@@ -4907,7 +4951,8 @@ but {len(command_options[key1][key2])} '{key2}'.'''
                     time.sleep(1)
                 else: break
             if OK_returned:
-                print()
+                #print()
+                printGlobals()
                 sql = input(db_version)
 
     try:
