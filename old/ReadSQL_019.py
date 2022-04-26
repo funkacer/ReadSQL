@@ -752,7 +752,7 @@ def data_profile(rowsi, colsi, purge = False):
         except Exception as e:
             #traceback.print_exc()
             #TypeError: '<' not supported between instances of 'str' and 'datetime.date'
-            variables["$printRed"]["options"]["value"](f'''Mixed format detected in '{colsp[ci]["name"]}'. Check results carefully!''')
+            printRed(f'''Mixed format detected in '{colsp[ci]["name"]}'. Check results carefully!''')
             uvd = {}    # calculate unique value dict with string cats only
             for val in colsp[ci]["array_valids"]['value']:
                 if uvd.get(str(val)) is not None:
@@ -1494,11 +1494,11 @@ def show_data(data, columns, show_title = True):
     rows = range(1, nrows + 1)
     colsi = range(1, ncols + 1)
     if nrows <= show_cases*2:
-        if show_title: variables["$printInvGreen"]["options"]["value"](f"There are {nrows} rows, {ncols} columns. Printing all cases with all columns.")
+        if show_title: printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing all cases with all columns.")
         rowsi = range(1, nrows + 1)
         print_data(rowsi, colsi, data, columns, rows, rows_label)
     else:
-        if show_title: variables["$printInvGreen"]["options"]["value"](f"There are {nrows} rows, {ncols} columns. Printing first / last {show_cases} cases with all columns.")
+        if show_title: printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing first / last {show_cases} cases with all columns.")
         data_show = list(data[:show_cases])
         #print("Data show",data_show)
         data_show += [["" for c in columns]]
@@ -1521,10 +1521,10 @@ def find_columns(colss):
                 colsi.append(i + 1)
                 is_column += 1
         if is_column < 1:
-            variables["$printRed"]["options"]["value"](f"Column '{cols}' not in columns!")
+            printRed(f"Column '{cols}' not in columns!")
             print()
         elif is_column > 1:
-            variables["$printRed"]["options"]["value"](f"Multiple columns '{cols}' are in columns!")
+            printRed(f"Multiple columns '{cols}' are in columns!")
             print()
     return colsi
 
@@ -1709,7 +1709,7 @@ def data_select():
                 if ri not in rowni:
                     rowsi.append(ri)
         else:
-            variables["$printInvRed"]["options"]["value"]("Error, none_option not recognized")
+            printInvRed("Error, none_option not recognized")
     elif randd > 0:
         if too == 0: too = nrows
         if len(listi) > 0:
@@ -1875,7 +1875,7 @@ def parseVariable(command, options, n, vartest):
     return ret, opt
 
 
-def parseCommand(command_line, variables, command_options):
+def parseCommand(command_line):
     commands = []
     command = ""
     #options = {}
@@ -1953,14 +1953,14 @@ def parseCommand(command_line, variables, command_options):
                             if does_exist: break
                             #print(a)
                 if not does_exist:
-                    variables["$printRed"]["options"]["value"](f'''Unknown option '{cll[0]}'. I will not use your '{cll[1]}' value in any way.''')
+                    printRed(f'''Unknown option '{cll[0]}'. I will not use your '{cll[1]}' value in any way.''')
                     execute = False
             elif cl != "":
                 if i < len (command_options[command]["name"]):
                     #print(f'''I will use '{cl}' for option '{command_options[c]["name"][i]}'.''')
                     options[command_options[command]["name"][i]] = cl
                 else:
-                    variables["$printRed"]["options"]["value"](f'''Too many options given. I will not use your '{cl}' value in any way.''')
+                    printRed(f'''Too many options given. I will not use your '{cl}' value in any way.''')
 
         for i, z in enumerate(zip(command_options[command]["name"], command_options[command]["required"], command_options[command]["default"], command_options[command]["type"])):
             n, r, d, t = z[0], z[1], z[2], z[3]
@@ -1968,7 +1968,7 @@ def parseCommand(command_line, variables, command_options):
             if r:
                 #assert command_options[command]["name"][i] in options
                 if n not in options:
-                    variables["$printRed"]["options"]["value"](f'''Missing required argument '{n}'. Command not executed.''')
+                    printRed(f'''Missing required argument '{n}'. Command not executed.''')
                     execute = False
                     break
             if n not in options and d is not None:
@@ -2166,7 +2166,7 @@ def parseCommand(command_line, variables, command_options):
                                         r = r.strip("'")
                                     lst_new[l] = r
                         else:
-                            variables["$printRed"]["options"]["value"](f"Error parsing dictlist option {lst}. Check results carefully!!!")
+                            printRed(f"Error parsing dictlist option {lst}. Check results carefully!!!")
                     options[n] = lst_new
 
         print("Command:", command)
@@ -2186,16 +2186,16 @@ def parseCommand(command_line, variables, command_options):
                 printoptions[op] = "'" + options[op] + "'"
             else:
                 printoptions[op] = options[op]
-        variables["$printYellow"]["options"]["value"](f'''Command '{command}' with options [{', '.join([str(str(op) + "=" + str(printoptions[op])) for op in printoptions])}].''')
+        printYellow(f'''Command '{command}' with options [{', '.join([str(str(op) + "=" + str(printoptions[op])) for op in printoptions])}].''')
         print()
 
     return command, options
 
-def get_sql_queries_dict(lst, folder_exists, foldername):
+def get_sql_queries_dict(lst):
     sqls_local = {}
     for sql_filename in lst:
         #print("SQL file:", sql_file)
-        file_exists, full_filename = check_filename(sql_filename, folder_exists, foldername)
+        file_exists, full_filename = check_filename(sql_filename)
         #print("Check if file exists:", sql_file_exists)
         if file_exists:
             with open(full_filename, mode="r", encoding="utf-8") as f:
@@ -2204,7 +2204,7 @@ def get_sql_queries_dict(lst, folder_exists, foldername):
                 #print(sql.strip(), sql.count(";"))
                 sqls_local[full_filename] = parseText(sql, ";")
         else:
-            variables["$printRed"]["options"]["value"](f'''! SQL file '{full_filename}' does not exist !''')
+            printRed(f'''! SQL file '{full_filename}' does not exist !''')
     return sqls_local
 
 def check_foldername(foldername, foldername_old):
@@ -2222,7 +2222,7 @@ def check_foldername(foldername, foldername_old):
         full_foldername = foldername
     return folder_exists, full_foldername
 
-def check_filename(filename, folder_exists, folder_name):
+def check_filename(filename):
     file_exists = False
     full_filename = None
     if folder_exists and not os.path.isabs(filename):
@@ -2235,16 +2235,16 @@ def check_filename(filename, folder_exists, folder_name):
 
 def printGlobals():
     print()
-    print("conn", variables["$conn"]["options"]["value"].__class__, variables["$conn"]["options"]["value"])
+    print("conn", conn.__class__, conn)
     print("data", data.__class__)
     print("columns", columns.__class__)
     print("data_old", data_old.__class__)
     print("columns_old", columns_old.__class__)
-    print("folder_exists", variables["$folder_exists"]["options"]["value"].__class__, variables["$folder_exists"]["options"]["value"])
-    print("folder_name", variables["$folder_name"]["options"]["value"].__class__, variables["$folder_name"]["options"]["value"])
-    print("db_version", variables["$db_version"]["options"]["value"].__class__, variables["$db_version"]["options"]["value"])
+    print("folder_exists", folder_exists.__class__, folder_exists)
+    print("folder_name", folder_name.__class__, folder_name)
+    print("db_version", db_version.__class__, db_version)
 
-def do_sql(sql, variables, command_options):
+def do_sql(sql):
 
     '''
     Perform sql query or user command
@@ -2264,23 +2264,17 @@ def do_sql(sql, variables, command_options):
     db_schema, \
             fromm, too, stepp, randd, listt, colss, noness, noneso, variables, command_history, colsp, \
             data_memory, columns_memory, colsp_memory
-
+    '''
 
     global conn, data, columns, data_old, columns_old, folder_exists, folder_name, db_version, \
             fromm, too, stepp, randd, listt, colss, noness, noneso, variables, command_history, colsp, \
             data_memory, columns_memory, colsp_memory
-    '''
 
-    global data, columns, data_old, columns_old, \
-           fromm, too, stepp, randd, listt, colss, noness, noneso, colsp, \
-           data_memory, columns_memory, colsp_memory
-    
     time.sleep(variables["$sleep"]["options"]["value"])
 
     OK = 1
     if sql.startswith("\\"):
-        command, options = parseCommand(sql, variables, command_options)
-        print(command, options)
+        command, options = parseCommand(sql)
 
         if command == "quit" or command == "q":
             OK = 0
@@ -2293,15 +2287,15 @@ def do_sql(sql, variables, command_options):
             if title: # excluse empty string to show title
                     if title_color:
                         cc = colorCode(title_color)
-                        variables["$printColor"]["options"]["value"](title, cc)
+                        printColor(title, cc)
                     else:
                         cc = INVGREEN
-                        variables["$printColor"]["options"]["value"](title, cc)
+                        printColor(title, cc)
             if note:
                 print()
                 if note_color:
                     cc = colorCode(note_color)
-                    variables["$printColor"]["options"]["value"](note, cc)
+                    printColor(note, cc)
                 else:
                     print(note)
 
@@ -2310,29 +2304,29 @@ def do_sql(sql, variables, command_options):
             db_filename = options["filename"]
             parse_formats = options.get("parse_formats")
             if db_filename == ":memory:":
-                variables["$printInvGreen"]["options"]["value"]("Using database in memory. Save or loose!")
+                printInvGreen("Using database in memory. Save or loose!")
                 try:
                     if parse_formats:
-                        variables["$conn"]["options"]["value"] = sqlite3.connect(":memory:", detect_types=sqlite3.PARSE_DECLTYPES)
+                        conn = sqlite3.connect(":memory:", detect_types=sqlite3.PARSE_DECLTYPES)
                     else:
-                        variables["$conn"]["options"]["value"] = sqlite3.connect(":memory:")
-                    variables["$db_version"]["options"]["value"] = "Sqlite3 (memory): "
+                        conn = sqlite3.connect(":memory:")
+                    db_version = "Sqlite3 (memory): "
                 except Exception as e:
                     traceback.print_exc()
             else:
-                file_exists, full_filename = check_filename(db_filename, variables["$folder_exists"]["options"]["value"], variables["$folder_name"]["options"]["value"])
-                db_full_filename = os.path.join(variables["$folder_name"]["options"]["value"], full_filename)
+                file_exists, full_filename = check_filename(db_filename)
+                db_full_filename = os.path.join(folder_name, full_filename)
                 if file_exists:
-                    variables["$printInvGreen"]["options"]["value"](f"Using database '{db_full_filename}'.")
+                    printInvGreen(f"Using database '{db_full_filename}'.")
                 else:
-                    variables["$printInvGreen"]["options"]["value"](f"Creating database '{db_full_filename}'.")
+                    printInvGreen(f"Creating database '{db_full_filename}'.")
                 try:
                     #conn = sqlite3.connect(full_filename, isolation_level=None)
                     if parse_formats:
-                        variables["$conn"]["options"]["value"] = sqlite3.connect(full_filename, detect_types=sqlite3.PARSE_DECLTYPES)
+                        conn = sqlite3.connect(full_filename, detect_types=sqlite3.PARSE_DECLTYPES)
                     else:
-                        variables["$conn"]["options"]["value"] = sqlite3.connect(full_filename)
-                    variables["$db_version"]["options"]["value"] = f"Sqlite3 ({db_full_filename}): "
+                        conn = sqlite3.connect(full_filename)
+                    db_version = f"Sqlite3 ({db_full_filename}): "
                 except Exception as e:
                     traceback.print_exc()
 
@@ -2357,12 +2351,12 @@ def do_sql(sql, variables, command_options):
                 #print(connpars["user"])
                 #print(connpars["password"])
                 try:
-                    variables["$conn"]["options"]["value"] = MySQLdb.connect(database = database, \
+                    conn = MySQLdb.connect(database = database, \
                     user = user, password = password, host = host, \
                     port = port, use_unicode=True,charset="utf8")
                     #conn.autocommit(True)
                     #conn = mysql.connector.connect(host = "localhost", user = "root", password="admin", use_unicode=True,charset="utf8")
-                    variables["$db_version"]["options"]["value"] = f"MySQL (Add schema!): "
+                    db_version = f"MySQL (Add schema!): "
                 except Exception as e:
                     traceback.print_exc()
 
@@ -2381,12 +2375,12 @@ def do_sql(sql, variables, command_options):
                 print("Using psycopg2 version:", version("psycopg2"))
                 import psycopg2
                 try:
-                    variables["$conn"]["options"]["value"] = psycopg2.connect(database = database, \
+                    conn = psycopg2.connect(database = database, \
                     user = user, password = password, host = host, \
                     port = port)
                     #conn.set_session(autocommit=True)
                     #conn = mysql.connector.connect(host = "localhost", user = "root", password="admin", use_unicode=True,charset="utf8")
-                    variables["$db_version"]["options"]["value"] = f"PostgreSQL (Add schema!): "
+                    db_version = f"PostgreSQL (Add schema!): "
                 except Exception as e:
                     traceback.print_exc()
             except Exception as e:
@@ -2405,13 +2399,13 @@ def do_sql(sql, variables, command_options):
                 print("Using pyodbc version:", version("pyodbc"))
                 import pyodbc
                 try:
-                    variables["$conn"]["options"]["value"] = pyodbc.connect('Driver={SQL Server};'
+                    conn = pyodbc.connect('Driver={SQL Server};'
                       f'Server={server}\SQLEXPRESS;'
                       f'Database={database};'
                       'Trusted_Connection=yes;')
                     #conn.autocommit = True
                     #conn = mysql.connector.connect(host = "localhost", user = "root", password="admin", use_unicode=True,charset="utf8")
-                    variables["$db_version"]["options"]["value"] = f"MsSQL (Add schema!): "
+                    db_version = f"MsSQL (Add schema!): "
                 except Exception as e:
                     traceback.print_exc()
             except Exception as e:
@@ -2451,24 +2445,24 @@ def do_sql(sql, variables, command_options):
 
 
         elif command == "folder":
-            variables["$folder_exists_old"]["options"]["value"] = variables["$folder_exists"]["options"]["value"]
-            variables["$folder_name_old"]["options"]["value"] = variables["$folder_name"]["options"]["value"]
+            folder_exists_old = folder_exists
+            folder_name_old = folder_name
             #folder_name = sql[len("\folder:"):]
-            variables["$folder_name"]["options"]["value"] = options["foldername"]
+            folder_name = options["foldername"]
             #folder = os.path.isdir(folder_name)
-            variables["$folder_exists"]["options"]["value"], full_foldername = check_foldername(variables["$folder_name"]["options"]["value"], variables["$folder_name_old"]["options"]["value"])
-            if variables["$folder_exists"]["options"]["value"]:
-                variables["$printInvGreen"]["options"]["value"](f'''Using folder '{full_foldername}'.''')
-                variables["$folder_name"]["options"]["value"] = full_foldername
+            folder_exists, full_foldername = check_foldername(folder_name, folder_name_old)
+            if folder_exists:
+                printInvGreen(f'''Using folder '{full_foldername}'.''')
+                folder_name = full_foldername
             else:
-                if variables["$folder_exists_old"]["options"]["value"]:
-                    variables["$printInvRed"]["options"]["value"](f'''Folder '{variables["$folder_name"]["options"]["value"]}' does not exist. Using current folder '{variables["$folder_name_old"]["options"]["value"]}'.''')
-                    variables["$folder_exists"]["options"]["value"] = variables["$folder_exists_old"]["options"]["value"]
-                    variables["$folder_name"]["options"]["value"] = variables["$folder_name_old"]["options"]["value"]
+                if folder_exists_old:
+                    printInvRed(f'''Folder '{folder_name}' does not exist. Using current folder '{folder_name_old}'.''')
+                    folder_exists = folder_exists_old
+                    folder_name = folder_name_old
                 else:
                     # folder_name_old is None if sql imported file has wrong \folder command
-                    variables["$printInvRed"]["options"]["value"](f'''Folder '{variables["$folder_name"]["options"]["value"]}' does not exist. Using working directory '{os.getcwd()}'.''')
-                    variables["$folder_name"]["options"]["value"] = os.getcwd()
+                    printInvRed("Folder '{}' does not exist. Using working directory '{}'.".format(folder_name, os.getcwd()))
+                    folder_name = os.getcwd()
                 OK = 2
 
         elif command == "read":
@@ -2485,7 +2479,7 @@ def do_sql(sql, variables, command_options):
                 read_text_qualifier = None
             read_columns = options.get("read_columns")
             strip_columns = options.get("strip_columns")
-            file_exists, full_filename = check_filename(read_filename, variables["$folder_exists"]["options"]["value"], variables["$folder_name"]["options"]["value"])
+            file_exists, full_filename = check_filename(read_filename)
             #print("Read: '{}'".format(read_filename))
             try:
                 with open(full_filename, "r", encoding = "utf-8") as f:
@@ -2591,13 +2585,13 @@ def do_sql(sql, variables, command_options):
                             if max_columns > len(d):
                                 error +=1
                                 if error >= 0 and error < 10:
-                                    variables["$printRed"]["options"]["value"](f"ERROR on row {row+1}. Check carefully!!!")
+                                    printRed(f"ERROR on row {row+1}. Check carefully!!!")
                                 elif error == 10:
-                                    variables["$printRed"]["options"]["value"](f"Further ERROR messages surpressed!!!")
+                                    printRed(f"Further ERROR messages surpressed!!!")
                                 for i in range(max_columns - len(d)):
                                     d.append(None)
                     if error > 0:
-                        variables["$printInvRed"]["options"]["value"](f"ERRORs in TOTAL {error}. Check carefully!!!")
+                        printInvRed(f"ERRORs in TOTAL {error}. Check carefully!!!")
                         print(max_columns, len_columns)
                     if len(data_new) > 0 or len(columns_new) > 0:
                         data = data_new
@@ -2607,11 +2601,11 @@ def do_sql(sql, variables, command_options):
                         print()
                         show_data(data, columns)
                     else:
-                        variables["$printInvRed"]["options"]["value"]("! There are no data returned from this file !")
+                        printInvRed("! There are no data returned from this file !")
                         OK = 2
             except Exception as e:
                 traceback.print_exc()
-                variables["$printInvRed"]["options"]["value"](str(e))
+                printInvRed(str(e))
                 OK = 2
 
         elif command == "export":
@@ -2622,7 +2616,7 @@ def do_sql(sql, variables, command_options):
             else:
                 export_none = None  # never happens, but was before, now is ""
             #print("export_none", export_none)
-            file_exists, full_filename = check_filename(export_filename, variables["$folder_exists"]["options"]["value"], variables["$folder_name"]["options"]["value"])
+            file_exists, full_filename = check_filename(export_filename)
             #print("Export: '{}'".format(export_filename))
             col_len = len(columns)-1
             try:
@@ -2657,26 +2651,26 @@ def do_sql(sql, variables, command_options):
                     #print(sql.strip(), sql.count(";"))
                     sqls_load = parseText(sql, ";")
                 for i, sql in enumerate(sqls_load):
-                    variables["$printCom"]["options"]["value"](f"\n\\\\ SQL file '{full_filename}' loaded command no {str(i+1)} \\\\")
+                    printCom(f"\n\\\\ SQL file '{full_filename}' loaded command no {str(i+1)} \\\\")
                     do_sql(sql)
             else:
-                variables["$printRed"]["options"]["value"](f"! SQL file '{full_filename}' does not exist !")
+                printRed(f"! SQL file '{full_filename}' does not exist !")
             '''
-            sqls_load = get_sql_queries_dict([sql_filename], variables["$folder_exists"]["options"]["value"], variables["$folder_name"]["options"]["value"])
+            sqls_load = get_sql_queries_dict([sql_filename])
             for full_filename in sqls_load.keys():
                 #OK_returned = 1
                 for i, sql_load in enumerate(sqls_load[full_filename]):
-                    variables["$printCom"]["options"]["value"](f"\n\\\\ SQL file '{full_filename}' command no {str(i+1)} \\\\")
+                    printCom(f"\n\\\\ SQL file '{full_filename}' command no {str(i+1)} \\\\")
                     #print(sql)
                     #print()
                     start = time.perf_counter()
-                    OK_returned = do_sql(sql_load, variables, command_options)
+                    OK_returned = do_sql(sql_load)
                     end = time.perf_counter()
                     print()
                     if OK_returned == 1:
                         print("Elapsed time: " + str(datetime.timedelta(seconds=end-start)))
                     elif OK_returned > 1:
-                        variables["$printRed"]["options"]["value"]("Elapsed time: " + str(datetime.timedelta(seconds=end-start)))
+                        printRed("Elapsed time: " + str(datetime.timedelta(seconds=end-start)))
                         time.sleep(2)
                     else: break
 
@@ -2879,7 +2873,7 @@ def do_sql(sql, variables, command_options):
             sql2 = ""
             sql3 = ""
 
-            if variables["$db_version"]["options"]["value"][:7] == "Sqlite3":
+            if db_version[:7] == "Sqlite3":
                 sql1 = f'''drop table if exists "{tablename}"'''
                 #columns_create += "ida INTEGER PRIMARY KEY AUTOINCREMENT"
                 if table_id is not None:
@@ -2928,7 +2922,7 @@ def do_sql(sql, variables, command_options):
                 sql2 = f'''create table "{tablename}" ({columns_create})'''
                 sql3 = f'''insert into "{tablename}" ({part1}) values ({part2})'''
 
-            elif variables["$db_version"]["options"]["value"][:5] == "MySQL":
+            elif db_version[:5] == "MySQL":
                 sql1 = f'''drop table if exists `{tablename}`'''
                 #columns_create += "ida INTEGER PRIMARY KEY AUTOINCREMENT"
                 if table_id is not None:
@@ -2962,7 +2956,7 @@ def do_sql(sql, variables, command_options):
                 sql2 = f'''create table `{tablename}` ({columns_create})'''
                 sql3 = f'''insert into `{tablename}` ({part1}) values ({part2})'''
 
-            elif variables["$db_version"]["options"]["value"][:10] == "PostgreSQL":
+            elif db_version[:10] == "PostgreSQL":
                 sql1 = f'''drop table if exists "{tablename}"'''
                 #columns_create += "ida INTEGER PRIMARY KEY AUTOINCREMENT"
                 if table_id is not None:
@@ -2996,7 +2990,7 @@ def do_sql(sql, variables, command_options):
                 sql2 = f'''create table "{tablename}" ({columns_create})'''
                 sql3 = f'''insert into "{tablename}" ({part1}) values ({part2})'''
 
-            elif variables["$db_version"]["options"]["value"][:5] == "MsSQL":
+            elif db_version[:5] == "MsSQL":
                 sql1 = f'''drop table if exists "{tablename}"'''
                 #columns_create += "ida INTEGER PRIMARY KEY AUTOINCREMENT"
                 if table_id is not None:
@@ -3068,45 +3062,45 @@ def do_sql(sql, variables, command_options):
             if table_drop:
                 print(sql1)
                 try:
-                    c = variables["$conn"]["options"]["value"].cursor()
+                    c = conn.cursor()
                     #print(columns_print)
                     #print(sql.format(columns_print))
                     c.execute(sql1)
-                    variables["$conn"]["options"]["value"].commit()
+                    conn.commit()
                     #print()
-                    #variables["$printInvGreen"]["options"]["value"]("! There are no data returned from this sql query !")
+                    #printInvGreen("! There are no data returned from this sql query !")
                 except Exception as e:
                     traceback.print_exc()
-                    variables["$printInvRed"]["options"]["value"](str(e))
+                    printInvRed(str(e))
                     if OK: OK = 2
 
             try:
                 print(sql2)
-                c = variables["$conn"]["options"]["value"].cursor()
+                c = conn.cursor()
                 #print(columns_print)
                 #print(sql.format(columns_print))
                 c.execute(sql2)
-                variables["$conn"]["options"]["value"].commit()
+                conn.commit()
                 #print()
-                #variables["$printInvGreen"]["options"]["value"]("! There are no data returned from this sql query !")
+                #printInvGreen("! There are no data returned from this sql query !")
             except Exception as e:
                 traceback.print_exc()
-                variables["$printInvRed"]["options"]["value"](str(e))
+                printInvRed(str(e))
                 if OK: OK = 2
 
             if OK == 1:
                 print(sql3)
                 try:
-                    c = variables["$conn"]["options"]["value"].cursor()
+                    c = conn.cursor()
                     #print(columns_print)
                     #print(sql.format(columns_print))
                     c.executemany(sql3.format(columns_print), data)
-                    variables["$conn"]["options"]["value"].commit()
+                    conn.commit()
                     print()
-                    variables["$printInvGreen"]["options"]["value"]("! There are no data returned from this sql query !")
+                    printInvGreen("! There are no data returned from this sql query !")
                 except Exception as e:
                     traceback.print_exc()
-                    variables["$printInvRed"]["options"]["value"](str(e))
+                    printInvRed(str(e))
                     if OK: OK = 2
 
 
@@ -3116,7 +3110,7 @@ def do_sql(sql, variables, command_options):
             #print("\n" + "Insert:", tablename)
             part1 = ""
             part2 = ""
-            if variables["$db_version"]["options"]["value"][:7] == "Sqlite3":
+            if db_version[:7] == "Sqlite3":
                 for i, c in enumerate(columns):
                     if i == 0:
                         #part1 += '''{{0[{}]}}'''.format(str(i))
@@ -3138,7 +3132,7 @@ def do_sql(sql, variables, command_options):
                 for col in columns:
                     columns_print.append(f'''"{col}"''')
 
-            elif variables["$db_version"]["options"]["value"][:5] == "MySQL":
+            elif db_version[:5] == "MySQL":
                 for i, c in enumerate(columns):
                     if i == 0:
                         part1 += f"{{0[{str(i)}]}}"
@@ -3152,7 +3146,7 @@ def do_sql(sql, variables, command_options):
                 for col in columns:
                     columns_print.append(f'''`{col}`''')
 
-            elif variables["$db_version"]["options"]["value"][:10] == "PostgreSQL":
+            elif db_version[:10] == "PostgreSQL":
                 for i, c in enumerate(columns):
                     if i == 0:
                         part1 += f"{{0[{str(i)}]}}"
@@ -3166,7 +3160,7 @@ def do_sql(sql, variables, command_options):
                 for col in columns:
                     columns_print.append(f'''"{col}"''')
 
-            elif variables["$db_version"]["options"]["value"][:5] == "MsSQL":
+            elif db_version[:5] == "MsSQL":
                 for i, c in enumerate(columns):
                     if i == 0:
                         part1 += f"{{0[{str(i)}]}}"
@@ -3192,19 +3186,19 @@ def do_sql(sql, variables, command_options):
 
             #print()
             #print(db_version + sql)
-            print(variables["$db_version"]["options"]["value"] + sql.format(columns_print))
+            print(db_version + sql.format(columns_print))
             #print(columns, data)
             try:
-                c = variables["$conn"]["options"]["value"].cursor()
+                c = conn.cursor()
                 #print(columns_print)
                 #print(sql.format(columns_print))
                 c.executemany(sql.format(columns_print), data)
-                variables["$conn"]["options"]["value"].commit()
+                conn.commit()
                 print()
-                variables["$printInvGreen"]["options"]["value"]("! There are no data returned from this sql query !")
+                printInvGreen("! There are no data returned from this sql query !")
             except Exception as e:
                 traceback.print_exc()
-                variables["$printInvRed"]["options"]["value"](str(e))
+                printInvRed(str(e))
                 if OK: OK = 2
 
         elif command == "print" or command == "print data" or command == "print data all" or command == "print data easy" or command == "print columns" or command == "print history":
@@ -3222,7 +3216,7 @@ def do_sql(sql, variables, command_options):
 
             elif options["what"] == "history":
 
-                print(";\n".join([str(c) for c in variables["$command_history"]["options"]["value"]]) + ";")
+                print(";\n".join([str(c) for c in command_history]) + ";")
 
             elif options["what"] == "data":
 
@@ -3253,43 +3247,43 @@ def do_sql(sql, variables, command_options):
 
                 if title is not None:   # include empty string to show no title
                     title_text = title
-                    #variables["$printInvGreen"]["options"]["value"](title)
+                    #printInvGreen(title)
                 elif len(listt) > 0 and randd == 0:
                     if len(colss) > 0:
                         title_text = f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} listed cases {listi} with selected columns {columns_show}."
-                        #variables["$printInvGreen"]["options"]["value"](f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} listed cases {listi} with selected columns {columns_show}.")
+                        #printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} listed cases {listi} with selected columns {columns_show}.")
                     else:
                         title_text = f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} listed cases {listi} with all columns."
-                        #variables["$printInvGreen"]["options"]["value"](f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} listed cases {listi} with all columns.")
+                        #printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} listed cases {listi} with all columns.")
                 elif len(listt) > 0 and randd > 0:
                     if len(colss) > 0:
                         title_text = f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} random cases from {listi} with selected columns {columns_show}."
-                        #variables["$printInvGreen"]["options"]["value"](f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} random cases from {listi} with selected columns {columns_show}.")
+                        #printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} random cases from {listi} with selected columns {columns_show}.")
                     else:
                         title_text = f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} random cases from {listi} with all columns."
-                        #variables["$printInvGreen"]["options"]["value"](f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} random cases from {listi} with all columns.")
+                        #printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} random cases from {listi} with all columns.")
                 elif randd > 0:
                     if len(colss) > 0:
                         title_text = f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} random cases from {fromm} to {too} step {stepp} with selected columns {columns_show}."
-                        #variables["$printInvGreen"]["options"]["value"](f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} random cases from {fromm} to {too} step {stepp} with selected columns {columns_show}.")
+                        #printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} random cases from {fromm} to {too} step {stepp} with selected columns {columns_show}.")
                     else:
                         title_text = f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} random cases from {fromm} to {too} step {stepp} with all columns."
-                        #variables["$printInvGreen"]["options"]["value"](f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} random cases from {fromm} to {too} step {stepp} with all columns.")
+                        #printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} random cases from {fromm} to {too} step {stepp} with all columns.")
                 else:
                     if len(colss) > 0:
                         title_text = f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} cases from {fromm} to {too} step {stepp} with selected columns {columns_show}."
-                        #variables["$printInvGreen"]["options"]["value"](f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} cases from {fromm} to {too} step {stepp} with selected columns {columns_show}.")
+                        #printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} cases from {fromm} to {too} step {stepp} with selected columns {columns_show}.")
                     else:
                         title_text = f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} cases from {fromm} to {too} step {stepp} with all columns."
-                        #variables["$printInvGreen"]["options"]["value"](f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} cases from {fromm} to {too} step {stepp} with all columns.")
+                        #printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} cases from {fromm} to {too} step {stepp} with all columns.")
 
                 if title_text: # excluse empty string to show title
                     if title_color:
                         cc = colorCode(title_color)
-                        variables["$printColor"]["options"]["value"](title_text, cc)
+                        printColor(title_text, cc)
                     else:
                         cc = INVGREEN
-                        variables["$printColor"]["options"]["value"](title_text, cc)
+                        printColor(title_text, cc)
 
                 rows = range(1, nrows + 1)
                 #print(rows)
@@ -3299,7 +3293,7 @@ def do_sql(sql, variables, command_options):
                     print()
                     if note_color:
                         cc = colorCode(note_color)
-                        variables["$printColor"]["options"]["value"](note, cc)
+                        printColor(note, cc)
                     else:
                         print(note)
 
@@ -3329,17 +3323,17 @@ def do_sql(sql, variables, command_options):
 
             if title is not None:   # include empty string to show no title
                 title_text = title
-                #variables["$printInvGreen"]["options"]["value"](title)
+                #printInvGreen(title)
             else:
                 title_text = f"Format data {fill_formats}"
 
             if title_text: # excluse empty string to show title
                 if title_color:
                     cc = colorCode(title_color)
-                    variables["$printColor"]["options"]["value"](title_text, cc)
+                    printColor(title_text, cc)
                 else:
                     cc = INVGREEN
-                    variables["$printColor"]["options"]["value"](title_text, cc)
+                    printColor(title_text, cc)
 
             #rows = range(1, nrows + 1)
             #print(rows)
@@ -3350,7 +3344,7 @@ def do_sql(sql, variables, command_options):
                 print()
                 if note_color:
                     cc = colorCode(note_color)
-                    variables["$printColor"]["options"]["value"](note, cc)
+                    printColor(note, cc)
                 else:
                     print(note)
 
@@ -3398,43 +3392,43 @@ def do_sql(sql, variables, command_options):
 
             if title is not None:   # include empty string to show no title
                 title_text = title
-                #variables["$printInvGreen"]["options"]["value"](title)
+                #printInvGreen(title)
             elif len(listt) > 0 and randd == 0:
                 if len(colss) > 0:
                     title_text = f"There are {nrows} rows, {ncols} columns. Selected {len(rowsi)} listed cases {listi} with selected columns {columns_selected}."
-                    #variables["$printInvGreen"]["options"]["value"](f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} listed cases {listi} with selected columns {columns_show}.")
+                    #printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} listed cases {listi} with selected columns {columns_show}.")
                 else:
                     title_text = f"There are {nrows} rows, {ncols} columns. Selected {len(rowsi)} listed cases {listi} with all columns."
-                    #variables["$printInvGreen"]["options"]["value"](f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} listed cases {listi} with all columns.")
+                    #printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} listed cases {listi} with all columns.")
             elif len(listt) > 0 and randd > 0:
                 if len(colss) > 0:
                     title_text = f"There are {nrows} rows, {ncols} columns. Selected {len(rowsi)} random cases from {listi} with selected columns {columns_selected}."
-                    #variables["$printInvGreen"]["options"]["value"](f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} random cases from {listi} with selected columns {columns_show}.")
+                    #printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} random cases from {listi} with selected columns {columns_show}.")
                 else:
                     title_text = f"There are {nrows} rows, {ncols} columns. Selected {len(rowsi)} random cases from {listi} with all columns."
-                    #variables["$printInvGreen"]["options"]["value"](f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} random cases from {listi} with all columns.")
+                    #printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} random cases from {listi} with all columns.")
             elif randd > 0:
                 if len(colss) > 0:
                     title_text = f"There are {nrows} rows, {ncols} columns. Selected {len(rowsi)} random cases from {fromm} to {too} step {stepp} with selected columns {columns_selected}."
-                    #variables["$printInvGreen"]["options"]["value"](f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} random cases from {fromm} to {too} step {stepp} with selected columns {columns_show}.")
+                    #printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} random cases from {fromm} to {too} step {stepp} with selected columns {columns_show}.")
                 else:
                     title_text = f"There are {nrows} rows, {ncols} columns. Selected {len(rowsi)} random cases from {fromm} to {too} step {stepp} with all columns."
-                    #variables["$printInvGreen"]["options"]["value"](f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} random cases from {fromm} to {too} step {stepp} with all columns.")
+                    #printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} random cases from {fromm} to {too} step {stepp} with all columns.")
             else:
                 if len(colss) > 0:
                     title_text = f"There are {nrows} rows, {ncols} columns. Selected {len(rowsi)} cases from {fromm} to {too} step {stepp} with selected columns {columns_selected}."
-                    #variables["$printInvGreen"]["options"]["value"](f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} cases from {fromm} to {too} step {stepp} with selected columns {columns_show}.")
+                    #printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} cases from {fromm} to {too} step {stepp} with selected columns {columns_show}.")
                 else:
                     title_text = f"There are {nrows} rows, {ncols} columns. Selected {len(rowsi)} cases from {fromm} to {too} step {stepp} with all columns."
-                    #variables["$printInvGreen"]["options"]["value"](f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} cases from {fromm} to {too} step {stepp} with all columns.")
+                    #printInvGreen(f"There are {nrows} rows, {ncols} columns. Printing {len(rowsi)} cases from {fromm} to {too} step {stepp} with all columns.")
 
             if title_text: # excluse empty string to show title
                 if title_color:
                     cc = colorCode(title_color)
-                    variables["$printColor"]["options"]["value"](title_text, cc)
+                    printColor(title_text, cc)
                 else:
                     cc = INVGREEN
-                    variables["$printColor"]["options"]["value"](title_text, cc)
+                    printColor(title_text, cc)
 
             #rows = range(1, nrows + 1)
             #print(rows)
@@ -3445,7 +3439,7 @@ def do_sql(sql, variables, command_options):
                 print()
                 if note_color:
                     cc = colorCode(note_color)
-                    variables["$printColor"]["options"]["value"](note, cc)
+                    printColor(note, cc)
                 else:
                     print(note)
 
@@ -4140,16 +4134,15 @@ def do_sql(sql, variables, command_options):
                         OK = 0
 
         else:
-            variables["$printInvRed"]["options"]["value"]("! Command was not recognized or missing arguments !")
-            OK = 3
+            printInvRed("! Command was not recognized or missing arguments !")
 
     else:
-        variables["$printBlue"]["options"]["value"](variables["$db_version"]["options"]["value"] + sql + "\n")
+        printBlue(db_version + sql + "\n")
         data_new = None
         columns_new = None
         error = 0
         try:
-            c = variables["$conn"]["options"]["value"].cursor()
+            c = conn.cursor()
             #c.execute(""'{}'"".format(sql))
             c.execute(f"{sql}")
         except Exception as e:
@@ -4168,7 +4161,7 @@ def do_sql(sql, variables, command_options):
             #error = 1
             pass
         finally:
-            if variables["$conn"]["options"]["value"]: variables["$conn"]["options"]["value"].commit()
+            if conn: conn.commit()
         if data_new or columns_new:
             if isinstance(data_new, tuple):
                 #print("Converting to list")
@@ -4186,48 +4179,48 @@ def do_sql(sql, variables, command_options):
             #print("Columns class", columns.__class__)
             show_data(data, columns)
         elif not error:
-            variables["$printInvGreen"]["options"]["value"]("! There are no data returned from this sql query !")
+            printInvGreen("! There are no data returned from this sql query !")
         else:
-            variables["$printInvRed"]["options"]["value"]("! Error exexuting this sql query !")
+            printInvRed("! Error exexuting this sql query !")
             if OK: OK = 2
 
     # this checks dtb
-    if variables["$db_version"]["options"]["value"][:5] == "MySQL":
+    if db_version[:5] == "MySQL":
         #print(conn.get_proto_info())
         try:
-            c = variables["$conn"]["options"]["value"].cursor()
+            c = conn.cursor()
             c.execute("SELECT database();")
             data_new = c.fetchall()
-            variables["$db_schema"]["options"]["value"] = data_new[0][0]
-            variables["$db_version"]["options"]["value"] = f'''MySQL (`{variables["$db_schema"]["options"]["value"]}`): '''
+            db_schema = data_new[0][0]
+            db_version = f'''MySQL (`{db_schema}`): '''
         except Exception as e:
             traceback.print_exc()
-    if variables["$db_version"]["options"]["value"][:5] == "MsSQL":
+    if db_version[:5] == "MsSQL":
         #print(conn.get_proto_info())
         try:
-            c = variables["$conn"]["options"]["value"].cursor()
+            c = conn.cursor()
             c.execute("SELECT DB_NAME();")
             data_new = c.fetchall()
-            variables["$db_schema"]["options"]["value"] = data_new[0][0]
-            variables["$db_version"]["options"]["value"] = f'''MsSQL ("{variables["$db_schema"]["options"]["value"]}"): '''
+            db_schema = data_new[0][0]
+            db_version = f'''MsSQL ("{db_schema}"): '''
         except Exception as e:
             traceback.print_exc()
-    if variables["$db_version"]["options"]["value"][:10] == "PostgreSQL":
+    if db_version[:10] == "PostgreSQL":
         #print(conn.get_proto_info())
         try:
-            c = variables["$conn"]["options"]["value"].cursor()
+            c = conn.cursor()
             c.execute("SELECT current_database();")
             data_new = c.fetchall()
-            variables["$db_schema"]["options"]["value"] = data_new[0][0]
-            variables["$db_version"]["options"]["value"] = f'''PostgreSQL ("{variables["$db_schema"]["options"]["value"]}"): '''
+            db_schema = data_new[0][0]
+            db_version = f'''PostgreSQL ("{db_schema}"): '''
         except Exception as e:
-            variables["$db_version"]["options"]["value"] = "None: "
-            variables["$db_schema"]["options"]["value"] = None
-            variables["$conn"]["options"]["value"] = None
+            db_version = "None: "
+            db_schema = None
+            conn = None
             traceback.print_exc()
     # SELECT current_database();
-    variables["$command_history"]["options"]["value"].append(sql)
-    variables["$all"]["print history"]["value"] = len(variables["$command_history"]["options"]["value"])
+    command_history.append(sql)
+    variables["$all"]["print history"]["value"] = len(command_history)
     sql = ""
     return OK
 
@@ -4337,97 +4330,6 @@ def main(argv):
         if f == "@int(":
             ret, opt = int_function(vartest)
         return ret, opt
-
-
-    variables["$command_history"] = {}
-    variables["$command_history"]["shorts"] = []
-    variables["$command_history"]["options"] = {}
-    variables["$command_history"]["options"]["value"] = []
-
-
-    RED, YELLOW, GREEN, BLUE, COM, INVGREEN, INVRED, END = '\033[91m', '\033[33m', '\033[92m', '\033[96m', '\033[4m', '\033[97m\033[42m', '\033[97m\033[101m', '\033[0m'
-
-    variables["$printRed"] = {}
-    variables["$printRed"]["shorts"] = []
-    variables["$printRed"]["options"] = {}
-    variables["$printRed"]["options"]["value"] = lambda sTxt: print(RED + sTxt + END)
-
-    variables["$printGreen"] = {}
-    variables["$printGreen"]["shorts"] = []
-    variables["$printGreen"]["options"] = {}
-    variables["$printGreen"]["options"]["value"] = lambda sTxt: print(GREEN + sTxt + END)
-
-    variables["$printYellow"] = {}
-    variables["$printYellow"]["shorts"] = []
-    variables["$printYellow"]["options"] = {}
-    variables["$printYellow"]["options"]["value"] = lambda sTxt: print(YELLOW + sTxt + END)
-
-    variables["$printBlue"] = {}
-    variables["$printBlue"]["shorts"] = []
-    variables["$printBlue"]["options"] = {}
-    variables["$printBlue"]["options"]["value"] = lambda sTxt: print(BLUE + sTxt + END)
-
-    variables["$printCom"] = {}
-    variables["$printCom"]["shorts"] = []
-    variables["$printCom"]["options"] = {}
-    variables["$printCom"]["options"]["value"] = lambda sTxt: print(COM + sTxt + END)
-
-    variables["$printInvGreen"] = {}
-    variables["$printInvGreen"]["shorts"] = []
-    variables["$printInvGreen"]["options"] = {}
-    variables["$printInvGreen"]["options"]["value"] = lambda sTxt: print(INVGREEN + sTxt + END)
-
-    variables["$printInvRed"] = {}
-    variables["$printInvRed"]["shorts"] = []
-    variables["$printInvRed"]["options"] = {}
-    variables["$printInvRed"]["options"]["value"] = lambda sTxt: print(INVRED + sTxt + END)
-
-    variables["$printColor"] = {}
-    variables["$printColor"]["shorts"] = []
-    variables["$printColor"]["options"] = {}
-    variables["$printColor"]["options"]["value"] = lambda sTxt, mColor: print(mColor + sTxt + END)
-
-
-    variables["$Assert"] = {}
-    variables["$Assert"]["shorts"] = []
-    variables["$Assert"]["options"] = {}
-    variables["$Assert"]["options"]["value"] = lambda bCond=False, sTxt='': variables["$printRed"]["options"]["value"](sTxt) if not bCond else None
-
-
-    variables["$conn"] = {}
-    variables["$conn"]["shorts"] = []
-    variables["$conn"]["options"] = {}
-    variables["$conn"]["options"]["value"] = None
-
-    variables["$db_schema"] = {}
-    variables["$db_schema"]["shorts"] = []
-    variables["$db_schema"]["options"] = {}
-    variables["$db_schema"]["options"]["value"] = ""
-
-    variables["$db_version"] = {}
-    variables["$db_version"]["shorts"] = []
-    variables["$db_version"]["options"] = {}
-    variables["$db_version"]["options"]["value"] = "None: "
-
-    variables["$folder_name_old"] = {}
-    variables["$folder_name_old"]["shorts"] = []
-    variables["$folder_name_old"]["options"] = {}
-    variables["$folder_name_old"]["options"]["value"] = ""
-    
-    variables["$folder_name"] = {}
-    variables["$folder_name"]["shorts"] = []
-    variables["$folder_name"]["options"] = {}
-    variables["$folder_name"]["options"]["value"] = ""
-
-    variables["$folder_exists_old"] = {}
-    variables["$folder_exists_old"]["shorts"] = []
-    variables["$folder_exists_old"]["options"] = {}
-    variables["$folder_exists_old"]["options"]["value"] = False
-    
-    variables["$folder_exists"] = {}
-    variables["$folder_exists"]["shorts"] = []
-    variables["$folder_exists"]["options"] = {}
-    variables["$folder_exists"]["options"]["value"] = False
 
     variables["$parse_value_type"] = {}
     variables["$parse_value_type"]["shorts"] = []
@@ -4979,22 +4881,22 @@ but {len(command_options[key1][key2])} '{key2}'.'''
         print("Multiprocessing:", do_mp)
 
     if len(vars(namespace)["sql_files"]) > 0:
-        sqls = get_sql_queries_dict(vars(namespace)["sql_files"], variables["$folder_exists"]["options"]["value"], foldername)
+        sqls = get_sql_queries_dict(vars(namespace)["sql_files"])
         #print(sqls)
         for full_filename in sqls.keys():
             #OK_returned = 1
             for i, sql in enumerate(sqls[full_filename]):
-                variables["$printCom"]["options"]["value"](f"\n\\\\ SQL file '{full_filename}' command no {str(i+1)} \\\\")
+                printCom(f"\n\\\\ SQL file '{full_filename}' command no {str(i+1)} \\\\")
                 #print(sql)
                 #print()
                 start = time.perf_counter()
-                OK_returned = do_sql(sql, variables, command_options)
+                OK_returned = do_sql(sql)
                 end = time.perf_counter()
                 print()
                 if OK_returned == 1:
                     print("Elapsed time: " + str(datetime.timedelta(seconds=end-start)))
                 elif OK_returned > 1:
-                    variables["$printRed"]["options"]["value"]("Elapsed time: " + str(datetime.timedelta(seconds=end-start)))
+                    printRed("Elapsed time: " + str(datetime.timedelta(seconds=end-start)))
                     time.sleep(2)
                 else: break
 
@@ -5002,25 +4904,25 @@ but {len(command_options[key1][key2])} '{key2}'.'''
     if len(vars(namespace)["sql_files"]) == 0 and isinstance(vars(namespace)["interactive"], str) or vars(namespace)["interactive"]:
         print("\nEntering interactive mode. Type '\quit' to quit.")
 
-        if variables["$conn"]["options"]["value"]:
-            if variables["$db_version"]["options"]["value"][:7] == "Sqlite3":
+        if conn:
+            if db_version[:7] == "Sqlite3":
                 print(f'''Using Sqlite3 filename "{db_full_filename}". Use \connect sqlite3 filename' for change.''')
-            elif variables["$db_version"]["options"]["value"][:5] == "MySQL":
-                print(f'''Using MySQL database `{variables["$db_schema"]["options"]["value"]}`. Use '\connect mysql database' for change.''')
-            elif variables["$db_version"]["options"]["value"][:5] == "MsSQL":
-                print(f'''Using MsSQL database "{variables["$db_schema"]["options"]["value"]}". Use '\connect mssql database' for change.''')
-            elif variables["$db_version"]["options"]["value"][:10] == "PostgreSQL":
-                print(f'''Using PostgreSQL database "{variables["$db_schema"]["options"]["value"]}". Use '\connect mysql database' for change.''')
+            elif db_version[:5] == "MySQL":
+                print(f'''Using MySQL database `{db_schema}`. Use '\connect mysql database' for change.''')
+            elif db_version[:5] == "MsSQL":
+                print(f'''Using MsSQL database "{db_schema}". Use '\connect mssql database' for change.''')
+            elif db_version[:10] == "PostgreSQL":
+                print(f'''Using PostgreSQL database "{db_schema}". Use '\connect mysql database' for change.''')
             else:
-                variables["$printRed"]["options"]["value"]("Sorry, no db_version.")
+                printRed("Sorry, no db_version.")
         else:
             print("Database is not specified. Please use '\sqlite3 filename' for example.")
 
-        if variables["$folder_exists"]["options"]["value"]:
-            print(f'''Using folder '{variables["$folder_name"]["options"]["value"]}'.''')
+        if folder_exists:
+            print(f"Using folder '{folder_name}'.")
         else:
-            variables["$folder_name"]["options"]["value"] = os.getcwd()
-            print(f'''Folder is not specified. Using working directory '{variables["$folder_name"]["options"]["value"]}'.''')
+            folder_name = os.getcwd()
+            print(f"Folder is not specified. Using working directory '{folder_name}'.")
         print()
 
         interactive_pass = 0
@@ -5035,17 +4937,17 @@ but {len(command_options[key1][key2])} '{key2}'.'''
             sqls[sql_filename] = parseText(sql, ";")
             #OK_returned = 1
             for i, sql in enumerate(sqls[sql_filename]):
-                variables["$printCom"]["options"]["value"](f'''\n\\\\ SQL file '{sql_filename}' command no {str(i+1)} \\\\''')
+                printCom(f'''\n\\\\ SQL file '{sql_filename}' command no {str(i+1)} \\\\''')
                 #print(sql)
                 #print()
                 start = time.perf_counter()
-                OK_returned = do_sql(sql, variables, command_options)
+                OK_returned = do_sql(sql)
                 end = time.perf_counter()
                 print()
                 if OK_returned == 1:
                     print("Elapsed time: " + str(datetime.timedelta(seconds=end-start)))
                 elif OK_returned > 1:
-                    variables["$printRed"]["options"]["value"]("Elapsed time: " + str(datetime.timedelta(seconds=end-start)))
+                    printRed("Elapsed time: " + str(datetime.timedelta(seconds=end-start)))
                     time.sleep(1)
                 else: break
             if OK_returned:
@@ -5054,7 +4956,7 @@ but {len(command_options[key1][key2])} '{key2}'.'''
                 sql = input(db_version)
 
     try:
-        variables["$conn"]["options"]["value"].close()
+        conn.close()
     except Exception as e:
         #traceback.print_exc()
         pass
