@@ -105,6 +105,11 @@ variables["$command_history"]["shorts"] = []
 variables["$command_history"]["options"] = {}
 variables["$command_history"]["options"]["value"] = []
 
+variables["$command_results"] = {}
+variables["$command_results"]["shorts"] = []
+variables["$command_results"]["options"] = {}
+variables["$command_results"]["options"]["value"] = []
+
 
 RED, YELLOW, GREEN, BLUE, COM, INVGREEN, INVRED, END = '\033[91m', '\033[33m', '\033[92m', '\033[96m', '\033[4m', '\033[97m\033[42m', '\033[97m\033[101m', '\033[0m'
 

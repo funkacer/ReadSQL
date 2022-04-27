@@ -2244,7 +2244,7 @@ def printGlobals():
     print("folder_name", variables["$folder_name"]["options"]["value"].__class__, variables["$folder_name"]["options"]["value"])
     print("db_version", variables["$db_version"]["options"]["value"].__class__, variables["$db_version"]["options"]["value"])
 
-def do_sql(sql, variables, command_options):
+def do_sql(sql, variables, command_options, data, columns):
 
     '''
     Perform sql query or user command
@@ -2271,10 +2271,10 @@ def do_sql(sql, variables, command_options):
             data_memory, columns_memory, colsp_memory
     '''
 
-    global data, columns, data_old, columns_old, \
+    global data_old, columns_old, \
            fromm, too, stepp, randd, listt, colss, noness, noneso, colsp, \
            data_memory, columns_memory, colsp_memory
-    
+
     time.sleep(variables["$sleep"]["options"]["value"])
 
     OK = 1
@@ -2670,7 +2670,8 @@ def do_sql(sql, variables, command_options):
                     #print(sql)
                     #print()
                     start = time.perf_counter()
-                    OK_returned = do_sql(sql_load, variables, command_options)
+                    variables, data, columns = do_sql(sql_load, variables, command_options, data, columns)
+                    OK_returned = variables["$command_results"]["options"]["value"][-1]
                     end = time.perf_counter()
                     print()
                     if OK_returned == 1:
@@ -4228,8 +4229,9 @@ def do_sql(sql, variables, command_options):
     # SELECT current_database();
     variables["$command_history"]["options"]["value"].append(sql)
     variables["$all"]["print history"]["value"] = len(variables["$command_history"]["options"]["value"])
-    sql = ""
-    return OK
+    variables["$command_results"]["options"]["value"].append(OK)
+    #sql = ""
+    return variables, data, columns
 
 def main(argv):
 
@@ -4344,6 +4346,11 @@ def main(argv):
     variables["$command_history"]["options"] = {}
     variables["$command_history"]["options"]["value"] = []
 
+    variables["$command_results"] = {}
+    variables["$command_results"]["shorts"] = []
+    variables["$command_results"]["options"] = {}
+    variables["$command_results"]["options"]["value"] = []
+
 
     RED, YELLOW, GREEN, BLUE, COM, INVGREEN, INVRED, END = '\033[91m', '\033[33m', '\033[92m', '\033[96m', '\033[4m', '\033[97m\033[42m', '\033[97m\033[101m', '\033[0m'
 
@@ -4413,7 +4420,7 @@ def main(argv):
     variables["$folder_name_old"]["shorts"] = []
     variables["$folder_name_old"]["options"] = {}
     variables["$folder_name_old"]["options"]["value"] = ""
-    
+
     variables["$folder_name"] = {}
     variables["$folder_name"]["shorts"] = []
     variables["$folder_name"]["options"] = {}
@@ -4423,7 +4430,7 @@ def main(argv):
     variables["$folder_exists_old"]["shorts"] = []
     variables["$folder_exists_old"]["options"] = {}
     variables["$folder_exists_old"]["options"]["value"] = False
-    
+
     variables["$folder_exists"] = {}
     variables["$folder_exists"]["shorts"] = []
     variables["$folder_exists"]["options"] = {}
@@ -4979,7 +4986,7 @@ but {len(command_options[key1][key2])} '{key2}'.'''
         print("Multiprocessing:", do_mp)
 
     if len(vars(namespace)["sql_files"]) > 0:
-        sqls = get_sql_queries_dict(vars(namespace)["sql_files"], variables["$folder_exists"]["options"]["value"], foldername)
+        sqls = get_sql_queries_dict(vars(namespace)["sql_files"], variables["$folder_exists"]["options"]["value"], variables["$folder_name"]["options"]["value"])
         #print(sqls)
         for full_filename in sqls.keys():
             #OK_returned = 1
@@ -4988,7 +4995,8 @@ but {len(command_options[key1][key2])} '{key2}'.'''
                 #print(sql)
                 #print()
                 start = time.perf_counter()
-                OK_returned = do_sql(sql, variables, command_options)
+                variables, data, columns = do_sql(sql, variables, command_options, data, columns)
+                OK_returned = variables["$command_results"]["options"]["value"][-1]
                 end = time.perf_counter()
                 print()
                 if OK_returned == 1:
@@ -5039,7 +5047,8 @@ but {len(command_options[key1][key2])} '{key2}'.'''
                 #print(sql)
                 #print()
                 start = time.perf_counter()
-                OK_returned = do_sql(sql, variables, command_options)
+                variables, data, columns = do_sql(sql, variables, command_options, data, columns)
+                OK_returned = variables["$command_results"]["options"]["value"][-1]
                 end = time.perf_counter()
                 print()
                 if OK_returned == 1:
@@ -5050,7 +5059,7 @@ but {len(command_options[key1][key2])} '{key2}'.'''
                 else: break
             if OK_returned:
                 #print()
-                printGlobals()
+                #printGlobals()
                 sql = input(db_version)
 
     try:

@@ -14,28 +14,43 @@ from src.params import command_options
 
 #print(variables)
 
+data = None
+columns = None
+
 class TestCase(unittest.TestCase):
 
-    def test_folder1(self):
+    def test_folder_exists(self):
+        global variables, command_options, data, columns
         from ReadSQL import do_sql
-        inp = r"\f test_folder_exists"
-        self.assertEqual(1, do_sql(inp, variables, command_options))
-        
-    def test_folder2(self):
-        from ReadSQL import do_sql
-        inp = r"\f ''"
-        self.assertEqual(1, do_sql(inp, variables, command_options))
-        
-    def test_folder3(self):
-        from ReadSQL import do_sql
-        inp = r"\f test_folder_not_exists"
-        self.assertEqual(2, do_sql(inp, variables, command_options))
+        sql = r"\f test_folder_exists"
+        variables, data, columns = do_sql(sql, variables, command_options, data, columns)
+        OK_returned = variables["$command_results"]["options"]["value"][-1]
+        self.assertEqual(1, OK_returned)
 
-    def test_folder4(self):
+    def test_folder_not_exists(self):
+        global variables, command_options, data, columns
         from ReadSQL import do_sql
-        inp = r"\f"
-        self.assertEqual(3, do_sql(inp, variables, command_options))
-        
+        sql = r"\f test_folder_not_exists"
+        variables, data, columns = do_sql(sql, variables, command_options, data, columns)
+        OK_returned = variables["$command_results"]["options"]["value"][-1]
+        self.assertEqual(2, OK_returned)
+
+    def test_folder_missing_required_argument(self):
+        global variables, command_options, data, columns
+        from ReadSQL import do_sql
+        sql = r"\f"
+        variables, data, columns = do_sql(sql, variables, command_options, data, columns)
+        OK_returned = variables["$command_results"]["options"]["value"][-1]
+        self.assertEqual(3, OK_returned)
+
+    def test_folder_empty_string(self):
+        global variables, command_options, data, columns
+        from ReadSQL import do_sql
+        sql = r"\f ''"
+        variables, data, columns = do_sql(sql, variables, command_options, data, columns)
+        OK_returned = variables["$command_results"]["options"]["value"][-1]
+        self.assertEqual(1, OK_returned)
+
 '''
 
     def test_integers_part(self):
@@ -78,7 +93,7 @@ class TestCase(unittest.TestCase):
             with self.assertRaises(TypeError):
                 check_input(input, options)
 
-            
+
     def test_floats_simple(self):
         from src.check_input import check_input
         options = [-220.9,-22.8,-11.7,-2.6,-1.5,0.4,1.3,2.2,11.1,22.0, 220.99]
