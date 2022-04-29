@@ -100,6 +100,21 @@ def call_function(vartest, f):
     return ret, opt
 
 
+variables["$row_format_l"] = {}
+variables["$row_format_l"]["shorts"] = []
+variables["$row_format_l"]["options"] = {}
+variables["$row_format_l"]["options"]["value"] = lambda columns: "".join([f"{{:>{columns[c]['w']}}}" for c in columns]) if isinstance(columns, dict) else "{:>15}" * (len(columns) + 1)
+
+variables["$rows_label"] = {}
+variables["$rows_label"]["shorts"] = []
+variables["$rows_label"]["options"] = {}
+variables["$rows_label"]["options"]["value"] = "(Row)"
+
+variables["$show_cases"] = {}
+variables["$show_cases"]["shorts"] = []
+variables["$show_cases"]["options"] = {}
+variables["$show_cases"]["options"]["value"] = 5
+
 variables["$command_history"] = {}
 variables["$command_history"]["shorts"] = []
 variables["$command_history"]["options"] = {}
@@ -174,7 +189,7 @@ variables["$db_version"] = {}
 variables["$db_version"]["shorts"] = []
 variables["$db_version"]["options"] = {}
 variables["$db_version"]["options"]["value"] = "None: "
-    
+
 variables["$folder_name_old"] = {}
 variables["$folder_name_old"]["shorts"] = []
 variables["$folder_name_old"]["options"] = {}
@@ -712,5 +727,3 @@ command_options["split"]["help1"] = "Help for command 'folder'"
 command_options["split"]["help2"] = ["Bla1","Bla2"]
 command_options["split"]["alternative"] = ["split", "s"]
 command_options["split"]["altoption"] = [["c"],["s"]]
-
-

@@ -1456,7 +1456,7 @@ def data_width(rowsi, colsi, data, columns, rows, rows_label):
     return colsp
 
 
-def print_data(rowsi, colsi, data, columns, rows, rows_label):
+def print_data(rowsi, colsi, data, columns, rows, rows_label, variables):
     #print(rows_show)
     colsp = data_width(rowsi, colsi, data, columns, rows, rows_label)
     terminal_resize(colsp)
@@ -1476,7 +1476,7 @@ def print_data(rowsi, colsi, data, columns, rows, rows_label):
         for ci in colsp:
             if colsp[ci]['screen'] == screen + 1:
                 colspart[ci] = colsp[ci]
-        row_format = row_format_l(colspart)
+        row_format = variables["$row_format_l"]["options"]["value"](colspart)
         print(row_format.format(*[colsp[ci]['name'] for ci in colspart]))
         for ri in rowsi:
             #print(row_format.format(profile_rows[i], *[str(col) for col in row if col in colspart]))    # Null to None
@@ -1484,32 +1484,33 @@ def print_data(rowsi, colsi, data, columns, rows, rows_label):
         screen += 1
 
 
-def show_data(data, columns, show_title = True):
-    global variables
+def show_data(data, columns, variables, show_title = True):
+    #global variables
     nrows = len(data)
     variables["$all"]["data"]["value"] = nrows
     variables["$columns_all"]["data"]["value"] = columns
 
+    rows_label = variables["$rows_label"]["options"]["value"]
     ncols = len(columns)
     rows = range(1, nrows + 1)
     colsi = range(1, ncols + 1)
-    if nrows <= show_cases*2:
+    if nrows <= variables["$show_cases"]["options"]["value"]*2:
         if show_title: variables["$printInvGreen"]["options"]["value"](f"There are {nrows} rows, {ncols} columns. Printing all cases with all columns.")
         rowsi = range(1, nrows + 1)
-        print_data(rowsi, colsi, data, columns, rows, rows_label)
+        print_data(rowsi, colsi, data, columns, rows, rows_label, variables)
     else:
-        if show_title: variables["$printInvGreen"]["options"]["value"](f"There are {nrows} rows, {ncols} columns. Printing first / last {show_cases} cases with all columns.")
-        data_show = list(data[:show_cases])
+        if show_title: variables["$printInvGreen"]["options"]["value"](f'''There are {nrows} rows, {ncols} columns. Printing first / last {variables["$show_cases"]["options"]["value"]} cases with all columns.''')
+        data_show = list(data[:variables["$show_cases"]["options"]["value"]])
         #print("Data show",data_show)
         data_show += [["" for c in columns]]
-        data_show += data[-show_cases:]
+        data_show += data[-variables["$show_cases"]["options"]["value"]:]
         #print("Data show",data_show)
-        rows = list(range(1,show_cases+1))
+        rows = list(range(1,variables["$show_cases"]["options"]["value"]+1))
         rows += ["..."]
-        rows += list(range(nrows-show_cases+1, nrows +1))
+        rows += list(range(nrows-variables["$show_cases"]["options"]["value"]+1, nrows +1))
         #print("Rows:", rows)
         rowsi = range(1, len(data_show) + 1)
-        print_data(rowsi, colsi, data_show, columns, rows, rows_label)
+        print_data(rowsi, colsi, data_show, columns, rows, rows_label, variables)
 
 
 def find_columns(colss):
@@ -1539,13 +1540,13 @@ def parseValue(value, typestr):
                     value = int(value)
                 except Exception as e:
                     traceback.print_exc()
-                Assert(isinstance(value, int), f"Tried parse int value {value} as {typestr} and failed. Check results carefully!!!")
+                variables["$Assert"]["options"]["value"](isinstance(value, int), f"Tried parse int value {value} as {typestr} and failed. Check results carefully!!!")
             elif value[0] in ["-","0","1","2","3","4","5","6","7","8","9",dstring] and dstring in value:
                 try:
                     value = float(value)
                 except Exception as e:
                     traceback.print_exc()
-                Assert(isinstance(value, float), f"Tried parse float value {value} as {typestr} and failed. Check results carefully!!!")
+                variables["$Assert"]["options"]["value"](isinstance(value, float), f"Tried parse float value {value} as {typestr} and failed. Check results carefully!!!")
     return value
 
 
@@ -1646,8 +1647,8 @@ def data_fill(fill_formats = {}, fill_nones = {}):
     print()
 
 
-def data_select():
-    global fromm, too, stepp, randd, listt, colss, listi
+def data_select(data, columns, fromm, too, stepp, randd, listt, colss):
+    #global fromm, too, stepp, randd, listt, colss, listi
     nrows = len(data)
     ncols = len(columns)
     colsi = range(1, ncols + 1)
@@ -1740,7 +1741,7 @@ def data_select():
             rowsi = listi
         else:
             rowsi = range(fromm, too+1, stepp)
-    return rowsi, colsi
+    return rowsi, colsi, listi, fromm, too, stepp, randd, listt, colss
 
 
 
@@ -1984,7 +1985,7 @@ def parseCommand(command_line, variables, command_options):
                     bCond = options[n] in t
                     #print(options[n], t, bCond)
                     sTxt = f"Value '{options[n]}' is not valid for option '{n}'. Use one of these options: {t}."
-                    Assert(bCond, sTxt)
+                    variables["$Assert"]["options"]["value"](bCond, sTxt)
                     if not bCond:
                         execute = False
                         break
@@ -2015,7 +2016,7 @@ def parseCommand(command_line, variables, command_options):
                         options[n] = int(options[n])
                     except Exception as e:
                         traceback.print_exc()
-                    Assert(isinstance(options[n], int), result_message)
+                    variables["$Assert"]["options"]["value"](isinstance(options[n], int), result_message)
                     if not isinstance(options[n], int):
                         #options[n] = d
                         execute = False
@@ -2024,7 +2025,7 @@ def parseCommand(command_line, variables, command_options):
                     var, opt = parseVariable(command, options, n, str(options[n]))
                     if opt:
                         options[n] = var
-                    Assert(options[n][0] == "[" and options[n][-1] == "]", "Lists must be enclosed with []. Probably not doing what expected!")
+                    variables["$Assert"]["options"]["value"](options[n][0] == "[" and options[n][-1] == "]", "Lists must be enclosed with []. Probably not doing what expected!")
                     options_list_line = options[n][1:-1]
                     #options_list_line = ",".join(parseText(options_list_line, " "))
                     lst_old = parseText(options_list_line, ",")
@@ -2043,7 +2044,7 @@ def parseCommand(command_line, variables, command_options):
                             l_new = int(l_old)
                         except Exception as e:
                             traceback.print_exc()
-                        Assert(isinstance(l_new, int), result_message)
+                        variables["$Assert"]["options"]["value"](isinstance(l_new, int), result_message)
                         if isinstance(l_new, int) and l_new not in lst_new: lst_new.append(l_new)
                     options[n] = lst_new
                 elif t == "strlist":
@@ -2051,7 +2052,7 @@ def parseCommand(command_line, variables, command_options):
                     #print("var", var)
                     if opt:
                         options[n] = var
-                    Assert(options[n][0] == "[" and options[n][-1] == "]", "Lists must be enclosed with []. Probably not doing what expected!")
+                    variables["$Assert"]["options"]["value"](options[n][0] == "[" and options[n][-1] == "]", "Lists must be enclosed with []. Probably not doing what expected!")
                     #print(options[n])
                     options_list_line = options[n][1:-1]
                     #options_list_line = ",".join(parseText(options_list_line, " "))
@@ -2082,7 +2083,7 @@ def parseCommand(command_line, variables, command_options):
                     var, opt = parseVariable(command, options, n, str(options[n]))
                     if opt:
                         options[n] = var
-                    Assert(options[n][0] == "{" and options[n][-1] == "}", "Dicts must be enclosed with {}. Probably not doing what expected!")
+                    variables["$Assert"]["options"]["value"](options[n][0] == "{" and options[n][-1] == "}", "Dicts must be enclosed with {}. Probably not doing what expected!")
                     options_list_line = options[n][1:-1]
                     #print("options_list_line", options_list_line)
                     options_list_line = ":".join(parseText(options_list_line, ":"))
@@ -2145,7 +2146,7 @@ def parseCommand(command_line, variables, command_options):
                                     lst_new[l] = r
                             elif ll is not None and rr is not None:
                                 # make two lists
-                                Assert(len(ll) == len(rr), f"Lists {ll}:{rr} in dict '{n}' not of the same size. Check results carefully!!!")
+                                variables["$Assert"]["options"]["value"](len(ll) == len(rr), f"Lists {ll}:{rr} in dict '{n}' not of the same size. Check results carefully!!!")
                                 print(list(zip(ll, rr)))
                                 for l, r in zip(ll, rr):
                                     var, opt = parseVariable(command, options, n, str(l))
@@ -2605,7 +2606,7 @@ def do_sql(sql, variables, command_options, data, columns):
                         data_old = None
                         columns_old = None
                         print()
-                        show_data(data, columns)
+                        show_data(data, columns, variables)
                     else:
                         variables["$printInvRed"]["options"]["value"]("! There are no data returned from this file !")
                         OK = 2
@@ -2760,7 +2761,7 @@ def do_sql(sql, variables, command_options, data, columns):
             print()
             print()
 
-            print_data(rowsi, colsi, split_data, split_columns, split_rows, split_rows_label)
+            print_data(rowsi, colsi, split_data, split_columns, split_rows, split_rows_label, variables)
 
 
         elif command == "data memory" or command == "data memory easy":
@@ -2781,7 +2782,7 @@ def do_sql(sql, variables, command_options, data, columns):
                 colsp = copy.deepcopy(colsp_memory.get(memory_name))
                 data_old = None
                 columns_old = None
-            show_data(data, columns)
+            show_data(data, columns, variables)
 
 
         elif command == "graph histogram":
@@ -3245,7 +3246,7 @@ def do_sql(sql, variables, command_options, data, columns):
                 nrows = len(data)
                 ncols = len(columns)
 
-                rowsi, colsi = data_select()
+                rowsi, colsi, listi, fromm, too, stepp, randd, listt, colss = data_select(data, columns, fromm, too, stepp, randd, listt, colss)
                 #print(rows_show)
 
                 columns_show = [columns[ci-1] for ci in colsi]
@@ -3293,8 +3294,9 @@ def do_sql(sql, variables, command_options, data, columns):
                         variables["$printColor"]["options"]["value"](title_text, cc)
 
                 rows = range(1, nrows + 1)
+                rows_label = variables["$rows_label"]["options"]["value"]
                 #print(rows)
-                print_data(rowsi, colsi, data, columns, rows, rows_label)
+                print_data(rowsi, colsi, data, columns, rows, rows_label, variables)
 
                 if note:
                     print()
@@ -3345,7 +3347,7 @@ def do_sql(sql, variables, command_options, data, columns):
             #rows = range(1, nrows + 1)
             #print(rows)
             #print_data(rowsi, colsi, data, columns, rows, rows_label)
-            show_data(data, columns, False)
+            show_data(data, columns, variables, False)
 
             if note:
                 print()
@@ -3361,7 +3363,7 @@ def do_sql(sql, variables, command_options, data, columns):
             if data_old and columns_old:
                 data = copy.deepcopy(data_old)
                 columns = copy.deepcopy(columns_old)
-            show_data(data, columns)
+            show_data(data, columns, variables)
 
         elif command == "data select easy" or command == "data select":
 
@@ -3389,7 +3391,7 @@ def do_sql(sql, variables, command_options, data, columns):
             nrows = len(data)
             ncols = len(columns)
 
-            rowsi, colsi = data_select()
+            rowsi, colsi, listi, fromm, too, stepp, randd, listt, colss = data_select(data, columns, fromm, too, stepp, randd, listt, colss)
             #print(rows_show)
 
             columns_selected = [columns[ci-1] for ci in colsi]
@@ -3440,7 +3442,7 @@ def do_sql(sql, variables, command_options, data, columns):
             #rows = range(1, nrows + 1)
             #print(rows)
             #print_data(rowsi, colsi, data, columns, rows, rows_label)
-            show_data(data_selected, columns_selected, False)
+            show_data(data_selected, columns_selected, variables, False)
 
             if note:
                 print()
@@ -3480,7 +3482,7 @@ def do_sql(sql, variables, command_options, data, columns):
             #nrows = len(data)
             #ncols = len(columns)
 
-            rowsi, colsi = data_select()
+            rowsi, colsi, listi, fromm, too, stepp, randd, listt, colss = data_select(data, columns, fromm, too, stepp, randd, listt, colss)
 
             #TODO: option to print only if closp exists
             if do_mp:
@@ -3496,7 +3498,8 @@ def do_sql(sql, variables, command_options, data, columns):
                         rowsins.append(rowsi[i*splr:])
                 varins = {}
                 for var in variables:
-                    if var != "$now": varins[var] = variables[var]
+                    if var in ["$time", "$decimal_separator", "$thousands_separator", "$datetime", "$date"]:
+                        varins[var] = variables[var]
                 for order, rowsin in enumerate(rowsins):
                     print("order", order)
                     print("rowsin", rowsin)
@@ -3736,7 +3739,7 @@ def do_sql(sql, variables, command_options, data, columns):
             print()
             print()
             #colsp = data_profile(rowsi, colsi, profile_data, profile_columns, profile_rows, profile_rows_label)
-            print_data(rowsi, colsi, profile_data, profile_columns, profile_rows, profile_rows_label)
+            print_data(rowsi, colsi, profile_data, profile_columns, profile_rows, profile_rows_label, variables)
 
 
         elif command == "data profile easy old" or command == "data profile old":
@@ -3761,7 +3764,7 @@ def do_sql(sql, variables, command_options, data, columns):
             #nrows = len(data)
             #ncols = len(columns)
 
-            rowsi, colsi = data_select()
+            rowsi, colsi, listi, fromm, too, stepp, randd, listt, colss = data_select(data, columns, fromm, too, stepp, randd, listt, colss)
 
             '''
             nrows = len(data)
@@ -4104,7 +4107,7 @@ def do_sql(sql, variables, command_options, data, columns):
             print()
             print()
             #colsp = data_profile(rowsi, colsi, profile_data, profile_columns, profile_rows, profile_rows_label)
-            print_data(rowsi, colsi, profile_data, profile_columns, profile_rows, profile_rows_label)
+            print_data(rowsi, colsi, profile_data, profile_columns, profile_rows, profile_rows_label, variables)
 
 
         elif sql.startswith("\pause:"):
@@ -4181,11 +4184,11 @@ def do_sql(sql, variables, command_options, data, columns):
             columns_old = None
             colsp = {}  #reset columns profile
             # mysql returns data as tuples, not lists as sqlite3
-            # this causes problems in show_data if nrows > show_cases*2
+            # this causes problems in show_data if nrows > variables["$show_cases"]["options"]["value"]*2
             # (cannoct add anzthing to tuple, probably)
             #if len(data) > 0: print("Data class", data[0].__class__)
             #print("Columns class", columns.__class__)
-            show_data(data, columns)
+            show_data(data, columns, variables)
         elif not error:
             variables["$printInvGreen"]["options"]["value"]("! There are no data returned from this sql query !")
         else:
@@ -4340,6 +4343,20 @@ def main(argv):
             ret, opt = int_function(vartest)
         return ret, opt
 
+    variables["$row_format_l"] = {}
+    variables["$row_format_l"]["shorts"] = []
+    variables["$row_format_l"]["options"] = {}
+    variables["$row_format_l"]["options"]["value"] = lambda columns: "".join([f"{{:>{columns[c]['w']}}}" for c in columns]) if isinstance(columns, dict) else "{:>15}" * (len(columns) + 1)
+
+    variables["$rows_label"] = {}
+    variables["$rows_label"]["shorts"] = []
+    variables["$rows_label"]["options"] = {}
+    variables["$rows_label"]["options"]["value"] = "(Row)"
+
+    variables["$show_cases"] = {}
+    variables["$show_cases"]["shorts"] = []
+    variables["$show_cases"]["options"] = {}
+    variables["$show_cases"]["options"]["value"] = 5
 
     variables["$command_history"] = {}
     variables["$command_history"]["shorts"] = []
