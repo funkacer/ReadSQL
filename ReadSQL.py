@@ -2396,20 +2396,39 @@ def do_sql(sql, variables, command_options, data, columns):
 
         elif command == "connect mssql":
             #"database", "user", "password", "host", "port"
+            #"", "root", "admin", "localhost", 3306
+
+            driver = "SQL Server"
+            server = socket.gethostname()
             database = options["database"]
             user = options["user"]
             password = options["password"]
             host = options["host"]
             port = options["port"]
-            server = socket.gethostname()
+            option = options["option"]  #"trustedconn=true"
+
+            '''
+            driver = "FreeTDS"
+            server = "wvxxxgroup.cz"
+            port = 1111
+            database = "dbSPSS"
+            user = "u"
+            password = "p"
+            option = "TDS_Version=8.0"
+            #server = socket.gethostname()
+            '''
+
             try:
                 print("Using pyodbc version:", version("pyodbc"))
                 import pyodbc
                 try:
-                    variables["$conn"]["options"]["value"] = pyodbc.connect('Driver={SQL Server};'
-                      f'Server={server}\SQLEXPRESS;'
+                    variables["$conn"]["options"]["value"] = pyodbc.connect(f'DRIVER={driver};'
+                      f'Server={server};'
+                      f'PORT={port}'
                       f'Database={database};'
-                      'Trusted_Connection=yes;')
+                      f'UID={user};'
+                      f'PWD={password};'
+                      f'{option};')
                     #conn.autocommit = True
                     #conn = mysql.connector.connect(host = "localhost", user = "root", password="admin", use_unicode=True,charset="utf8")
                     variables["$db_version"]["options"]["value"] = f"MsSQL (Add schema!): "
