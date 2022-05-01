@@ -2516,23 +2516,30 @@ def do_sql(sql, variables, command_options, data, columns):
                     data_line = f.readline()
                     # line with column names
                     if data_line:
-                        if read_columns:
-                            if data_line[-1] == "\n": data_line = data_line[:-1]
-                            if read_text_qualifier:
-                                if strip_columns:
-                                    parsed_line = parseText(data_line, read_delimiter, [read_text_qualifier], True)
-                                else:
-                                    parsed_line = parseText(data_line, read_delimiter, [read_text_qualifier], False)
-                                for c in parsed_line:
-                                    columns_new.append(c)
+                        if data_line[-1] == "\n": data_line = data_line[:-1]
+                        if read_text_qualifier:
+                            parsed_line = parseText(data_line, read_delimiter, [read_text_qualifier], False)
+                        else:
+                            parsed_line = data_line.split(read_delimiter)
+                        cc = 0
+                        rest = len(parsed_line)
+                        while rest > 0:
+                            rest = int(rest/(10**cc))
+                            #print(rest)
+                            cc += 1
+                        for i, c in enumerate(parsed_line):
+                            if read_text_qualifier and len(c) >= 2:
+                                if c[0] == read_text_qualifier and c[-1] == read_text_qualifier: c = c[1:-1]
+                                #print(c)
+                            if strip_columns: c = c.strip()
+                            if read_columns and c != "":
+                                columns_new.append(c)
                             else:
-                                parsed_line = data_line.split(read_delimiter)
-                                for c in parsed_line:
-                                    if strip_columns:
-                                        columns_new.append(c.strip())
-                                    else:
-                                        columns_new.append(c)
-                            data_line = f.readline()
+                                c = default_columns_name + f"{(i+1):0{(cc-1)}}"
+                                columns_new.append(c)
+                            #columns_new.append(c)
+                        if read_columns: data_line = f.readline()
+                        '''
                         else:
                             # just determine number of columns from the first row
                             # column names are created at the end (in case more columns occure)
@@ -2550,6 +2557,7 @@ def do_sql(sql, variables, command_options, data, columns):
                             for i in range(len(parsed_line)):
                                 c = default_columns_name + f"{(i+1):0{(cc-1)}}"
                                 columns_new.append(c)
+                        '''
                         row = 1
                         len_columns = len(columns_new)
                         max_columns = len(columns_new)
