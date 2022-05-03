@@ -100,6 +100,16 @@ def call_function(vartest, f):
     return ret, opt
 
 
+variables["$profile_show_categorical"] = {}
+variables["$profile_show_categorical"]["shorts"] = []
+variables["$profile_show_categorical"]["options"] = {}
+variables["$profile_show_categorical"]["options"]["value"] = 5
+
+variables["$do_mp"] = {}
+variables["$do_mp"]["shorts"] = []
+variables["$do_mp"]["options"] = {}
+variables["$do_mp"]["options"]["value"] = False
+    
 variables["$row_format_l"] = {}
 variables["$row_format_l"]["shorts"] = []
 variables["$row_format_l"]["options"] = {}
@@ -189,7 +199,7 @@ variables["$db_version"] = {}
 variables["$db_version"]["shorts"] = []
 variables["$db_version"]["options"] = {}
 variables["$db_version"]["options"]["value"] = "None: "
-
+    
 variables["$folder_name_old"] = {}
 variables["$folder_name_old"]["shorts"] = []
 variables["$folder_name_old"]["options"] = {}
@@ -423,14 +433,14 @@ command_options["connect postgre"]["alternative"] = ["c postgre", "c pg", "c p",
 command_options["connect postgre"]["altoption"] = [["d"],["u"],["p"],["h"],["po"]]
 
 command_options["connect mssql"] = {}
-command_options["connect mssql"]["name"] = ["database", "user", "password", "host", "port"]
-command_options["connect mssql"]["required"] = [False, False, False, False, False]
-command_options["connect mssql"]["type"] = ["str", "str", "str", "str", "int"]
-command_options["connect mssql"]["default"] = ["", "root", "admin", "localhost", 3306]
+command_options["connect mssql"]["name"] = ["database", "user", "password", "host", "port", "driver", "option"]
+command_options["connect mssql"]["required"] = [False, False, False, False, False, False, False]
+command_options["connect mssql"]["type"] = ["str", "str", "str", "str", "int", "str", "str"]
+command_options["connect mssql"]["default"] = ["", "root", "admin", "localhost", 3306, "SQL Server", "trustedconn=true"]
 command_options["connect mssql"]["help1"] = "Help for command 'folder'"
-command_options["connect mssql"]["help2"] = ["Bla1", "Bla2", "Bla3", "Bla4", "Bla5"]
+command_options["connect mssql"]["help2"] = ["Bla1", "Bla2", "Bla3", "Bla4", "Bla5", "Bla6", "Bla7"]
 command_options["connect mssql"]["alternative"] = ["c mssql", "c ms", "cmssql", "cms"]
-command_options["connect mssql"]["altoption"] = [["d"],["u"],["p"],["h"],["po"]]
+command_options["connect mssql"]["altoption"] = [["d"],["u"],["p"],["h"],["po"],["dr"],["o", "do"]]
 
 command_options["read"] = {}
 command_options["read"]["name"] = ["filename", "delimiter", "text_qualifier", "read_columns", "strip_columns", "lines"]
@@ -727,3 +737,5 @@ command_options["split"]["help1"] = "Help for command 'folder'"
 command_options["split"]["help2"] = ["Bla1","Bla2"]
 command_options["split"]["alternative"] = ["split", "s"]
 command_options["split"]["altoption"] = [["c"],["s"]]
+
+

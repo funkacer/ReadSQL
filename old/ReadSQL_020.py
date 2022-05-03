@@ -584,9 +584,8 @@ def data_split(colsi, colspi, combine = True):
                             '''
 
 
-def data_profile(data, columns, variables, colsp, rowsi, colsi, purge = False):
-    #global data, variables, colsp
-    import numpy as np
+def data_profile(rowsi, colsi, purge = False):
+    global data, variables, colsp
 
     proc_old = 0
     nrows = len(rowsi)
@@ -770,14 +769,14 @@ def data_profile(data, columns, variables, colsp, rowsi, colsi, purge = False):
             if colsp[ci]["unique"] > 0:
                 # only one category us minimal => probably bonominal ditribution, keep all cats
                 uvp = uv[uc != min(uc)]
-                if colsp[ci]["unique"] > variables["$profile_show_categorical"]["options"]["value"]:
+                if colsp[ci]["unique"] > profile_show_categorical:
                     ucp = uc[uc != min(uc)]
                 else:
                     uvp = uv
                     ucp = uc
                 # if 0 cats or max count is the same as min count, there are no modes
                 if len(uvp) > 0:
-                    colsp[ci]["categ_counts"] = np.flip(np.sort(np.rec.fromarrays((uvp, ucp), names=('value', 'count')), order = "count"))[:variables["$profile_show_categorical"]["options"]["value"]]
+                    colsp[ci]["categ_counts"] = np.flip(np.sort(np.rec.fromarrays((uvp, ucp), names=('value', 'count')), order = "count"))[:profile_show_categorical]
             #count_sort_ind = np.argsort(-count)
             #u[count_sort_ind]
             #print(cc)
@@ -848,7 +847,7 @@ def data_profile(data, columns, variables, colsp, rowsi, colsi, purge = False):
     sys.stdout.flush()
 
     #print(colsp)
-    return data, colsp
+    return None
 
 
 def data_profile_prep_mp(inn):
@@ -1004,7 +1003,7 @@ def data_profile_prep_mp(inn):
 def data_profile_mp(inn):
     colsp = {}
     ci = 0
-    colsp[ci], cir, variables, i, imax = inn[0], inn[1], inn[2], inn[3], inn[4]
+    colsp[ci], cir, profile_show_categorical, i, imax = inn[0], inn[1], inn[2], inn[3], inn[4]
     import numpy as np
 
     RED, END = '\033[91m', '\033[0m'
@@ -1039,14 +1038,14 @@ def data_profile_mp(inn):
         if colsp[ci]["unique"] > 0:
             # only one category us minimal => probably bonominal ditribution, keep all cats
             uvp = uv[uc != min(uc)]
-            if colsp[ci]["unique"] > variables["$profile_show_categorical"]["options"]["value"]:
+            if colsp[ci]["unique"] > profile_show_categorical:
                 ucp = uc[uc != min(uc)]
             else:
                 uvp = uv
                 ucp = uc
             # if 0 cats or max count is the same as min count, there are no modes
             if len(uvp) > 0:
-                colsp[ci]["categ_counts"] = np.flip(np.sort(np.rec.fromarrays((uvp, ucp), names=('value', 'count')), order = "count"))[:variables["$profile_show_categorical"]["options"]["value"]]
+                colsp[ci]["categ_counts"] = np.flip(np.sort(np.rec.fromarrays((uvp, ucp), names=('value', 'count')), order = "count"))[:profile_show_categorical]
         #count_sort_ind = np.argsort(-count)
         #u[count_sort_ind]
         #print(cc)
@@ -1815,7 +1814,7 @@ def parseText(myText, delimiter, text_qualifiers = ['"', "'", "[", "{"], do_stri
     return lst_new
 
 
-def parseVariable(variables, command, options, n, vartest):
+def parseVariable(command, options, n, vartest):
     # get variables in context
     ret = None
     opt = None
@@ -1993,7 +1992,7 @@ def parseCommand(command_line, variables, command_options):
                 elif t == "str":
                     #options[n] = options[n].strip('"')
                     #print("options[n]", options[n])
-                    var, opt = parseVariable(variables, command, options, n, str(options[n]))
+                    var, opt = parseVariable(command, options, n, str(options[n]))
                     if opt:
                         options[n] = var
                     if len(options[n]) > 0:
@@ -2006,7 +2005,7 @@ def parseCommand(command_line, variables, command_options):
                 elif t == "int":
                     #print(f"I am going to translate '{options[n]}' to 'int'")
                     # check variables first
-                    var, opt = parseVariable(variables, command, options, n, str(options[n]))
+                    var, opt = parseVariable(command, options, n, str(options[n]))
                     if opt:
                         options[n] = var
                     if opt == 0:
@@ -2023,7 +2022,7 @@ def parseCommand(command_line, variables, command_options):
                         execute = False
                     #print(f"Parse option '{n}' as integer:", options[n])
                 elif t == "intlist":
-                    var, opt = parseVariable(variables, command, options, n, str(options[n]))
+                    var, opt = parseVariable(command, options, n, str(options[n]))
                     if opt:
                         options[n] = var
                     variables["$Assert"]["options"]["value"](options[n][0] == "[" and options[n][-1] == "]", "Lists must be enclosed with []. Probably not doing what expected!")
@@ -2034,7 +2033,7 @@ def parseCommand(command_line, variables, command_options):
                     #print("lst_old", lst_old)
                     for l_old in lst_old:
                         l_new = None
-                        var, opt = parseVariable(variables, command, options, n, str(l_old))
+                        var, opt = parseVariable(command, options, n, str(l_old))
                         if opt:
                             l_old = var
                         if opt == 0:
@@ -2049,7 +2048,7 @@ def parseCommand(command_line, variables, command_options):
                         if isinstance(l_new, int) and l_new not in lst_new: lst_new.append(l_new)
                     options[n] = lst_new
                 elif t == "strlist":
-                    var, opt = parseVariable(variables, command, options, n, str(options[n]))
+                    var, opt = parseVariable(command, options, n, str(options[n]))
                     #print("var", var)
                     if opt:
                         options[n] = var
@@ -2061,7 +2060,7 @@ def parseCommand(command_line, variables, command_options):
                     lst_new = []
                     #print("lst_old", lst_old)
                     for l_old in lst_old:
-                        var, opt = parseVariable(variables, command, options, n, str(l_old))
+                        var, opt = parseVariable(command, options, n, str(l_old))
                         if opt:
                             lst_new.append(var)
                         else:
@@ -2081,7 +2080,7 @@ def parseCommand(command_line, variables, command_options):
                     else:
                         options[n] = d
                 elif t == "dictlist":
-                    var, opt = parseVariable(variables, command, options, n, str(options[n]))
+                    var, opt = parseVariable(command, options, n, str(options[n]))
                     if opt:
                         options[n] = var
                     variables["$Assert"]["options"]["value"](options[n][0] == "{" and options[n][-1] == "}", "Dicts must be enclosed with {}. Probably not doing what expected!")
@@ -2102,7 +2101,7 @@ def parseCommand(command_line, variables, command_options):
                         if len(lst) > 1:
                             #lst[0] = lst[0].strip()
                             #lst[1] = lst[1].strip()
-                            var, opt = parseVariable(variables, command, options, n, str(lst[0]))
+                            var, opt = parseVariable(command, options, n, str(lst[0]))
                             if opt:
                                 lst[0] = var
                             if lst[0][0] == '[' and lst[0][-1] == ']':
@@ -2116,7 +2115,7 @@ def parseCommand(command_line, variables, command_options):
                                 l = lst[0].strip("'")
                             else:
                                 l = lst[0]
-                            var, opt = parseVariable(variables, command, options, n, str(lst[1]))
+                            var, opt = parseVariable(command, options, n, str(lst[1]))
                             if opt:
                                 lst[1] = var
                             if lst[1] is not None:
@@ -2137,7 +2136,7 @@ def parseCommand(command_line, variables, command_options):
                                 lst_new[l] = r
                             if ll is not None and rr is None:
                                 for l in ll:
-                                    var, opt = parseVariable(variables, command, options, n, str(l))
+                                    var, opt = parseVariable(command, options, n, str(l))
                                     if opt:
                                         l = var
                                     if l[0] == '"' and l[-1] == '"':
@@ -2150,14 +2149,14 @@ def parseCommand(command_line, variables, command_options):
                                 variables["$Assert"]["options"]["value"](len(ll) == len(rr), f"Lists {ll}:{rr} in dict '{n}' not of the same size. Check results carefully!!!")
                                 print(list(zip(ll, rr)))
                                 for l, r in zip(ll, rr):
-                                    var, opt = parseVariable(variables, command, options, n, str(l))
+                                    var, opt = parseVariable(command, options, n, str(l))
                                     if opt:
                                         l = var
                                     if l[0] == '"' and l[-1] == '"':
                                         l = l.strip('"')
                                     elif l[0] == "'" and l[-1] == "'":
                                         l = l.strip("'")
-                                    var, opt = parseVariable(variables, command, options, n, str(r))
+                                    var, opt = parseVariable(command, options, n, str(r))
                                     if opt:
                                         r = var
                                     if len(r) == 0:
@@ -2399,13 +2398,14 @@ def do_sql(sql, variables, command_options, data, columns):
             #"database", "user", "password", "host", "port"
             #"", "root", "admin", "localhost", 3306
 
-            database = options.get("database")
-            user = options.get("user")  #root
-            password = options.get("password")  #admin
-            host = options.get("host")  #socket.gethostname()
-            port = options.get("port")  #3306
-            driver = options.get("driver")  #"SQL Server"
-            option = options.get("option")  #"trustedconn=true"
+            driver = "SQL Server"
+            server = socket.gethostname()
+            database = options["database"]
+            user = options["user"]
+            password = options["password"]
+            host = options["host"]
+            port = options["port"]
+            option = options["option"]  #"trustedconn=true"
 
             '''
             driver = "FreeTDS"
@@ -2416,35 +2416,19 @@ def do_sql(sql, variables, command_options, data, columns):
             password = "p"
             option = "TDS_Version=8.0"
             #server = socket.gethostname()
-
-            conn = pyodbc.connect('Driver={SQL Server};'
-              f'Server={server}\SQLEXPRESS;'
-              f'Database={database};'
-              'Trusted_Connection=yes;')
-
-            f'DRIVER={driver};'
-              f'Server={host};'
-              f'PORT={port}'
-              f'Database={database};'
-              f'UID={user};'
-              f'PWD={password};'
-              f'{option};'
             '''
-            #print(database)
-            connstring = ""
-            if driver is not None: connstring += f'DRIVER={driver};'
-            if host is not None: connstring += f'Server={host};'
-            if port is not None: connstring += f'PORT={port}'
-            if database is not None: connstring += f'Database={database};'
-            if user is not None: connstring += f'UID={user};'
-            if password is not None: connstring += f'PWD={password};'
-            if option is not None: connstring += f'{option};'
 
             try:
                 print("Using pyodbc version:", version("pyodbc"))
                 import pyodbc
                 try:
-                    variables["$conn"]["options"]["value"] = pyodbc.connect(connstring)
+                    variables["$conn"]["options"]["value"] = pyodbc.connect(f'DRIVER={driver};'
+                      f'Server={server};'
+                      f'PORT={port}'
+                      f'Database={database};'
+                      f'UID={user};'
+                      f'PWD={password};'
+                      f'{option};')
                     #conn.autocommit = True
                     #conn = mysql.connector.connect(host = "localhost", user = "root", password="admin", use_unicode=True,charset="utf8")
                     variables["$db_version"]["options"]["value"] = f"MsSQL (Add schema!): "
@@ -2741,7 +2725,7 @@ def do_sql(sql, variables, command_options, data, columns):
             colsif = [ci for ci in colsi if colsp[ci]['t'] == "Integer" or colsp[ci]['t'] == "Float"]
             print("colsif (final colsi):", colsif)
             colspif = [cspi for cspi in colspi if colsp[cspi]['t'] == "Categorical"]
-            if variables["$do_mp"]["options"]["value"]:
+            if do_mp:
                 inn = [[colsp, [colspi]] for colspi in colspif]
                 pool = mp.Pool()
                 returns = pool.map(data_split_prep_mp, inn)
@@ -3528,7 +3512,7 @@ def do_sql(sql, variables, command_options, data, columns):
             rowsi, colsi, listi, fromm, too, stepp, randd, listt, colss = data_select(data, columns, fromm, too, stepp, randd, listt, colss)
 
             #TODO: option to print only if closp exists
-            if variables["$do_mp"]["options"]["value"]:
+            if do_mp:
                 inn = []
                 #spli = 4
                 spli = mp.cpu_count()
@@ -3610,7 +3594,7 @@ def do_sql(sql, variables, command_options, data, columns):
                 sys.stdout.write(u"\u001b[1000D" +  "Data concat processed: " + str(proc) + "% ")
                 sys.stdout.flush()
 
-                inn = [(colsp[ci], ci, varins, i, len(colsp)) for i, ci in enumerate(colsp)]
+                inn = [(colsp[ci], ci, profile_show_categorical, i, len(colsp)) for i, ci in enumerate(colsp)]
                 pool = mp.Pool(processes = spli)
                 returns = pool.map(data_profile_mp, inn)
                 #print(returns)
@@ -3623,7 +3607,7 @@ def do_sql(sql, variables, command_options, data, columns):
                 sys.stdout.write(u"\u001b[1000D" +  "Data profile processed: " + str(proc) + "% ")
                 sys.stdout.flush()
             else:
-                data, colsp = data_profile(data, columns, variables, colsp, rowsi, colsi, purge)
+                data_profile(rowsi, colsi, purge)
 
             if print_all:
                 profile_columns = [colsp[ci]["name"] for ci in colsp ] # print all profiled columns
@@ -3633,7 +3617,7 @@ def do_sql(sql, variables, command_options, data, columns):
             profile_rows_label = '(Stat)'
             stats = ["type", "class", "valid", "none", "valid%", "sum", "min", "max", "range", "mean", "q1", "q2", "q3", "iqr", "var", "std", "skew", "unique", "fnq"]
 
-            for i in range(variables["$profile_show_categorical"]["options"]["value"]):
+            for i in range(profile_show_categorical):
                 for j in range(3):
                     if j == 0: profile_rows.append("Cat" + str(i + 1) + " (v)")
                     elif j == 1: profile_rows.append("Cat" + str(i + 1) + " (n)")
@@ -3818,7 +3802,7 @@ def do_sql(sql, variables, command_options, data, columns):
             '''
 
             #TODO: option to print only if closp exists
-            if variables["$do_mp"]["options"]["value"]:
+            if do_mp:
                 inn = []
                 spli = 4
                 splr = int(len(rowsi)/spli)
@@ -3910,7 +3894,7 @@ def do_sql(sql, variables, command_options, data, columns):
             stats = ["t", "cl", "v", "n", "v%", "sum", "min", "max", "mean", "q1", "q2", "q3", "ran", "iqr", "var", "std", "skw", "uni", "fnq"]
             #stats = ["t", "cl", "v", "n", "v%", "sum", "min", "max", "mean", "q1", "q2", "q3", "ran", "iqr", "var", "std", "skw"]
 
-            for i in range(variables["$profile_show_categorical"]["options"]["value"]):
+            for i in range(profile_show_categorical):
                 for j in range(3):
                     if j == 0: profile_rows.append("Cat" + str(i + 1) + " (v)")
                     elif j == 1: profile_rows.append("Cat" + str(i + 1) + " (n)")
@@ -4257,7 +4241,6 @@ def do_sql(sql, variables, command_options, data, columns):
             data_new = c.fetchall()
             variables["$db_schema"]["options"]["value"] = data_new[0][0]
             variables["$db_version"]["options"]["value"] = f'''MsSQL ("{variables["$db_schema"]["options"]["value"]}"): '''
-            #print(variables["$db_version"]["options"]["value"])
         except Exception as e:
             traceback.print_exc()
     if variables["$db_version"]["options"]["value"][:10] == "PostgreSQL":
@@ -4386,22 +4369,6 @@ def main(argv):
         if f == "@int(":
             ret, opt = int_function(vartest)
         return ret, opt
-
-
-    variables["$mssql_host"] = {}
-    variables["$mssql_host"]["shorts"] = []
-    variables["$mssql_host"]["options"] = {}
-    variables["$mssql_host"]["options"]["value"] = socket.gethostname()
-
-    variables["$profile_show_categorical"] = {}
-    variables["$profile_show_categorical"]["shorts"] = []
-    variables["$profile_show_categorical"]["options"] = {}
-    variables["$profile_show_categorical"]["options"]["value"] = 5
-
-    variables["$do_mp"] = {}
-    variables["$do_mp"]["shorts"] = []
-    variables["$do_mp"]["options"] = {}
-    variables["$do_mp"]["options"]["value"] = False
 
     variables["$row_format_l"] = {}
     variables["$row_format_l"]["shorts"] = []
@@ -4725,14 +4692,14 @@ def main(argv):
     command_options["connect postgre"]["altoption"] = [["d"],["u"],["p"],["h"],["po"]]
 
     command_options["connect mssql"] = {}
-    command_options["connect mssql"]["name"] = ["database", "user", "password", "host", "port", "driver", "option"]
-    command_options["connect mssql"]["required"] = [False, False, False, False, False, False, False]
-    command_options["connect mssql"]["type"] = ["str", "str", "str", "str", "int", "str", "str"]
-    command_options["connect mssql"]["default"] = ["", None, None, f'''{variables["$mssql_host"]["options"]["value"]}\SQLEXPRESS''', None, "SQL Server", "Trusted_Connection=yes"]
+    command_options["connect mssql"]["name"] = ["database", "user", "password", "host", "port"]
+    command_options["connect mssql"]["required"] = [False, False, False, False, False]
+    command_options["connect mssql"]["type"] = ["str", "str", "str", "str", "int"]
+    command_options["connect mssql"]["default"] = ["", "root", "admin", "localhost", 3306]
     command_options["connect mssql"]["help1"] = "Help for command 'folder'"
-    command_options["connect mssql"]["help2"] = ["Bla1", "Bla2", "Bla3", "Bla4", "Bla5", "Bla6", "Bla7"]
+    command_options["connect mssql"]["help2"] = ["Bla1", "Bla2", "Bla3", "Bla4", "Bla5"]
     command_options["connect mssql"]["alternative"] = ["c mssql", "c ms", "cmssql", "cms"]
-    command_options["connect mssql"]["altoption"] = [["d"],["u"],["p"],["h"],["po"],["dr"],["o", "do"]]
+    command_options["connect mssql"]["altoption"] = [["d"],["u"],["p"],["h"],["po"]]
 
     command_options["read"] = {}
     command_options["read"]["name"] = ["filename", "delimiter", "text_qualifier", "read_columns", "strip_columns", "lines"]
@@ -5053,14 +5020,14 @@ but {len(command_options[key1][key2])} '{key2}'.'''
         print(k, v)
     """
 
-    variables["$do_mp"]["options"]["value"] = False
+    do_mp = False
     if isinstance(vars(namespace)["do_mp"], bool):
-        variables["$do_mp"]["options"]["value"] = vars(namespace)["do_mp"]
+        do_mp = vars(namespace)["do_mp"]
 
-    if variables["$do_mp"]["options"]["value"]:
-        print("Multiprocessing:", variables["$do_mp"]["options"]["value"], f"(using {mp.cpu_count()} processes)")
+    if do_mp:
+        print("Multiprocessing:", do_mp, f"(using {mp.cpu_count()} processes)")
     else:
-        print("Multiprocessing:", variables["$do_mp"]["options"]["value"])
+        print("Multiprocessing:", do_mp)
 
     if len(vars(namespace)["sql_files"]) > 0:
         sqls = get_sql_queries_dict(vars(namespace)["sql_files"], variables["$folder_exists"]["options"]["value"], variables["$folder_name"]["options"]["value"])
@@ -5109,7 +5076,7 @@ but {len(command_options[key1][key2])} '{key2}'.'''
         print()
 
         interactive_pass = 0
-        sql = input(variables["$db_version"]["options"]["value"])
+        sql = input(db_version)
         OK_returned = 1
 
         while OK_returned:
@@ -5137,7 +5104,7 @@ but {len(command_options[key1][key2])} '{key2}'.'''
             if OK_returned:
                 #print()
                 #printGlobals()
-                sql = input(variables["$db_version"]["options"]["value"])
+                sql = input(db_version)
 
     try:
         variables["$conn"]["options"]["value"].close()

@@ -19,13 +19,34 @@ columns = None
 
 class TestCase(unittest.TestCase):
 
-    def test_read(self):
+    def test_read_file_not_exists(self):
         global variables, command_options, data, columns
         from ReadSQL import do_sql
         sql = r"\r test4.csvx, l = 1000"
         variables, data, columns = do_sql(sql, variables, command_options, data, columns)
         OK_returned = variables["$command_results"]["options"]["value"][-1]
+        self.assertEqual(2, OK_returned)
+
+    def test_read_file_exists(self):
+        global variables, command_options, data, columns
+        from ReadSQL import do_sql
+        sql = r"\r test_folder_exists\test1.csvx"
+        variables, data, columns = do_sql(sql, variables, command_options, data, columns)
+        OK_returned = variables["$command_results"]["options"]["value"][-1]
         self.assertEqual(1, OK_returned)
+
+    def test_read_profile(self):
+        global variables, command_options, data, columns
+        from ReadSQL import do_sql
+        sql = r"\r test_folder_exists\test1.csvx, l = 100"
+        variables, data, columns = do_sql(sql, variables, command_options, data, columns)
+        OK_returned = variables["$command_results"]["options"]["value"][-1]
+        self.assertEqual(1, OK_returned)
+        sql = r"\dp$a"
+        variables, data, columns = do_sql(sql, variables, command_options, data, columns)
+        OK_returned = variables["$command_results"]["options"]["value"][-1]
+        self.assertEqual(1, OK_returned)
+        
 
 
 '''
