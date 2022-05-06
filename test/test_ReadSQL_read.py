@@ -22,6 +22,8 @@ class TestCase(unittest.TestCase):
     def test_read_file_not_exists(self):
         global variables, command_options, data, columns
         from ReadSQL import do_sql
+        variables["$folder_name_old"]["options"]["value"] = os.getcwd()
+        variables["$folder_name"]["options"]["value"] = os.getcwd()
         sql = r"\r test4.csvx, l = 1000"
         variables, data, columns = do_sql(sql, variables, command_options, data, columns)
         OK_returned = variables["$command_results"]["options"]["value"][-1]
@@ -30,6 +32,8 @@ class TestCase(unittest.TestCase):
     def test_read_file_exists(self):
         global variables, command_options, data, columns
         from ReadSQL import do_sql
+        variables["$folder_name_old"]["options"]["value"] = os.getcwd()
+        variables["$folder_name"]["options"]["value"] = os.getcwd()
         sql = r"\r test_folder_exists\test1.csvx"
         variables, data, columns = do_sql(sql, variables, command_options, data, columns)
         OK_returned = variables["$command_results"]["options"]["value"][-1]
@@ -38,6 +42,8 @@ class TestCase(unittest.TestCase):
     def test_read_profile(self):
         global variables, command_options, data, columns
         from ReadSQL import do_sql
+        variables["$folder_name_old"]["options"]["value"] = os.getcwd()
+        variables["$folder_name"]["options"]["value"] = os.getcwd()
         sql = r"\r test_folder_exists\test1.csvx, l = 100"
         variables, data, columns = do_sql(sql, variables, command_options, data, columns)
         OK_returned = variables["$command_results"]["options"]["value"][-1]

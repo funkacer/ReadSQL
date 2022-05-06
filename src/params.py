@@ -100,6 +100,17 @@ def call_function(vartest, f):
     return ret, opt
 
 
+
+variables["$db_full_filename"] = {}
+variables["$db_full_filename"]["shorts"] = []
+variables["$db_full_filename"]["options"] = {}
+variables["$db_full_filename"]["options"]["value"] = ""
+
+variables["$mssql_host"] = {}
+variables["$mssql_host"]["shorts"] = []
+variables["$mssql_host"]["options"] = {}
+variables["$mssql_host"]["options"]["value"] = socket.gethostname()
+
 variables["$profile_show_categorical"] = {}
 variables["$profile_show_categorical"]["shorts"] = []
 variables["$profile_show_categorical"]["options"] = {}
@@ -109,7 +120,7 @@ variables["$do_mp"] = {}
 variables["$do_mp"]["shorts"] = []
 variables["$do_mp"]["options"] = {}
 variables["$do_mp"]["options"]["value"] = False
-    
+
 variables["$row_format_l"] = {}
 variables["$row_format_l"]["shorts"] = []
 variables["$row_format_l"]["options"] = {}
@@ -199,7 +210,7 @@ variables["$db_version"] = {}
 variables["$db_version"]["shorts"] = []
 variables["$db_version"]["options"] = {}
 variables["$db_version"]["options"]["value"] = "None: "
-    
+
 variables["$folder_name_old"] = {}
 variables["$folder_name_old"]["shorts"] = []
 variables["$folder_name_old"]["options"] = {}
@@ -737,5 +748,3 @@ command_options["split"]["help1"] = "Help for command 'folder'"
 command_options["split"]["help2"] = ["Bla1","Bla2"]
 command_options["split"]["alternative"] = ["split", "s"]
 command_options["split"]["altoption"] = [["c"],["s"]]
-
-

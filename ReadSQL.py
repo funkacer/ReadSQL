@@ -2323,18 +2323,18 @@ def do_sql(sql, variables, command_options, data, columns):
                     traceback.print_exc()
             else:
                 file_exists, full_filename = check_filename(db_filename, variables["$folder_exists"]["options"]["value"], variables["$folder_name"]["options"]["value"])
-                db_full_filename = os.path.join(variables["$folder_name"]["options"]["value"], full_filename)
+                variables["$db_full_filename"]["options"]["value"] = os.path.join(variables["$folder_name"]["options"]["value"], full_filename)
                 if file_exists:
-                    variables["$printInvGreen"]["options"]["value"](f"Using database '{db_full_filename}'.")
+                    variables["$printInvGreen"]["options"]["value"](f'''Using database '{variables["$db_full_filename"]["options"]["value"]}'.''')
                 else:
-                    variables["$printInvGreen"]["options"]["value"](f"Creating database '{db_full_filename}'.")
+                    variables["$printInvGreen"]["options"]["value"](f'''Creating database '{variables["$db_full_filename"]["options"]["value"]}'.''')
                 try:
                     #conn = sqlite3.connect(full_filename, isolation_level=None)
                     if parse_formats:
                         variables["$conn"]["options"]["value"] = sqlite3.connect(full_filename, detect_types=sqlite3.PARSE_DECLTYPES)
                     else:
                         variables["$conn"]["options"]["value"] = sqlite3.connect(full_filename)
-                    variables["$db_version"]["options"]["value"] = f"Sqlite3 ({db_full_filename}): "
+                    variables["$db_version"]["options"]["value"] = f'''Sqlite3 ({variables["$db_full_filename"]["options"]["value"]}): '''
                 except Exception as e:
                     traceback.print_exc()
 
@@ -4388,6 +4388,11 @@ def main(argv):
         return ret, opt
 
 
+    variables["$db_full_filename"] = {}
+    variables["$db_full_filename"]["shorts"] = []
+    variables["$db_full_filename"]["options"] = {}
+    variables["$db_full_filename"]["options"]["value"] = ""
+
     variables["$mssql_host"] = {}
     variables["$mssql_host"]["shorts"] = []
     variables["$mssql_host"]["options"] = {}
@@ -5089,7 +5094,7 @@ but {len(command_options[key1][key2])} '{key2}'.'''
 
         if variables["$conn"]["options"]["value"]:
             if variables["$db_version"]["options"]["value"][:7] == "Sqlite3":
-                print(f'''Using Sqlite3 filename "{db_full_filename}". Use \connect sqlite3 filename' for change.''')
+                print(f'''Using Sqlite3 filename "{variables["$db_full_filename"]["options"]["value"]}". Use \connect sqlite3 filename' for change.''')
             elif variables["$db_version"]["options"]["value"][:5] == "MySQL":
                 print(f'''Using MySQL database `{variables["$db_schema"]["options"]["value"]}`. Use '\connect mysql database' for change.''')
             elif variables["$db_version"]["options"]["value"][:5] == "MsSQL":
