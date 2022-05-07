@@ -1,0 +1,12 @@
+,Ticker Symbol,Years,Period Ending, Total Revenue , Cost of Goods Sold ," Sales, General and Admin. "
+0,AAL,Year 1,12/31/2012," $24,855,000,000 "," $10,499,000,000 "," $12,977,000,000 ", $-   ," $845,000,000 ",Industrials,Airlines
+1,AAL,Year 2,12/31/2013," $26,743,000,000 "," $11,019,000,000 "," $12,913,000,000 ", $-   ," $853,000,000 ",Industrials,Airlines
+2,AAL,Year 3,12/31/2014," $42,650,000,000 "," $15,620,000,000 "," $20,686,000,000 ", $-   ," $1,295,000,000 ",Industrials,Airlines
+3,AAL,Year 4,12/31/2015," $40,990,000,000 "," $11,096,000,000 "," $21,275,000,000 ", $-   ," $1,364,000,000 ",Industrials,Airlines
+4,AAP,Year 1,12/29/2012," $6,205,003,000 "," $3,106,967,000 "," $2,440,721,000 ", $-   , $-   ,Consumer Discretionary,Automotive Retail
+5,AAP,Year 2,12/28/2013," $6,493,814,000 "," $3,241,668,000 "," $2,591,828,000 ", $-   , $-   ,Consumer Discretionary,Automotive Retail
+6,AAP,Year 3,1/3/2015," $9,843,861,000 "," $5,390,248,000 "," $3,601,903,000 ", $-   , $-   ,Consumer Discretionary,Automotive Retail
+7,AAP,Year 4,1/2/2016," $9,737,018,000 "," $5,314,246,000 "," $3,596,992,000 ", $-   , $-   ,Consumer Discretionary,Automotive Retail
+8,AAPL,Year 1,9/28/2013," $170,910,000,000 "," $106,606,000,000 "," $10,830,000,000 "," $4,475,000,000 ", $-   ,Information Technology,Computer Hardware
+9,AAPL,Year 2,9/27/2014," $182,795,000,000 "," $112,258,000,000 "," $11,993,000,000 "," $6,041,000,000 ", $-   ,Information Technology,Computer Hardware
+10,AAPL,Year 3,9/26/2015," $233,715,000,000 "," $140,089,000,000 "," $14,329,000,000 "," $8,067,000,000 ", $-   ,Information Technology,Computer Hardware

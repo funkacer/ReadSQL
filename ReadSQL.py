@@ -2509,16 +2509,11 @@ def do_sql(sql, variables, command_options, data, columns):
 
         elif command == "read":
             colsp = {}  #reset columns profile
-            read_filename = options["filename"]
-            read_delimiter = options["delimiter"]
-            if options.get("lines"):
-                read_lines = options["lines"]
-            else:
-                read_lines = 0
-            if options.get("text_qualifier"):
-                read_text_qualifier = options["text_qualifier"]
-            else:
-                read_text_qualifier = None
+            read_filename = options.get("filename")
+            read_delimiter = options.get("delimiter")
+            read_lines = options.get("lines")
+            if read_lines is None: read_lines = -1
+            read_text_qualifier = options.get("text_qualifier")
             read_columns = options.get("read_columns")
             strip_columns = options.get("strip_columns")
             file_exists, full_filename = check_filename(read_filename, variables["$folder_exists"]["options"]["value"], variables["$folder_name"]["options"]["value"])
@@ -2537,51 +2532,23 @@ def do_sql(sql, variables, command_options, data, columns):
                             parsed_line = parseText(data_line, read_delimiter, [read_text_qualifier], False)
                         else:
                             parsed_line = data_line.split(read_delimiter)
-                        cc = 0
-                        rest = len(parsed_line)
-                        while rest > 0:
-                            rest = int(rest/(10**cc))
-                            #print(rest)
-                            cc += 1
                         for i, c in enumerate(parsed_line):
-                            if read_text_qualifier and len(c) >= 2:
-                                if c[0] == read_text_qualifier and c[-1] == read_text_qualifier: c = c[1:-1]
-                                #print(c)
-                            if strip_columns: c = c.strip()
-                            if read_columns and c != "":
+                            if read_columns:
+                                if read_text_qualifier and len(c) >= 2:
+                                    if c[0] == read_text_qualifier and c[-1] == read_text_qualifier: c = c[1:-1]
+                                    #print(c)
+                                if strip_columns: c = c.strip()
                                 columns_new.append(c)
                             else:
-                                c = default_columns_name + f"{(i+1):0{(cc-1)}}"
-                                columns_new.append(c)
-                            #columns_new.append(c)
+                                # add empty column name for later correction
+                                columns_new.append("")
                         if read_columns: data_line = f.readline()
-                        '''
-                        else:
-                            # just determine number of columns from the first row
-                            # column names are created at the end (in case more columns occure)
-                            if data_line[-1] == "\n": data_line = data_line[:-1]
-                            if read_text_qualifier:
-                                parsed_line = parseText(data_line, read_delimiter, [read_text_qualifier], False)
-                            else:
-                                parsed_line = data_line.split(read_delimiter)
-                            cc = 0
-                            rest = len(parsed_line)
-                            while rest > 0:
-                                rest = int(rest/(10**cc))
-                                #print(rest)
-                                cc += 1
-                            for i in range(len(parsed_line)):
-                                c = default_columns_name + f"{(i+1):0{(cc-1)}}"
-                                columns_new.append(c)
-                        '''
-                        row = 1
+                        row = 0
                         len_columns = len(columns_new)
                         max_columns = len(columns_new)
-                        #print("."+data_line+".")
-                        while data_line:
-                            sys.stdout.write(u"\u001b[1000D" +  "Lines read: " + str(row) + " ")
-                            sys.stdout.flush()
+                        while data_line and row != read_lines:
                             #print("."+data_line+".")
+                            row += 1
                             row_new = []
                             if data_line[-1] == "\n": data_line = data_line[:-1]
                             if read_text_qualifier:
@@ -2600,37 +2567,28 @@ def do_sql(sql, variables, command_options, data, columns):
                                 else:
                                     row_new.append(None)
                             data_new.append(row_new)
-                            if read_lines == row: break
                             #print(row_new)
-                            row += 1
                             #time.sleep(1)
                             data_line = f.readline()
+                            if row % 10000 == 0:
+                                sys.stdout.write(u"\u001b[1000D" +  "Lines read: " + str(row) + " ")
+                                sys.stdout.flush()
                     #print(data_new)
+                    sys.stdout.write(u"\u001b[1000D" +  "Lines read: " + str(row) + " ")
+                    sys.stdout.flush()
                     print()
+                    # calculate cc for missing columns
+                    cc = 0
+                    rest = max_columns
+                    while rest > 0:
+                        rest = int(rest/(10**cc))
+                        #print(rest)
+                        cc += 1
                     if is_error:
-                        if read_columns:
-                            # add new column names only
-                            for i in range(len_columns, max_columns):
-                                cc = 0
-                                rest = max_columns
-                                while rest > 0:
-                                    rest = int(rest/(10**cc))
-                                    #print(rest)
-                                    cc += 1
-                                c = default_columns_name + f"{(i+1):0{(cc-1)}}"
-                                columns_new.append(c)
-                        else:
-                            # create all column names again
-                            columns_new = []
-                            for i in range(max_columns):
-                                cc = 0
-                                rest = max_columns
-                                while rest > 0:
-                                    rest = int(rest/(10**cc))
-                                    #print(rest)
-                                    cc += 1
-                                c = default_columns_name + f"{(i+1):0{(cc-1)}}"
-                                columns_new.append(c)
+                        # add new column names only; these columns has always artificial names
+                        for i in range(len_columns, max_columns):
+                            c = variables["$default_column_name"]["options"]["value"] + f"{(i+1):0{(cc-1)}}"
+                            columns_new.append(c)
                         for row, d in enumerate(data_new):
                             if max_columns > len(d):
                                 error +=1
@@ -2640,6 +2598,10 @@ def do_sql(sql, variables, command_options, data, columns):
                                     variables["$printRed"]["options"]["value"](f"Further ERROR messages surpressed!!!")
                                 for i in range(max_columns - len(d)):
                                     d.append(None)
+                    # correct empty column names
+                    for i in range(len(columns_new)):
+                        if columns_new[i] == "":
+                            columns_new[i] = variables["$default_column_name"]["options"]["value"] + f"{(i+1):0{(cc-1)}}"
                     if error > 0:
                         variables["$printInvRed"]["options"]["value"](f"ERRORs in TOTAL {error}. Check carefully!!!")
                         print(max_columns, len_columns)
@@ -4387,6 +4349,11 @@ def main(argv):
             ret, opt = int_function(vartest)
         return ret, opt
 
+
+    variables["$default_column_name"] = {}
+    variables["$default_column_name"]["shorts"] = []
+    variables["$default_column_name"]["options"] = {}
+    variables["$default_column_name"]["options"]["value"] = "Column_"
 
     variables["$db_full_filename"] = {}
     variables["$db_full_filename"]["shorts"] = []

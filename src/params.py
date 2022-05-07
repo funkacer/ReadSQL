@@ -1,6 +1,7 @@
 import os
 import datetime
 from importlib.metadata import version
+import socket
 
 #do_mp = True
 do_mp = False
@@ -100,7 +101,11 @@ def call_function(vartest, f):
     return ret, opt
 
 
-
+variables["$default_column_name"] = {}
+variables["$default_column_name"]["shorts"] = []
+variables["$default_column_name"]["options"] = {}
+variables["$default_column_name"]["options"]["value"] = "Column_"
+    
 variables["$db_full_filename"] = {}
 variables["$db_full_filename"]["shorts"] = []
 variables["$db_full_filename"]["options"] = {}
