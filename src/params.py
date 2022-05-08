@@ -51,7 +51,7 @@ columns = None
 data_old = None
 columns_old = None
 folder_exists = False
-folder_name = ""
+foldername = ""
 show_cases = 5
 print_max_default = 10
 profile_max_categorical = 100
@@ -105,7 +105,7 @@ variables["$default_column_name"] = {}
 variables["$default_column_name"]["shorts"] = []
 variables["$default_column_name"]["options"] = {}
 variables["$default_column_name"]["options"]["value"] = "Column_"
-    
+
 variables["$db_full_filename"] = {}
 variables["$db_full_filename"]["shorts"] = []
 variables["$db_full_filename"]["options"] = {}
@@ -216,26 +216,10 @@ variables["$db_version"]["shorts"] = []
 variables["$db_version"]["options"] = {}
 variables["$db_version"]["options"]["value"] = "None: "
 
-variables["$folder_name_old"] = {}
-variables["$folder_name_old"]["shorts"] = []
-variables["$folder_name_old"]["options"] = {}
-variables["$folder_name_old"]["options"]["value"] = ""
-
-variables["$folder_name"] = {}
-variables["$folder_name"]["shorts"] = []
-variables["$folder_name"]["options"] = {}
-variables["$folder_name"]["options"]["value"] = ""
-
-variables["$folder_exists_old"] = {}
-variables["$folder_exists_old"]["shorts"] = []
-variables["$folder_exists_old"]["options"] = {}
-variables["$folder_exists_old"]["options"]["value"] = False
-
-variables["$folder_exists"] = {}
-variables["$folder_exists"]["shorts"] = []
-variables["$folder_exists"]["options"] = {}
-variables["$folder_exists"]["options"]["value"] = False
-
+variables["$foldername"] = {}
+variables["$foldername"]["shorts"] = []
+variables["$foldername"]["options"] = {}
+variables["$foldername"]["options"]["value"] = ""
 
 variables["$parse_value_type"] = {}
 variables["$parse_value_type"]["shorts"] = []
@@ -378,14 +362,13 @@ command_options["quit"]["altoption"] = []
 
 command_options["folder"] = {}
 command_options["folder"]["name"] = ["foldername"]
-command_options["folder"]["required"] = [True]
+command_options["folder"]["required"] = [False]
 command_options["folder"]["type"] = ["str"]
-command_options["folder"]["default"] = [None]
+command_options["folder"]["default"] = [""]
 command_options["folder"]["help1"] = "Help for command 'folder'"
 command_options["folder"]["help2"] = ["Blabla1"]
 command_options["folder"]["alternative"] = ["folder", "f"]
 command_options["folder"]["altoption"] = [["fn","f"]]
-
 
 command_options["set variable easy"] = {}
 command_options["set variable easy"]["name"] = ["names"]

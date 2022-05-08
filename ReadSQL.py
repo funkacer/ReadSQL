@@ -2193,11 +2193,11 @@ def parseCommand(command_line, variables, command_options):
 
     return command, options
 
-def get_sql_queries_dict(lst, folder_exists, foldername):
+def get_sql_queries_dict(lst, foldername):
     sqls_local = {}
     for sql_filename in lst:
         #print("SQL file:", sql_file)
-        file_exists, full_filename = check_filename(sql_filename, folder_exists, foldername)
+        full_filename, file_exists = check_filename(sql_filename, foldername)
         #print("Check if file exists:", sql_file_exists)
         if file_exists:
             with open(full_filename, mode="r", encoding="utf-8") as f:
@@ -2212,28 +2212,27 @@ def get_sql_queries_dict(lst, folder_exists, foldername):
 def check_foldername(foldername, foldername_old):
     folder_exists = False
     full_foldername = None
-    if not os.path.isabs(foldername):
-        if foldername_old:
-            full_foldername = os.path.join(foldername_old, foldername)
-            folder_exists = os.path.isdir(full_foldername)
-        else:
-            full_foldername = os.path.join(os.getcwd(), foldername)
-            folder_exists = os.path.isdir(full_foldername)
+    if foldername == os.pardir:
+        full_foldername = os.path.dirname(foldername_old)
     else:
-        folder_exists = os.path.isdir(foldername)
-        full_foldername = foldername
-    return folder_exists, full_foldername
+        #if foldername == "": foldername = os.getcwd()
+        if os.path.isabs(foldername):
+            full_foldername = foldername
+        else:
+            full_foldername = os.path.join(foldername_old, foldername)
+    folder_exists = os.path.isdir(full_foldername)
+    return full_foldername, folder_exists
 
-def check_filename(filename, folder_exists, folder_name):
+def check_filename(filename, foldername):
     file_exists = False
     full_filename = None
-    if folder_exists and not os.path.isabs(filename):
-        full_filename = os.path.realpath(os.path.join(folder_name, os.path.expanduser(filename)))
-    else:
+    if os.path.isabs(filename):
         full_filename = filename
+    else:
+        full_filename = os.path.realpath(os.path.join(foldername, os.path.expanduser(filename)))
     file_exists = os.path.isfile(full_filename)
     #print(full_filename)
-    return file_exists, full_filename
+    return full_filename, file_exists
 
 def printGlobals():
     print()
@@ -2243,7 +2242,7 @@ def printGlobals():
     print("data_old", data_old.__class__)
     print("columns_old", columns_old.__class__)
     print("folder_exists", variables["$folder_exists"]["options"]["value"].__class__, variables["$folder_exists"]["options"]["value"])
-    print("folder_name", variables["$folder_name"]["options"]["value"].__class__, variables["$folder_name"]["options"]["value"])
+    print("foldername", variables["$foldername"]["options"]["value"].__class__, variables["$foldername"]["options"]["value"])
     print("db_version", variables["$db_version"]["options"]["value"].__class__, variables["$db_version"]["options"]["value"])
 
 def do_sql(sql, variables, command_options, data, columns):
@@ -2261,14 +2260,14 @@ def do_sql(sql, variables, command_options, data, columns):
     columns_old: tuple or list of columns (shallow or deep copy)
     db_full_filename: filename incl folder of sqlite3 db (Using Sqlite3 filename "{db_full_filename}". Use \connect sqlite3 filename' for change)
     folder_exists: bool (folder_exists = os.path.isdir(foldername))
-    folder_name: string (f"Using folder '{folder_name}'.")
+    foldername: string (f"Using folder '{foldername}'.")
     db_version: string prompting user with db name (db_version = f"Sqlite3 ({db_full_filename}): ")
     db_schema, \
             fromm, too, stepp, randd, listt, colss, noness, noneso, variables, command_history, colsp, \
             data_memory, columns_memory, colsp_memory
 
 
-    global conn, data, columns, data_old, columns_old, folder_exists, folder_name, db_version, \
+    global conn, data, columns, data_old, columns_old, folder_exists, foldername, db_version, \
             fromm, too, stepp, randd, listt, colss, noness, noneso, variables, command_history, colsp, \
             data_memory, columns_memory, colsp_memory
     '''
@@ -2322,8 +2321,8 @@ def do_sql(sql, variables, command_options, data, columns):
                 except Exception as e:
                     traceback.print_exc()
             else:
-                file_exists, full_filename = check_filename(db_filename, variables["$folder_exists"]["options"]["value"], variables["$folder_name"]["options"]["value"])
-                variables["$db_full_filename"]["options"]["value"] = os.path.join(variables["$folder_name"]["options"]["value"], full_filename)
+                full_filename, file_exists = check_filename(db_filename, variables["$foldername"]["options"]["value"])
+                variables["$db_full_filename"]["options"]["value"] = os.path.join(variables["$foldername"]["options"]["value"], full_filename)
                 if file_exists:
                     variables["$printInvGreen"]["options"]["value"](f'''Using database '{variables["$db_full_filename"]["options"]["value"]}'.''')
                 else:
@@ -2487,25 +2486,19 @@ def do_sql(sql, variables, command_options, data, columns):
 
 
         elif command == "folder":
-            variables["$folder_exists_old"]["options"]["value"] = variables["$folder_exists"]["options"]["value"]
-            variables["$folder_name_old"]["options"]["value"] = variables["$folder_name"]["options"]["value"]
-            #folder_name = sql[len("\folder:"):]
-            variables["$folder_name"]["options"]["value"] = options["foldername"]
-            #folder = os.path.isdir(folder_name)
-            variables["$folder_exists"]["options"]["value"], full_foldername = check_foldername(variables["$folder_name"]["options"]["value"], variables["$folder_name_old"]["options"]["value"])
-            if variables["$folder_exists"]["options"]["value"]:
-                variables["$printInvGreen"]["options"]["value"](f'''Using folder '{full_foldername}'.''')
-                variables["$folder_name"]["options"]["value"] = full_foldername
+            foldername_old = variables["$foldername"]["options"]["value"]
+            #foldername = sql[len("\folder:"):]
+            foldername = options.get("foldername")
+            #folder = os.path.isdir(foldername)
+            full_foldername, folder_exists = check_foldername(foldername, foldername_old)
+            if folder_exists:
+                variables["$printInvGreen"]["options"]["value"](f"Using folder '{full_foldername}'.")
+                variables["$foldername"]["options"]["value"] = full_foldername
             else:
-                if variables["$folder_exists_old"]["options"]["value"]:
-                    variables["$printInvRed"]["options"]["value"](f'''Folder '{variables["$folder_name"]["options"]["value"]}' does not exist. Using current folder '{variables["$folder_name_old"]["options"]["value"]}'.''')
-                    variables["$folder_exists"]["options"]["value"] = variables["$folder_exists_old"]["options"]["value"]
-                    variables["$folder_name"]["options"]["value"] = variables["$folder_name_old"]["options"]["value"]
-                else:
-                    # folder_name_old is None if sql imported file has wrong \folder command
-                    variables["$printInvRed"]["options"]["value"](f'''Folder '{variables["$folder_name"]["options"]["value"]}' does not exist. Using working directory '{os.getcwd()}'.''')
-                    variables["$folder_name"]["options"]["value"] = os.getcwd()
+                variables["$printInvRed"]["options"]["value"](f"Folder '{foldername}' does not exist. Using current folder '{foldername_old}'.")
+                variables["$foldername"]["options"]["value"] = foldername_old
                 OK = 2
+
 
         elif command == "read":
             colsp = {}  #reset columns profile
@@ -2516,7 +2509,7 @@ def do_sql(sql, variables, command_options, data, columns):
             read_text_qualifier = options.get("text_qualifier")
             read_columns = options.get("read_columns")
             strip_columns = options.get("strip_columns")
-            file_exists, full_filename = check_filename(read_filename, variables["$folder_exists"]["options"]["value"], variables["$folder_name"]["options"]["value"])
+            full_filename, file_exists = check_filename(read_filename, variables["$foldername"]["options"]["value"])
             #print("Read: '{}'".format(read_filename))
             try:
                 with open(full_filename, "r", encoding = "utf-8") as f:
@@ -2628,7 +2621,7 @@ def do_sql(sql, variables, command_options, data, columns):
             else:
                 export_none = None  # never happens, but was before, now is ""
             #print("export_none", export_none)
-            file_exists, full_filename = check_filename(export_filename, variables["$folder_exists"]["options"]["value"], variables["$folder_name"]["options"]["value"])
+            full_filename, file_exists = check_filename(export_filename, variables["$foldername"]["options"]["value"])
             #print("Export: '{}'".format(export_filename))
             col_len = len(columns)-1
             try:
@@ -2652,23 +2645,9 @@ def do_sql(sql, variables, command_options, data, columns):
 
         elif command == "load":
             #Vratit zpatky db_version a folder pred load
+            foldername_return = variables["$foldername"]["options"]["value"]
             sql_filename = options["filename"]
-            '''
-            file_exists, full_filename = check_filename(sql_filename)
-            #print("Check if file exists:", sql_file_exists)
-            if file_exists:
-                with open(full_filename, mode="r", encoding="utf-8") as f:
-                    sql = f.read()
-                    #print("SQL file query:")
-                    #print(sql.strip(), sql.count(";"))
-                    sqls_load = parseText(sql, ";")
-                for i, sql in enumerate(sqls_load):
-                    variables["$printCom"]["options"]["value"](f"\n\\\\ SQL file '{full_filename}' loaded command no {str(i+1)} \\\\")
-                    do_sql(sql)
-            else:
-                variables["$printRed"]["options"]["value"](f"! SQL file '{full_filename}' does not exist !")
-            '''
-            sqls_load = get_sql_queries_dict([sql_filename], variables["$folder_exists"]["options"]["value"], variables["$folder_name"]["options"]["value"])
+            sqls_load = get_sql_queries_dict([sql_filename], variables["$foldername"]["options"]["value"])
             for full_filename in sqls_load.keys():
                 #OK_returned = 1
                 for i, sql_load in enumerate(sqls_load[full_filename]):
@@ -2686,6 +2665,7 @@ def do_sql(sql, variables, command_options, data, columns):
                         variables["$printRed"]["options"]["value"]("Elapsed time: " + str(datetime.timedelta(seconds=end-start)))
                         time.sleep(2)
                     else: break
+            variables["$foldername"]["options"]["value"] = foldername_return
 
 
         elif command == "split":
@@ -4244,7 +4224,7 @@ def do_sql(sql, variables, command_options, data, columns):
 
 def main(argv):
 
-    global conn, data, columns, data_old, columns_old, db_full_filename, folder_exists, folder_name, db_version, db_schema, \
+    global conn, data, columns, data_old, columns_old, db_full_filename, folder_exists, foldername, db_version, db_schema, \
             fromm, too, stepp, randd, listt, colss, noness, noneso, variables, command_history, colsp, \
             data_memory, columns_memory, colsp_memory, sqls, command_options, printYellow, printInvGreen, Assert, \
             printInvRed, printCom, printBlue, printRed, show_cases, rows_label, row_format_l, profile_max_categorical, \
@@ -4299,7 +4279,7 @@ def main(argv):
     data_old = None
     columns_old = None
     folder_exists = False
-    folder_name = ""
+    foldername = ""
     db_version = "None: "
     show_cases = 5
     print_max_default = 10
@@ -4465,25 +4445,10 @@ def main(argv):
     variables["$db_version"]["options"] = {}
     variables["$db_version"]["options"]["value"] = "None: "
 
-    variables["$folder_name_old"] = {}
-    variables["$folder_name_old"]["shorts"] = []
-    variables["$folder_name_old"]["options"] = {}
-    variables["$folder_name_old"]["options"]["value"] = ""
-
-    variables["$folder_name"] = {}
-    variables["$folder_name"]["shorts"] = []
-    variables["$folder_name"]["options"] = {}
-    variables["$folder_name"]["options"]["value"] = ""
-
-    variables["$folder_exists_old"] = {}
-    variables["$folder_exists_old"]["shorts"] = []
-    variables["$folder_exists_old"]["options"] = {}
-    variables["$folder_exists_old"]["options"]["value"] = False
-
-    variables["$folder_exists"] = {}
-    variables["$folder_exists"]["shorts"] = []
-    variables["$folder_exists"]["options"] = {}
-    variables["$folder_exists"]["options"]["value"] = False
+    variables["$foldername"] = {}
+    variables["$foldername"]["shorts"] = []
+    variables["$foldername"]["options"] = {}
+    variables["$foldername"]["options"]["value"] = ""
 
     variables["$parse_value_type"] = {}
     variables["$parse_value_type"]["shorts"] = []
@@ -4626,9 +4591,9 @@ def main(argv):
 
     command_options["folder"] = {}
     command_options["folder"]["name"] = ["foldername"]
-    command_options["folder"]["required"] = [True]
+    command_options["folder"]["required"] = [False]
     command_options["folder"]["type"] = ["str"]
-    command_options["folder"]["default"] = [None]
+    command_options["folder"]["default"] = [""]
     command_options["folder"]["help1"] = "Help for command 'folder'"
     command_options["folder"]["help2"] = ["Blabla1"]
     command_options["folder"]["alternative"] = ["folder", "f"]
@@ -5035,7 +5000,9 @@ but {len(command_options[key1][key2])} '{key2}'.'''
         print("Multiprocessing:", variables["$do_mp"]["options"]["value"])
 
     if len(vars(namespace)["sql_files"]) > 0:
-        sqls = get_sql_queries_dict(vars(namespace)["sql_files"], variables["$folder_exists"]["options"]["value"], variables["$folder_name"]["options"]["value"])
+        foldername_return = variables["$foldername"]["options"]["value"]
+        variables["$foldername"]["options"]["value"] = os.getcwd()  #temporarily specify default folder
+        sqls = get_sql_queries_dict(vars(namespace)["sql_files"], variables["$foldername"]["options"]["value"])
         #print(sqls)
         for full_filename in sqls.keys():
             #OK_returned = 1
@@ -5054,6 +5021,7 @@ but {len(command_options[key1][key2])} '{key2}'.'''
                     variables["$printRed"]["options"]["value"]("Elapsed time: " + str(datetime.timedelta(seconds=end-start)))
                     time.sleep(2)
                 else: break
+        variables["$foldername"]["options"]["value"] = foldername_return
 
 
     if len(vars(namespace)["sql_files"]) == 0 and isinstance(vars(namespace)["interactive"], str) or vars(namespace)["interactive"]:
@@ -5073,11 +5041,13 @@ but {len(command_options[key1][key2])} '{key2}'.'''
         else:
             print("Database is not specified. Please use '\sqlite3 filename' for example.")
 
-        if variables["$folder_exists"]["options"]["value"]:
-            print(f'''Using folder '{variables["$folder_name"]["options"]["value"]}'.''')
+        if variables["$foldername"]["options"]["value"] != "":
+            foldername = variables["$foldername"]["options"]["value"]
+            print(f'''Using folder '{foldername}'.''')
         else:
-            variables["$folder_name"]["options"]["value"] = os.getcwd()
-            print(f'''Folder is not specified. Using working directory '{variables["$folder_name"]["options"]["value"]}'.''')
+            variables["$foldername"]["options"]["value"] = os.getcwd()
+            foldername = variables["$foldername"]["options"]["value"]
+            print(f'''Folder is not specified. Using working directory '{foldername}'.''')
         print()
 
         interactive_pass = 0

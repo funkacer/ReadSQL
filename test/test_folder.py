@@ -19,42 +19,63 @@ columns = None
 
 class TestCase(unittest.TestCase):
 
-    def test_read_file_not_exists(self):
+    def test_folder_missing_argument(self):
         global variables, command_options, data, columns
         from ReadSQL import do_sql
-        variables["$folder_name_old"]["options"]["value"] = os.getcwd()
-        variables["$folder_name"]["options"]["value"] = os.getcwd()
-        sql = r"\r read_test.csv, l = 1000"
+        sql = r"\f"
+        foldername_old = variables["$foldername"]["options"]["value"]
         variables, data, columns = do_sql(sql, variables, command_options, data, columns)
         OK_returned = variables["$command_results"]["options"]["value"][-1]
+        foldername = variables["$foldername"]["options"]["value"]
+        self.assertEqual(1, OK_returned)
+        self.assertEqual(os.path.join(foldername_old, ""), foldername)
+
+    def test_folder_empty_string(self):
+        global variables, command_options, data, columns
+        from ReadSQL import do_sql
+        sql = r"\f ''"
+        # getcwd is done in __main__
+        variables["$foldername"]["options"]["value"] = os.getcwd()
+        foldername_old = variables["$foldername"]["options"]["value"]
+        variables, data, columns = do_sql(sql, variables, command_options, data, columns)
+        OK_returned = variables["$command_results"]["options"]["value"][-1]
+        foldername = variables["$foldername"]["options"]["value"]
+        self.assertEqual(1, OK_returned)
+        self.assertEqual(os.path.join(foldername_old, ""), foldername)
+
+    def test_folder_exists(self):
+        global variables, command_options, data, columns
+        from ReadSQL import do_sql
+        sql = r"\f test_folder_exists"
+        variables, data, columns = do_sql(sql, variables, command_options, data, columns)
+        OK_returned = variables["$command_results"]["options"]["value"][-1]
+        foldername = variables["$foldername"]["options"]["value"]
+        self.assertEqual(1, OK_returned)
+        self.assertEqual(os.path.join(os.getcwd(), "test_folder_exists"), foldername)
+
+    def test_folder_not_exists(self):
+        global variables, command_options, data, columns
+        from ReadSQL import do_sql
+        variables["$foldername"]["options"]["value"] = os.getcwd()
+        sql = r"\f test_folder_not_exists"
+        variables, data, columns = do_sql(sql, variables, command_options, data, columns)
+        OK_returned = variables["$command_results"]["options"]["value"][-1]
+        foldername = variables["$foldername"]["options"]["value"]
         self.assertEqual(2, OK_returned)
+        self.assertEqual(os.getcwd(), foldername)
 
-    def test_read_file_exists(self):
+    def test_folder_parent(self):
         global variables, command_options, data, columns
         from ReadSQL import do_sql
-        variables["$folder_name_old"]["options"]["value"] = os.getcwd()
-        variables["$folder_name"]["options"]["value"] = os.getcwd()
-        sql = r"\r test_folder_exists\read_test.csv"
+        variables["$foldername"]["options"]["value"] = os.path.join(os.getcwd(), "test_folder_exists")
+        sql = r"\f .."
         variables, data, columns = do_sql(sql, variables, command_options, data, columns)
         OK_returned = variables["$command_results"]["options"]["value"][-1]
+        foldername = variables["$foldername"]["options"]["value"]
         self.assertEqual(1, OK_returned)
+        self.assertEqual(os.getcwd(), foldername)
 
-    def test_read_profile(self):
-        global variables, command_options, data, columns
-        from ReadSQL import do_sql
-        variables["$folder_name_old"]["options"]["value"] = os.getcwd()
-        variables["$folder_name"]["options"]["value"] = os.getcwd()
-        sql = r'''\r test_folder_exists\read_test.csv, ",", '"' '''
-        variables, data, columns = do_sql(sql, variables, command_options, data, columns)
-        OK_returned = variables["$command_results"]["options"]["value"][-1]
-        self.assertEqual(1, OK_returned)
-        sql = r"\dp$a"
-        variables, data, columns = do_sql(sql, variables, command_options, data, columns)
-        OK_returned = variables["$command_results"]["options"]["value"][-1]
-        self.assertEqual(1, OK_returned)
         
-
-
 '''
 
     def test_integers_part(self):
