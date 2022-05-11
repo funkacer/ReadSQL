@@ -791,8 +791,8 @@ def data_profile(data, columns, variables, colsp, rowsi, colsi, purge = False):
         colsp[ci]["q2"] = None
         colsp[ci]["q3"] = None
         colsp[ci]["iqr"] = None
-        colsp[ci]["smd2"] = None
-        colsp[ci]["smd3"] = None
+        colsp[ci]["smd2"] = 0
+        colsp[ci]["smd3"] = 0
         colsp[ci]["var"] = None
         colsp[ci]["std"] = None
         colsp[ci]["skew"] = None
@@ -826,18 +826,13 @@ def data_profile(data, columns, variables, colsp, rowsi, colsi, purge = False):
                     colsp[ci]["q3"] = m[-1*int((lenc+1)/2)]
                 if lenc >= 2 and (lenc % 2) == 0:
                     colsp[ci]["q3"] = (m[-1*int(lenc/2)] + m[-1*(int(lenc/2))-1])/2    #mean of mid cases
-            colsp[ci]["iqr"] = colsp[ci]["q3"] - colsp[ci]["q1"]
-            colsp[ci]["smd2"] = 0
-            colsp[ci]["smd3"] = 0
+                colsp[ci]["iqr"] = colsp[ci]["q3"] - colsp[ci]["q1"]
             for mi in m:
                 colsp[ci]["smd2"] += (mi - colsp[ci]["mean"])**2
                 colsp[ci]["smd3"] += (mi - colsp[ci]["mean"])**3
-            colsp[ci]["var"] = None
-            colsp[ci]["std"] = None
             if colsp[ci]["valid"] > 0:
                 colsp[ci]["var"] = colsp[ci]["smd2"] / colsp[ci]["valid"]
                 colsp[ci]["std"] = (colsp[ci]["smd2"] / colsp[ci]["valid"])**0.5
-            colsp[ci]["skew"] = None
             if colsp[ci]["valid"] > 0 and colsp[ci]["smd2"] > 0:
                 colsp[ci]["skew"] = colsp[ci]["smd3"] / (colsp[ci]["valid"] * (colsp[ci]["smd2"] / colsp[ci]["valid"])**1.5)
 
@@ -1060,8 +1055,8 @@ def data_profile_mp(inn):
     colsp[ci]["q2"] = None
     colsp[ci]["q3"] = None
     colsp[ci]["iqr"] = None
-    colsp[ci]["smd2"] = None
-    colsp[ci]["smd3"] = None
+    colsp[ci]["smd2"] = 0
+    colsp[ci]["smd3"] = 0
     colsp[ci]["var"] = None
     colsp[ci]["std"] = None
     colsp[ci]["skew"] = None
@@ -1095,18 +1090,13 @@ def data_profile_mp(inn):
                 colsp[ci]["q3"] = m[-1*int((lenc+1)/2)]
             if lenc >= 2 and (lenc % 2) == 0:
                 colsp[ci]["q3"] = (m[-1*int(lenc/2)] + m[-1*(int(lenc/2))-1])/2    #mean of mid cases
-        colsp[ci]["iqr"] = colsp[ci]["q3"] - colsp[ci]["q1"]
-        colsp[ci]["smd2"] = 0
-        colsp[ci]["smd3"] = 0
+            colsp[ci]["iqr"] = colsp[ci]["q3"] - colsp[ci]["q1"]
         for mi in m:
             colsp[ci]["smd2"] += (mi - colsp[ci]["mean"])**2
             colsp[ci]["smd3"] += (mi - colsp[ci]["mean"])**3
-        colsp[ci]["var"] = None
-        colsp[ci]["std"] = None
         if colsp[ci]["valid"] > 0:
             colsp[ci]["var"] = colsp[ci]["smd2"] / colsp[ci]["valid"]
             colsp[ci]["std"] = (colsp[ci]["smd2"] / colsp[ci]["valid"])**0.5
-        colsp[ci]["skew"] = None
         if colsp[ci]["valid"] > 0 and colsp[ci]["smd2"] > 0:
             colsp[ci]["skew"] = colsp[ci]["smd3"] / (colsp[ci]["valid"] * (colsp[ci]["smd2"] / colsp[ci]["valid"])**1.5)
 
