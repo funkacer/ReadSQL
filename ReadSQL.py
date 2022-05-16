@@ -3473,7 +3473,7 @@ def do_sql(sql, variables, command_options, data, columns):
                         rowsins.append(rowsi[i*splr:])
                 varins = {}
                 for var in variables:
-                    if var in ["$time", "$decimal_separator", "$thousands_separator", "$datetime", "$date"]:
+                    if var in ["$time", "$decimal_separator", "$thousands_separator", "$datetime", "$date", "$profile_show_categorical"]:
                         varins[var] = variables[var]
                 for order, rowsin in enumerate(rowsins):
                     print("order", order)
