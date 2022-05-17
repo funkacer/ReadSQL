@@ -2479,19 +2479,8 @@ def do_sql(sql, variables, command_options, data, columns):
             foldername_old = variables["$foldername"]["options"]["value"]
             #foldername = sql[len("\folder:"):]
             foldername = options.get("foldername")
-            foldername_lst = parseText(foldername, delimiter = os.sep, text_qualifiers = [], do_strip = True)
-            print(foldername_lst)
             #folder = os.path.isdir(foldername)
-            if len(foldername_lst) > 1:
-                foldername_old_part = foldername_old
-                for foldername_part in foldername_lst:
-                    full_foldername, folder_exists = check_foldername(foldername_part, foldername_old_part)
-                    if folder_exists:
-                        foldername_old_part = full_foldername
-                    else:
-                        break
-            else:
-                full_foldername, folder_exists = check_foldername(foldername, foldername_old)
+            full_foldername, folder_exists = check_foldername(foldername, foldername_old)
             if folder_exists:
                 variables["$printInvGreen"]["options"]["value"](f"Using folder '{full_foldername}'.")
                 variables["$foldername"]["options"]["value"] = full_foldername

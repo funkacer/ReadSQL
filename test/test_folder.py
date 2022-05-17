@@ -75,7 +75,40 @@ class TestCase(unittest.TestCase):
         self.assertEqual(1, OK_returned)
         self.assertEqual(os.getcwd(), foldername)
 
-        
+    def test_folder_complex1(self):
+        global variables, command_options, data, columns
+        from ReadSQL import do_sql
+        variables["$foldername"]["options"]["value"] = os.path.join(os.getcwd(), "test_folder_exists")
+        sql = r"\f ..\test_folder_exists"
+        variables, data, columns = do_sql(sql, variables, command_options, data, columns)
+        OK_returned = variables["$command_results"]["options"]["value"][-1]
+        foldername = variables["$foldername"]["options"]["value"]
+        self.assertEqual(1, OK_returned)
+        self.assertEqual(os.getcwd(), foldername)
+
+    def test_folder_complex1(self):
+        global variables, command_options, data, columns
+        from ReadSQL import do_sql
+        variables["$foldername"]["options"]["value"] = os.path.join(os.getcwd(), "test_folder_exists")
+        sql = r"\f ..\test_folder_exists"
+        variables, data, columns = do_sql(sql, variables, command_options, data, columns)
+        OK_returned = variables["$command_results"]["options"]["value"][-1]
+        foldername = variables["$foldername"]["options"]["value"]
+        self.assertEqual(1, OK_returned)
+        self.assertEqual(variables["$foldername"]["options"]["value"], foldername)
+
+    def test_folder_complex2(self):
+        global variables, command_options, data, columns
+        from ReadSQL import do_sql
+        variables["$foldername"]["options"]["value"] = os.path.join(os.getcwd(), "test_folder_exists")
+        sql = r"\f \..\test_folder_exists\..\\"
+        variables, data, columns = do_sql(sql, variables, command_options, data, columns)
+        OK_returned = variables["$command_results"]["options"]["value"][-1]
+        foldername = variables["$foldername"]["options"]["value"]
+        self.assertEqual(1, OK_returned)
+        self.assertEqual(os.getcwd(), foldername)
+
+
 '''
 
     def test_integers_part(self):
