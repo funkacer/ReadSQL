@@ -2204,12 +2204,14 @@ def check_foldername(foldername, foldername_old):
     full_foldername = None
     if foldername == os.pardir:
         full_foldername = os.path.dirname(foldername_old)
-    else:
-        #if foldername == "": foldername = os.getcwd()
+    elif foldername.strip() != "":
         if os.path.isabs(foldername):
             full_foldername = foldername
         else:
             full_foldername = os.path.join(foldername_old, foldername)
+    else:
+        # foldername.strip() == "" => os.path.isdir(full_foldername) would fail
+        full_foldername = foldername_old
     folder_exists = os.path.isdir(full_foldername)
     return full_foldername, folder_exists
 
@@ -2480,11 +2482,13 @@ def do_sql(sql, variables, command_options, data, columns):
             #foldername = sql[len("\folder:"):]
             foldername = options.get("foldername")
             foldername_lst = parseText(foldername, delimiter = os.sep, text_qualifiers = [], do_strip = True)
-            print(foldername_lst)
+            #print(foldername_lst)
             #folder = os.path.isdir(foldername)
-            if len(foldername_lst) > 1:
+            if len(foldername_lst) > 0:
                 foldername_old_part = foldername_old
                 for foldername_part in foldername_lst:
+                    if foldername_part[-1] == ":": foldername_part += "\\"  #e.g."c:"
+                    if foldername_part == ".": foldername_part = ""  #e.g."c:"
                     full_foldername, folder_exists = check_foldername(foldername_part, foldername_old_part)
                     if folder_exists:
                         foldername_old_part = full_foldername
