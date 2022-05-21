@@ -24,11 +24,9 @@ from importlib.metadata import version
 
 import multiprocessing as mp
 
-import logging
-
 from src.params import variables, command_options
 
-#print(variables["$do_mp"])
+print(variables["$do_mp"])
 
 #from Scipy.stats import skew
 
@@ -1510,7 +1508,7 @@ def show_data(data, columns, variables, show_title = True):
         print_data(rowsi, colsi, data_show, columns, rows, rows_label, variables)
 
 
-def find_columns(colss, columns):
+def find_columns(colss):
     colsi = []
     for cols in colss:
         is_column = 0
@@ -1573,7 +1571,7 @@ def data_fill(fill_formats = {}, fill_nones = {}):
 
     if len(fill_columns) > 0:
         for i, colss in enumerate(fill_columns):
-            colsi = find_columns([colss], columns)
+            colsi = find_columns([colss])
             ncolsi = len(colsi)
             fill_format = fill_columns[colss].get("fill_format")
             fill_none = fill_columns[colss].get("fill_none")
@@ -1644,16 +1642,16 @@ def data_fill(fill_formats = {}, fill_nones = {}):
     print()
 
 
-def data_select(data, columns, fromm, too, stepp, randd, listt, colss, noness = [], noneso = ""):
+def data_select(data, columns, fromm, too, stepp, randd, listt, colss):
     #global fromm, too, stepp, randd, listt, colss, listi
     nrows = len(data)
     ncols = len(columns)
     colsi = range(1, ncols + 1)
     if len(colss) > 0:
-        colsi = find_columns(colss, columns)
+        colsi = find_columns(colss)
     nonesi = []
     if len(noness) > 0:
-        nonesi = find_columns(noness, columns)
+        nonesi = find_columns(noness)
     #columns_show = [columns[i] for i in colsi] # only existing
     rowsi = []
     listi = []
@@ -1811,12 +1809,12 @@ def parseText(myText, delimiter, text_qualifiers = ['"', "'", "[", "{"], do_stri
     return lst_new
 
 
-def parseVariable(variables, command, options, n, vartest, logger = None):
+def parseVariable(variables, command, options, n, vartest):
     # get variables in context
     ret = None
     opt = None
     variable = None
-    #print("vartest", vartest)
+    print("vartest", vartest)
     #vartest = str(options[n])
     if len (vartest) > 0:
         if vartest[0] == "$":
@@ -1836,16 +1834,15 @@ def parseVariable(variables, command, options, n, vartest, logger = None):
                             break
             if variable:
                 #get context
-                text = f"Getting context for variable '{variable}' in command '{command}' and option '{options[n]}':"
-                logger.debug(text)
+                print(f"Getting context for variable '{variable}' in command '{command}' and option '{options[n]}':")
                 for contexttest in variables[variable]:
                     #print(variables[variable][contexttest])
                     if command in variables[variable][contexttest] or contexttest == "user":
                         contexts.append(contexttest)
                 for context in contexts:
-                    text = f"Command '{command}' test passed with context '{context}'"
-                    logger.debug(text + ":\n" + str(variables[variable][contexttest]))
-                    #print(options)
+                    print(f"Command '{command}' test passed with context '{context}'!")
+                    print(variables[variable][contexttest])
+                    print(options)
                     opt = 1
                     if context != "user":
                         for optiontest in variables[variable][context][command]:
@@ -1874,7 +1871,7 @@ def parseVariable(variables, command, options, n, vartest, logger = None):
     return ret, opt
 
 
-def parseCommand(command_line, variables, command_options, logger = None):
+def parseCommand(command_line, variables, command_options):
     commands = []
     command = ""
     #options = {}
@@ -1901,15 +1898,15 @@ def parseCommand(command_line, variables, command_options, logger = None):
     command_line_original = command_line
 
     for c in commands:
-        #print(c[0], c[1])
+        print(c[0], c[1])
         command = c[0]
         command_line = command_line_original[len(c[1]):]
         command_line = "=".join(parseText(command_line, "="))
         #command_line = ",".join(parseText(command_line, " "))
-        #print("Command line:", command_line)
+        print("Command line:", command_line)
         #command_line_list = parseText(command_line, ",")
         command_line_list = [l.strip() for l in parseText(command_line, ",", do_strip = False)]
-        #print("Command line list:", command_line_list)
+        print("Command line list:", command_line_list)
 
         execute = True
         options = {}
@@ -1932,8 +1929,6 @@ def parseCommand(command_line, variables, command_options, logger = None):
         #print(cll_final)
 
         #print(command)
-        warnings = []
-        errors = []
         for i, cl in enumerate(cll_final):
             #cl = cl.strip()
             #if "=" in cl:
@@ -1954,18 +1949,14 @@ def parseCommand(command_line, variables, command_options, logger = None):
                             if does_exist: break
                             #print(a)
                 if not does_exist:
-                    text = f"Unknown option '{cll[0]}' for command '{command}'. I will not use your '{cll[1]}' value in any way."
-                    logger.debug(text)
-                    errors.append(text)
+                    variables["$printRed"]["options"]["value"](f'''Unknown option '{cll[0]}'. I will not use your '{cll[1]}' value in any way.''')
                     execute = False
             elif cl != "":
                 if i < len (command_options[command]["name"]):
                     #print(f'''I will use '{cl}' for option '{command_options[c]["name"][i]}'.''')
                     options[command_options[command]["name"][i]] = cl
                 else:
-                    text = f"Too many options given for command '{command}'. I will not use your '{cl}' value in any way."
-                    logger.debug(text)
-                    warnings.append(text)
+                    variables["$printRed"]["options"]["value"](f'''Too many options given. I will not use your '{cl}' value in any way.''')
 
         for i, z in enumerate(zip(command_options[command]["name"], command_options[command]["required"], command_options[command]["default"], command_options[command]["type"])):
             n, r, d, t = z[0], z[1], z[2], z[3]
@@ -1973,9 +1964,7 @@ def parseCommand(command_line, variables, command_options, logger = None):
             if r:
                 #assert command_options[command]["name"][i] in options
                 if n not in options:
-                    text = f"Missing required argument '{n}' for command '{command}'."
-                    logger.debug(text)
-                    errors.append(text)
+                    variables["$printRed"]["options"]["value"](f'''Missing required argument '{n}'. Command not executed.''')
                     execute = False
                     break
             if n not in options and d is not None:
@@ -1990,18 +1979,15 @@ def parseCommand(command_line, variables, command_options, logger = None):
                             options[n] = options[n].strip("'")
                     bCond = options[n] in t
                     #print(options[n], t, bCond)
-                    #sTxt = f"Value '{options[n]}' is not valid for option '{n}'. Use one of these options: {t}."
-                    #variables["$Assert"]["options"]["value"](bCond, sTxt)
+                    sTxt = f"Value '{options[n]}' is not valid for option '{n}'. Use one of these options: {t}."
+                    variables["$Assert"]["options"]["value"](bCond, sTxt)
                     if not bCond:
-                        text = f"Value '{options[n]}' is not valid for option '{n}'. Use one of these options {t} for command '{command}'."
-                        logger.debug(text)
-                        errors.append(text)
                         execute = False
                         break
                 elif t == "str":
                     #options[n] = options[n].strip('"')
                     #print("options[n]", options[n])
-                    var, opt = parseVariable(variables, command, options, n, str(options[n]), logger)
+                    var, opt = parseVariable(variables, command, options, n, str(options[n]))
                     if opt:
                         options[n] = var
                     if len(options[n]) > 0:
@@ -2014,84 +2000,62 @@ def parseCommand(command_line, variables, command_options, logger = None):
                 elif t == "int":
                     #print(f"I am going to translate '{options[n]}' to 'int'")
                     # check variables first
-                    var, opt = parseVariable(variables, command, options, n, str(options[n]), logger)
+                    var, opt = parseVariable(variables, command, options, n, str(options[n]))
                     if opt:
                         options[n] = var
                     if opt == 0:
-                        text = f"Option '{n}' should be integer but is '{options[n]}', which is not a variable in context of '{command}'. Probably not doing what expected!"
+                        result_message = f"Option '{n}' should be integer but is '{options[n]}', which is not a variable in context of {command}. Probably not doing what expected!"
                     else:
-                        text = f"Option '{n}' should be integer but is '{options[n]}' in command '{command}'. Probably not doing what expected!"
+                        result_message = f"Option '{n}' should be integer but is '{options[n]}'. Probably not doing what expected!"
                     try:
                         options[n] = int(options[n])
                     except Exception as e:
-                        #traceback.print_exc()
-                        pass
-                    #variables["$Assert"]["options"]["value"](isinstance(options[n], int), result_message)
+                        traceback.print_exc()
+                    variables["$Assert"]["options"]["value"](isinstance(options[n], int), result_message)
                     if not isinstance(options[n], int):
                         #options[n] = d
-                        logger.debug(text)
-                        errors.append(text)
                         execute = False
                     #print(f"Parse option '{n}' as integer:", options[n])
                 elif t == "intlist":
-                    var, opt = parseVariable(variables, command, options, n, str(options[n]), logger)
+                    var, opt = parseVariable(variables, command, options, n, str(options[n]))
                     if opt:
                         options[n] = var
-                    if options[n][0] == "[" and options[n][-1] == "]":
-                        options_list_line = options[n][1:-1]
-                    else:
-                        text = "Lists must be enclosed with []. Probably not doing what expected!"
-                        logger.debug(text)
-                        errors.append(text)
-                        execute = False
-                    #options_list_line = options[n][1:-1]
+                    variables["$Assert"]["options"]["value"](options[n][0] == "[" and options[n][-1] == "]", "Lists must be enclosed with []. Probably not doing what expected!")
+                    options_list_line = options[n][1:-1]
                     #options_list_line = ",".join(parseText(options_list_line, " "))
                     lst_old = parseText(options_list_line, ",")
                     lst_new = []
                     #print("lst_old", lst_old)
                     for l_old in lst_old:
                         l_new = None
-                        var, opt = parseVariable(variables, command, options, n, str(l_old), logger)
+                        var, opt = parseVariable(variables, command, options, n, str(l_old))
                         if opt:
                             l_old = var
                         if opt == 0:
-                            text = f"Option '{n}' should be integer but is '{options[n]}', which is not a variable in context of '{command}'. Probably not doing what expected!"
+                            result_message = f"Option '{n}' should be integer but is '{options[n]}', which is not a variable in context of {command}. Probably not doing what expected!"
                         else:
-                            text = f"Option '{n}' should be integer but is '{options[n]}' in command '{command}'. Probably not doing what expected!"
+                            result_message = f"Option '{n}' should be integer but is '{options[n]}'. Probably not doing what expected!"
                         try:
                             l_new = int(l_old)
                         except Exception as e:
-                            #traceback.print_exc()
-                            pass
-                        #variables["$Assert"]["options"]["value"](isinstance(l_new, int), result_message)
-                        if isinstance(l_new, int) and l_new not in lst_new:
-                            lst_new.append(l_new)
-                        elif not isinstance(l_new, int):
-                            logger.debug(text)
-                            errors.append(text)
-                            execute = False
+                            traceback.print_exc()
+                        variables["$Assert"]["options"]["value"](isinstance(l_new, int), result_message)
+                        if isinstance(l_new, int) and l_new not in lst_new: lst_new.append(l_new)
                     options[n] = lst_new
                 elif t == "strlist":
-                    var, opt = parseVariable(variables, command, options, n, str(options[n]), logger)
+                    var, opt = parseVariable(variables, command, options, n, str(options[n]))
                     #print("var", var)
                     if opt:
                         options[n] = var
-                    #variables["$Assert"]["options"]["value"](options[n][0] == "[" and options[n][-1] == "]", "Lists must be enclosed with []. Probably not doing what expected!")
-                    if options[n][0] == "[" and options[n][-1] == "]":
-                        options_list_line = options[n][1:-1]
-                    else:
-                        text = "Lists must be enclosed with []. Probably not doing what expected!"
-                        logger.debug(text)
-                        errors.append(text)
-                        execute = False
+                    variables["$Assert"]["options"]["value"](options[n][0] == "[" and options[n][-1] == "]", "Lists must be enclosed with []. Probably not doing what expected!")
                     #print(options[n])
-                    #options_list_line = options[n][1:-1]
+                    options_list_line = options[n][1:-1]
                     #options_list_line = ",".join(parseText(options_list_line, " "))
                     lst_old = parseText(options_list_line, ",")
                     lst_new = []
                     #print("lst_old", lst_old)
                     for l_old in lst_old:
-                        var, opt = parseVariable(variables, command, options, n, str(l_old), logger)
+                        var, opt = parseVariable(variables, command, options, n, str(l_old))
                         if opt:
                             lst_new.append(var)
                         else:
@@ -2109,23 +2073,13 @@ def parseCommand(command_line, variables, command_options, logger = None):
                     elif options[n] == False or options[n] == "False" or options[n] == "false" or options[n] == "0":
                         options[n] = False
                     else:
-                        text = f"Command '{command}' invalid bool option '{options[n]}'. Using default option '{d}'."
-                        logger.debug(text)
-                        warnings.append(text)
                         options[n] = d
                 elif t == "dictlist":
-                    var, opt = parseVariable(variables, command, options, n, str(options[n]), logger)
+                    var, opt = parseVariable(variables, command, options, n, str(options[n]))
                     if opt:
                         options[n] = var
-                    #variables["$Assert"]["options"]["value"](options[n][0] == "{" and options[n][-1] == "}", "Dicts must be enclosed with {}. Probably not doing what expected!")
-                    if options[n][0] == "[" and options[n][-1] == "]":
-                        options_list_line = options[n][1:-1]
-                    else:
-                        text = "Lists must be enclosed with []. Probably not doing what expected!"
-                        logger.debug(text)
-                        errors.append(text)
-                        execute = False
-                    #options_list_line = options[n][1:-1]
+                    variables["$Assert"]["options"]["value"](options[n][0] == "{" and options[n][-1] == "}", "Dicts must be enclosed with {}. Probably not doing what expected!")
+                    options_list_line = options[n][1:-1]
                     #print("options_list_line", options_list_line)
                     options_list_line = ":".join(parseText(options_list_line, ":"))
                     #options_list_line = ",".join(parseText(options_list_line, " "))
@@ -2135,14 +2089,14 @@ def parseCommand(command_line, variables, command_options, logger = None):
                     for l_old in lst_old:
                         #lst = parseText(l_old, ":", do_strip = False)
                         lst = [l.strip() for l in parseText(l_old, ":", do_strip = False)]
-                        #print("lst:", lst)
+                        print("lst:", lst)
                         # check if list on any side
                         #print(lst[0].strip().__class__)
                         l, r, ll, rr = None, None, None, None
                         if len(lst) > 1:
                             #lst[0] = lst[0].strip()
                             #lst[1] = lst[1].strip()
-                            var, opt = parseVariable(variables, command, options, n, str(lst[0]), logger)
+                            var, opt = parseVariable(variables, command, options, n, str(lst[0]))
                             if opt:
                                 lst[0] = var
                             if lst[0][0] == '[' and lst[0][-1] == ']':
@@ -2156,7 +2110,7 @@ def parseCommand(command_line, variables, command_options, logger = None):
                                 l = lst[0].strip("'")
                             else:
                                 l = lst[0]
-                            var, opt = parseVariable(variables, command, options, n, str(lst[1]), logger)
+                            var, opt = parseVariable(variables, command, options, n, str(lst[1]))
                             if opt:
                                 lst[1] = var
                             if lst[1] is not None:
@@ -2177,7 +2131,7 @@ def parseCommand(command_line, variables, command_options, logger = None):
                                 lst_new[l] = r
                             if ll is not None and rr is None:
                                 for l in ll:
-                                    var, opt = parseVariable(variables, command, options, n, str(l), logger)
+                                    var, opt = parseVariable(variables, command, options, n, str(l))
                                     if opt:
                                         l = var
                                     if l[0] == '"' and l[-1] == '"':
@@ -2188,16 +2142,16 @@ def parseCommand(command_line, variables, command_options, logger = None):
                             elif ll is not None and rr is not None:
                                 # make two lists
                                 variables["$Assert"]["options"]["value"](len(ll) == len(rr), f"Lists {ll}:{rr} in dict '{n}' not of the same size. Check results carefully!!!")
-                                #print(list(zip(ll, rr)))
+                                print(list(zip(ll, rr)))
                                 for l, r in zip(ll, rr):
-                                    var, opt = parseVariable(variables, command, options, n, str(l), logger)
+                                    var, opt = parseVariable(variables, command, options, n, str(l))
                                     if opt:
                                         l = var
                                     if l[0] == '"' and l[-1] == '"':
                                         l = l.strip('"')
                                     elif l[0] == "'" and l[-1] == "'":
                                         l = l.strip("'")
-                                    var, opt = parseVariable(variables, command, options, n, str(r), logger)
+                                    var, opt = parseVariable(variables, command, options, n, str(r))
                                     if opt:
                                         r = var
                                     if len(r) == 0:
@@ -2211,18 +2165,15 @@ def parseCommand(command_line, variables, command_options, logger = None):
                             variables["$printRed"]["options"]["value"](f"Error parsing dictlist option {lst}. Check results carefully!!!")
                     options[n] = lst_new
 
-        #print("Command:", command)
-        #print("Options:", options)
-        #print("Execute:", execute)
-        if not execute:
-            logger.debug(f"Parse command '{command}' as NOT EXECUTED on command line:\n" + command_line_original)
+        print("Command:", command)
+        print("Options:", options)
+        print("Execute:", execute)
 
         if execute: break
 
     if not execute:
         command = ""
         options = []
-        #print errors
         print()
     else:
         printoptions = {}
@@ -2279,43 +2230,59 @@ def check_filename(filename, foldername):
     #print(full_filename)
     return full_filename, file_exists
 
+def printGlobals():
+    print()
+    print("conn", variables["$conn"]["options"]["value"].__class__, variables["$conn"]["options"]["value"])
+    print("data", data.__class__)
+    print("columns", columns.__class__)
+    print("data_old", data_old.__class__)
+    print("columns_old", columns_old.__class__)
+    print("folder_exists", variables["$folder_exists"]["options"]["value"].__class__, variables["$folder_exists"]["options"]["value"])
+    print("foldername", variables["$foldername"]["options"]["value"].__class__, variables["$foldername"]["options"]["value"])
+    print("db_version", variables["$db_version"]["options"]["value"].__class__, variables["$db_version"]["options"]["value"])
 
-def do_sql(sql, command_options, variables, datas = {}, output = None, logger = None):
+def do_sql(sql, variables, command_options, data, columns):
 
-    data = None
-    columns = None
-    colsp = None
-    data_old = None
-    columns_old = None
-    colsp_old = None
+    '''
+    Perform sql query or user command
+    Inputs:
+    sql - string - (sql) querry or command (starting with "\")
 
-    if datas.get("data") is not None:
-        data = datas.get("data").get("data")
-        columns = datas.get("data").get("columns")
-        colsp = datas.get("data").get("colsp")
+    global variable description:
+    conn: Connection variable (conn = sqlite3.connect(":memory:"), c = conn.cursor(), c.execute(f"{sql}"))
+    data: tuple or list of data rows
+    columns: tuple or list of data columns
+    data_old: tuple or list of data rows (shallow or deep copy)
+    columns_old: tuple or list of columns (shallow or deep copy)
+    db_full_filename: filename incl folder of sqlite3 db (Using Sqlite3 filename "{db_full_filename}". Use \connect sqlite3 filename' for change)
+    folder_exists: bool (folder_exists = os.path.isdir(foldername))
+    foldername: string (f"Using folder '{foldername}'.")
+    db_version: string prompting user with db name (db_version = f"Sqlite3 ({db_full_filename}): ")
+    db_schema, \
+            fromm, too, stepp, randd, listt, colss, noness, noneso, variables, command_history, colsp, \
+            data_memory, columns_memory, colsp_memory
 
-    if datas.get("data_old") is not None:
-        data_old = datas.get("data_old").get("data")
-        columns_old = datas.get("data_old").get("columns")
-        colsp_old = datas.get("data_old").get("colsp")
 
-    if logger is None:
-        logging.basicConfig(filename='log.txtx', encoding='utf-8', filemode='w', level=logging.DEBUG)
-        logger = logging.getLogger(__name__)
-        logger.info('Started')
+    global conn, data, columns, data_old, columns_old, folder_exists, foldername, db_version, \
+            fromm, too, stepp, randd, listt, colss, noness, noneso, variables, command_history, colsp, \
+            data_memory, columns_memory, colsp_memory
+    '''
+
+    global data_old, columns_old, \
+           fromm, too, stepp, randd, listt, colss, noness, noneso, colsp, \
+           data_memory, columns_memory, colsp_memory
+
+    time.sleep(variables["$sleep"]["options"]["value"])
 
     OK = 1
-
     if sql.startswith("\\"):
-        command, options = parseCommand(sql, variables, command_options, logger)
-        #print(command, options)
+        command, options = parseCommand(sql, variables, command_options)
+        print(command, options)
 
         if command == "quit" or command == "q":
-            logger.debug(f"Command '{command}' passed as executed with options:\n" + str(options))
             OK = 0
 
         elif command == "#":
-            logger.debug(f"Command '{command}' passed as executed with options:\n" + str(options))
             title = options.get("title")
             note = options.get("note")
             title_color = options.get("title_color")
@@ -2325,7 +2292,7 @@ def do_sql(sql, command_options, variables, datas = {}, output = None, logger = 
                         cc = colorCode(title_color)
                         variables["$printColor"]["options"]["value"](title, cc)
                     else:
-                        cc = variables["$INVGREEN"]["options"]["value"]
+                        cc = INVGREEN
                         variables["$printColor"]["options"]["value"](title, cc)
             if note:
                 print()
@@ -2515,7 +2482,6 @@ def do_sql(sql, command_options, variables, datas = {}, output = None, logger = 
 
 
         elif command == "folder":
-            logger.debug(f"Command '{command}' passed as executed with options:\n" + str(options))
             foldername_old = variables["$foldername"]["options"]["value"]
             #foldername = sql[len("\folder:"):]
             foldername = options.get("foldername")
@@ -2542,23 +2508,18 @@ def do_sql(sql, command_options, variables, datas = {}, output = None, logger = 
                     if foldername[0] == "$" or foldername[0] == "%": foldername = os.path.expandvars(foldername)
                     if foldername == ".": foldername = ""  #e.g."c:"
                     if foldername == "~": foldername = os.path.expanduser(foldername)
-                #print(foldername)
+                print(foldername)
                 full_foldername, folder_exists = check_foldername(foldername, foldername_old)
             if folder_exists:
-                text = f"Using folder '{full_foldername}'."
-                variables["$printInvGreen"]["options"]["value"](text)
+                variables["$printInvGreen"]["options"]["value"](f"Using folder '{full_foldername}'.")
                 variables["$foldername"]["options"]["value"] = full_foldername
-                logger.info(text)
             else:
-                text = f"Folder '{foldername}' does not exist. Using current folder '{foldername_old}'."
-                variables["$printInvRed"]["options"]["value"](text)
+                variables["$printInvRed"]["options"]["value"](f"Folder '{foldername}' does not exist. Using current folder '{foldername_old}'.")
                 variables["$foldername"]["options"]["value"] = foldername_old
-                logger.error(text)
                 OK = 2
 
 
         elif command == "read":
-            logger.debug(f"Command '{command}' passed as executed with options:\n" + str(options))
             colsp = {}  #reset columns profile
             read_filename = options.get("filename")
             read_delimiter = options.get("delimiter")
@@ -2713,7 +2674,7 @@ def do_sql(sql, command_options, variables, datas = {}, output = None, logger = 
                     #print(sql)
                     #print()
                     start = time.perf_counter()
-                    variables, datas, output, logger = do_sql(sql_load, variables, command_options, datas, output, logger)
+                    variables, data, columns = do_sql(sql_load, variables, command_options, data, columns)
                     OK_returned = variables["$command_results"]["options"]["value"][-1]
                     end = time.perf_counter()
                     print()
@@ -2730,12 +2691,12 @@ def do_sql(sql, command_options, variables, datas = {}, output = None, logger = 
             colss = options.get("columns")
             colssp = options.get("split")
             if colss is not None:
-                colsi = find_columns(colss, columns)
+                colsi = find_columns(colss)
             else:
                 colsi = [ci for ci in range(1,len(columns)+1)]
             colsai = colsi
             if colssp is not None:
-                colspi = find_columns(colssp, columns)
+                colspi = find_columns(colssp)
             colsai = colsi + colspi
             data_profile(range(1, len(data) + 1), colsai)
             colsif = [ci for ci in colsi if colsp[ci]['t'] == "Integer" or colsp[ci]['t'] == "Float"]
@@ -2833,12 +2794,12 @@ def do_sql(sql, command_options, variables, datas = {}, output = None, logger = 
             colssp = options.get("split")
             title = options.get("title")
             if colss is not None:
-                colsi = find_columns(colss, columns)
+                colsi = find_columns(colss)
             else:
                 colsi = [ci for ci in range(1,len(columns)+1)]
             colsai = colsi
             if colssp is not None:
-                colspi = find_columns(colssp, columns)
+                colspi = find_columns(colssp)
             colsai = colsi + colspi
             data_profile(range(1, len(data) + 1), colsai)
             colsif = [ci for ci in colsi if colsp[ci]['t'] == "Integer" or colsp[ci]['t'] == "Float"]
@@ -2866,7 +2827,7 @@ def do_sql(sql, command_options, variables, datas = {}, output = None, logger = 
             colss = options.get("columns")
             title = options.get("title")
             if colss is not None:
-                colsi = find_columns(colss, columns)
+                colsi = find_columns(colss)
             else:
                 colsi = [ci for ci in range(1,len(columns)+1) if colsp[ci]['t'] == "Datetime" or colsp[ci]['t'] == "Date" or colsp[ci]['t'] == "Time"]
             #print(colsi)
@@ -2884,7 +2845,7 @@ def do_sql(sql, command_options, variables, datas = {}, output = None, logger = 
             title = options.get("title")
             boxplot_showfliers = options.get("show_fliers")
             if colss is not None:
-                colsi = find_columns(colss, columns)
+                colsi = find_columns(colss)
             else:
                 colsi = [ci for ci in range(1,len(columns)+1) if colsp[ci]['t'] == "Integer" or colsp[ci]['t'] == "Float"]
             #print("Colsi", colsi)
@@ -2896,7 +2857,7 @@ def do_sql(sql, command_options, variables, datas = {}, output = None, logger = 
             colss = options.get("columns")
             title = options.get("title")
             if colss is not None:
-                colsi = find_columns(colss, columns)
+                colsi = find_columns(colss)
             else:
                 colsi = [ci for ci in range(1,len(columns)+1) if colsp[ci]['t'] == "Categorical"]
             #print(colsi)
@@ -3260,8 +3221,6 @@ def do_sql(sql, command_options, variables, datas = {}, output = None, logger = 
             if options["what"] == "d": options["what"] = "data"
             if options["what"] == "h": options["what"] = "history"
 
-            logger.debug(f"Command '{command}' passed as executed with options:\n" + str(options))
-
             if options["what"] == "columns":
 
                 #print(", ".join([str(c) for c in columns]))
@@ -3335,7 +3294,7 @@ def do_sql(sql, command_options, variables, datas = {}, output = None, logger = 
                         cc = colorCode(title_color)
                         variables["$printColor"]["options"]["value"](title_text, cc)
                     else:
-                        cc = variables["$INVGREEN"]["options"]["value"]
+                        cc = INVGREEN
                         variables["$printColor"]["options"]["value"](title_text, cc)
 
                 rows = range(1, nrows + 1)
@@ -3436,7 +3395,7 @@ def do_sql(sql, command_options, variables, datas = {}, output = None, logger = 
             nrows = len(data)
             ncols = len(columns)
 
-            rowsi, colsi, listi, fromm, too, stepp, randd, listt, colss = data_select(data, columns, fromm, too, stepp, randd, listt, colss, noness, noneso)
+            rowsi, colsi, listi, fromm, too, stepp, randd, listt, colss = data_select(data, columns, fromm, too, stepp, randd, listt, colss)
             #print(rows_show)
 
             columns_selected = [columns[ci-1] for ci in colsi]
@@ -3527,7 +3486,7 @@ def do_sql(sql, command_options, variables, datas = {}, output = None, logger = 
             #nrows = len(data)
             #ncols = len(columns)
 
-            rowsi, colsi, listi, fromm, too, stepp, randd, listt, colss = data_select(data, columns, fromm, too, stepp, randd, listt, colss, noness, noneso)
+            rowsi, colsi, listi, fromm, too, stepp, randd, listt, colss = data_select(data, columns, fromm, too, stepp, randd, listt, colss)
 
             #TODO: option to print only if closp exists
             if variables["$do_mp"]["options"]["value"]:
@@ -3809,7 +3768,7 @@ def do_sql(sql, command_options, variables, datas = {}, output = None, logger = 
             #nrows = len(data)
             #ncols = len(columns)
 
-            rowsi, colsi, listi, fromm, too, stepp, randd, listt, colss = data_select(data, columns, fromm, too, stepp, randd, listt, colss, noness, noneso)
+            rowsi, colsi, listi, fromm, too, stepp, randd, listt, colss = data_select(data, columns, fromm, too, stepp, randd, listt, colss)
 
             '''
             nrows = len(data)
@@ -4280,31 +4239,16 @@ def do_sql(sql, command_options, variables, datas = {}, output = None, logger = 
     variables["$all"]["print history"]["value"] = len(variables["$command_history"]["options"]["value"])
     variables["$command_results"]["options"]["value"].append(OK)
     #sql = ""
-
-    datas["data"] = {}
-    datas["data_old"] = {}
-
-    datas["data"]["data"] = data
-    datas["data"]["columns"] = columns
-    datas["data"]["colsp"] = colsp
-    datas["data_old"]["data"] = data_old
-    datas["data_old"]["columns"] = columns_old
-    datas["data_old"]["colsp"] = colsp_old
-
-    return variables, datas, output, logger
+    return variables, data, columns
 
 def main(argv):
 
-    '''
     global conn, data, columns, data_old, columns_old, db_full_filename, folder_exists, foldername, db_version, db_schema, \
             fromm, too, stepp, randd, listt, colss, noness, noneso, command_history, colsp, \
             data_memory, columns_memory, colsp_memory, sqls, command_options, printYellow, printInvGreen, Assert, \
             printInvRed, printCom, printBlue, printRed, show_cases, rows_label, row_format_l, profile_max_categorical, \
             is_np, is_mpl, np, plt, do_mp, profile_show_categorical, default_columns_name, \
             printColor, RED, YELLOW, GREEN, BLUE, COM, INVGREEN, INVRED, END, variables
-    '''
-
-    global variables
 
     #do_mp = True
     #do_mp = False
@@ -4326,17 +4270,33 @@ def main(argv):
     if is_np: print("Using numpy version:", version("numpy"))
     if is_mpl: print("Using matplotlib version:", version("matplotlib"))
 
+    #from okno import zobraz
+
+    #\033[34m too dark blue text
+    os.system('color')
+    RED, YELLOW, GREEN, BLUE, COM, INVGREEN, INVRED, END = '\033[91m', '\033[33m', '\033[92m', '\033[96m', '\033[4m', '\033[97m\033[42m', '\033[97m\033[101m', '\033[0m'
+    printRed = lambda sTxt: print(RED + sTxt + END)
+    printGreen = lambda sTxt: print(GREEN + sTxt + END)
+    printYellow = lambda sTxt: print(YELLOW + sTxt + END)
+    printBlue = lambda sTxt: print(BLUE + sTxt + END)
+    printCom = lambda sTxt: print(COM + sTxt + END)
+    printInvGreen = lambda sTxt: print(INVGREEN + sTxt + END)
+    printInvRed = lambda sTxt: print(INVRED + sTxt + END)
+    Assert = lambda bCond=False, sTxt='': printRed(sTxt) if not bCond else None
+
+    printColor = lambda sTxt, mColor: print(mColor + sTxt + END)
+
+    #printInvRed("KO")
+    printInvGreen("OK")
+
     row_format_l = lambda columns: "".join([f"{{:>{columns[c]['w']}}}" for c in columns]) if isinstance(columns, dict) else "{:>15}" * (len(columns) + 1)
 
     conn = None
     sqls = {}
-    datas  = {}
-    datas["data"] = {}
-    datas["data"]["data"] = None
-    datas["data"]["columns"] = None
-    datas["data_old"] = {}
-    datas["data_old"]["data"] = None
-    datas["data_old"]["columns"] = None
+    data = None
+    columns = None
+    data_old = None
+    columns_old = None
     folder_exists = False
     foldername = ""
     db_version = "None: "
@@ -4355,9 +4315,6 @@ def main(argv):
     class_str = type("")
     class_int = type(0)
     class_float = type(0.0)
-
-    output = None
-    logger = None
 
     functions = set()
     functions.add("@(")
@@ -4422,14 +4379,6 @@ but {len(command_options[key1][key2])} '{key2}'.'''
     else:
         print("Multiprocessing:", variables["$do_mp"]["options"]["value"])
 
-    #printInvRed("KO")
-    variables["$printInvGreen"]["options"]["value"]("OK")
-
-    logging.basicConfig(filename='log.txtx', encoding='utf-8', filemode='w', level=logging.DEBUG, format='%(asctime)s:%(name)s\n%(levelname)s:%(message)s', datefmt='%Y-%d-%m %H:%M:%S')
-    logger = logging.getLogger(__name__)
-    logger.info(f'Started')
-
-
     if len(vars(namespace)["sql_files"]) > 0:
         foldername_return = variables["$foldername"]["options"]["value"]
         variables["$foldername"]["options"]["value"] = os.getcwd()  #temporarily specify default folder
@@ -4442,7 +4391,7 @@ but {len(command_options[key1][key2])} '{key2}'.'''
                 #print(sql)
                 #print()
                 start = time.perf_counter()
-                variables, datas, output, logger = do_sql(sql, command_options, variables, datas, output, logger)
+                variables, data, columns = do_sql(sql, variables, command_options, data, columns)
                 OK_returned = variables["$command_results"]["options"]["value"][-1]
                 end = time.perf_counter()
                 print()
@@ -4497,7 +4446,7 @@ but {len(command_options[key1][key2])} '{key2}'.'''
                 #print(sql)
                 #print()
                 start = time.perf_counter()
-                variables, datas, output, logger = do_sql(sql, command_options, variables, datas, output, logger)
+                variables, data, columns = do_sql(sql, variables, command_options, data, columns)
                 OK_returned = variables["$command_results"]["options"]["value"][-1]
                 end = time.perf_counter()
                 print()

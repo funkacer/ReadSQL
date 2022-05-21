@@ -9,124 +9,122 @@ sys.path.append(os.path.normpath(os.path.join(SCRIPT_DIR, PACKAGE_PARENT)))
 #print(os.path.normpath(os.path.join(SCRIPT_DIR, PACKAGE_PARENT)))
 #print(os.path.expanduser(__file__))
 
-from src.params import variables
 from src.params import command_options
+from src.params import variables
 
 #print(variables)
 
-data = None
-columns = None
 
 class TestCase(unittest.TestCase):
 
     def test_folder_missing_argument(self):
-        global variables, command_options, data, columns
+        global command_options, variables
         from ReadSQL import do_sql
         sql = r"\f"
         # getcwd is done in __main__
         variables["$foldername"]["options"]["value"] = os.getcwd()
         foldername_old = variables["$foldername"]["options"]["value"]
-        variables, data, columns = do_sql(sql, variables, command_options, data, columns)
+        variables, *_ = do_sql(sql, command_options, variables)
         OK_returned = variables["$command_results"]["options"]["value"][-1]
         foldername = variables["$foldername"]["options"]["value"]
         self.assertEqual(1, OK_returned)
         self.assertEqual(foldername_old, foldername)
 
     def test_folder_empty_string(self):
-        global variables, command_options, data, columns
+        global command_options, variables
         from ReadSQL import do_sql
         sql = r"\f ''"
         # getcwd is done in __main__
         variables["$foldername"]["options"]["value"] = os.getcwd()
         foldername_old = variables["$foldername"]["options"]["value"]
-        variables, data, columns = do_sql(sql, variables, command_options, data, columns)
+        variables, *_ = do_sql(sql, command_options, variables)
         OK_returned = variables["$command_results"]["options"]["value"][-1]
         foldername = variables["$foldername"]["options"]["value"]
         self.assertEqual(1, OK_returned)
         self.assertEqual(foldername_old, foldername)
 
     def test_folder_exists(self):
-        global variables, command_options, data, columns
+        global command_options, variables
         from ReadSQL import do_sql
         sql = r"\f test_folder_exists"
-        variables, data, columns = do_sql(sql, variables, command_options, data, columns)
+        variables, *_ = do_sql(sql, command_options, variables)
         OK_returned = variables["$command_results"]["options"]["value"][-1]
         foldername = variables["$foldername"]["options"]["value"]
         self.assertEqual(1, OK_returned)
         self.assertEqual(os.path.join(os.getcwd(), "test_folder_exists"), foldername)
 
     def test_folder_not_exists(self):
-        global variables, command_options, data, columns
+        global command_options, variables
         from ReadSQL import do_sql
         variables["$foldername"]["options"]["value"] = os.getcwd()
         sql = r"\f test_folder_not_exists"
-        variables, data, columns = do_sql(sql, variables, command_options, data, columns)
+        variables, *_ = do_sql(sql, command_options, variables)
         OK_returned = variables["$command_results"]["options"]["value"][-1]
         foldername = variables["$foldername"]["options"]["value"]
         self.assertEqual(2, OK_returned)
         self.assertEqual(os.getcwd(), foldername)
 
     def test_folder_parent(self):
-        global variables, command_options, data, columns
+        global command_options, variables
         from ReadSQL import do_sql
         variables["$foldername"]["options"]["value"] = os.path.join(os.getcwd(), "test_folder_exists")
         sql = r"\f .."
-        variables, data, columns = do_sql(sql, variables, command_options, data, columns)
+        variables, *_ = do_sql(sql, command_options, variables)
         OK_returned = variables["$command_results"]["options"]["value"][-1]
         foldername = variables["$foldername"]["options"]["value"]
         self.assertEqual(1, OK_returned)
         self.assertEqual(os.getcwd(), foldername)
 
     def test_folder_complex1(self):
-        global variables, command_options, data, columns
+        global command_options, variables
         from ReadSQL import do_sql
         variables["$foldername"]["options"]["value"] = os.path.join(os.getcwd(), "test_folder_exists")
         sql = r"\f ..\test_folder_exists"
-        variables, data, columns = do_sql(sql, variables, command_options, data, columns)
+        variables, *_ = do_sql(sql, command_options, variables)
         OK_returned = variables["$command_results"]["options"]["value"][-1]
         foldername = variables["$foldername"]["options"]["value"]
         self.assertEqual(1, OK_returned)
         self.assertEqual(variables["$foldername"]["options"]["value"], foldername)
 
     def test_folder_complex2(self):
-        global variables, command_options, data, columns
+        global command_options, variables
         from ReadSQL import do_sql
         variables["$foldername"]["options"]["value"] = os.path.join(os.getcwd(), "test_folder_exists")
         sql = r"\f ..\test_folder_exists\.."
-        variables, data, columns = do_sql(sql, variables, command_options, data, columns)
+        variables, *_ = do_sql(sql, command_options, variables)
         OK_returned = variables["$command_results"]["options"]["value"][-1]
         foldername = variables["$foldername"]["options"]["value"]
         self.assertEqual(1, OK_returned)
         self.assertEqual(os.getcwd(), foldername)
 
     def test_folder_complex3(self):
-        global variables, command_options, data, columns
+        global command_options, variables
         from ReadSQL import do_sql
         variables["$foldername"]["options"]["value"] = os.path.join(os.getcwd(), "test_folder_exists")
         sql = r"\f \..\test_folder_exists\..\\"
-        variables, data, columns = do_sql(sql, variables, command_options, data, columns)
+        variables, *_ = do_sql(sql, command_options, variables)
         OK_returned = variables["$command_results"]["options"]["value"][-1]
         foldername = variables["$foldername"]["options"]["value"]
         self.assertEqual(1, OK_returned)
         self.assertEqual(os.getcwd(), foldername)
 
     def test_folder_absolute1(self):
-        global variables, command_options, data, columns
+        global command_options, variables
         from ReadSQL import do_sql
         sql = r"\f c:"
-        variables, data, columns = do_sql(sql, variables, command_options, data, columns)
+        variables, *_ = do_sql(sql, command_options, variables)
         OK_returned = variables["$command_results"]["options"]["value"][-1]
         foldername = variables["$foldername"]["options"]["value"]
         self.assertEqual(1, OK_returned)
         self.assertEqual("c:\\", foldername)
 
     def test_folder_absolute2(self):
-        global variables, command_options, data, columns
+        global command_options, variables
         from ReadSQL import do_sql
         sql = r"\f c:"
-        variables, data, columns = do_sql(sql, variables, command_options, data, columns)
+        variables, *_ = do_sql(sql, command_options, variables)
         sql = r"\f"
-        variables, data, columns = do_sql(sql, variables, command_options, data, columns)
+        variables, *_ = do_sql(sql, command_options, variables)
         OK_returned = variables["$command_results"]["options"]["value"][-1]
         foldername = variables["$foldername"]["options"]["value"]
         self.assertEqual(1, OK_returned)

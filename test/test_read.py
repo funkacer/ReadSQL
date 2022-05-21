@@ -14,55 +14,52 @@ from src.params import command_options
 
 #print(variables)
 
-data = None
-columns = None
-
 class TestCase(unittest.TestCase):
 
     def test_read_missing_argument(self):
-        global variables, command_options, data, columns
+        global variables, command_options
         from ReadSQL import do_sql
         sql = r"\r"
-        variables, data, columns = do_sql(sql, variables, command_options, data, columns)
+        variables, *_ = do_sql(sql, command_options, variables)
         OK_returned = variables["$command_results"]["options"]["value"][-1]
         self.assertEqual(3, OK_returned)
 
     def test_read_empty_string(self):
-        global variables, command_options, data, columns
+        global variables, command_options
         from ReadSQL import do_sql
         sql = r"\r ''"
-        variables, data, columns = do_sql(sql, variables, command_options, data, columns)
+        variables, *_ = do_sql(sql, command_options, variables)
         OK_returned = variables["$command_results"]["options"]["value"][-1]
         self.assertEqual(2, OK_returned)
 
     def test_read_file_not_exists(self):
-        global variables, command_options, data, columns
+        global variables, command_options
         from ReadSQL import do_sql
         variables["$foldername"]["options"]["value"] = os.getcwd()
         sql = r"\r read_test.csv, l = 1000"
-        variables, data, columns = do_sql(sql, variables, command_options, data, columns)
+        variables, *_ = do_sql(sql, command_options, variables)
         OK_returned = variables["$command_results"]["options"]["value"][-1]
         self.assertEqual(2, OK_returned)
 
     def test_read_file_exists(self):
-        global variables, command_options, data, columns
+        global variables, command_options
         from ReadSQL import do_sql
         variables["$foldername"]["options"]["value"] = os.getcwd()
         sql = r"\r test_folder_exists\read_test.csv"
-        variables, data, columns = do_sql(sql, variables, command_options, data, columns)
+        variables, *_ = do_sql(sql, command_options, variables)
         OK_returned = variables["$command_results"]["options"]["value"][-1]
         self.assertEqual(1, OK_returned)
 
     def test_read_profile(self):
-        global variables, command_options, data, columns
+        global variables, command_options
         from ReadSQL import do_sql
         variables["$foldername"]["options"]["value"] = os.getcwd()
         sql = r'''\r test_folder_exists\read_test.csv, ",", '"' '''
-        variables, data, columns = do_sql(sql, variables, command_options, data, columns)
+        variables, datas, *_ = do_sql(sql, command_options, variables)
         OK_returned = variables["$command_results"]["options"]["value"][-1]
         self.assertEqual(1, OK_returned)
         sql = r"\dp$a"
-        variables, data, columns = do_sql(sql, variables, command_options, data, columns)
+        variables, *_ = do_sql(sql, command_options, variables, datas)
         OK_returned = variables["$command_results"]["options"]["value"][-1]
         self.assertEqual(1, OK_returned)
 
