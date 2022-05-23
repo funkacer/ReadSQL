@@ -101,6 +101,11 @@ variables["$printColor"]["shorts"] = []
 variables["$printColor"]["options"] = {}
 variables["$printColor"]["options"]["value"] = lambda sTxt, mColor: print(mColor + sTxt + END)
 
+variables["$strColor"] = {}
+variables["$strColor"]["shorts"] = []
+variables["$strColor"]["options"] = {}
+variables["$strColor"]["options"]["value"] = lambda sTxt, mColor: str(mColor + sTxt + END)
+
 
 variables["$Assert"] = {}
 variables["$Assert"]["shorts"] = []
@@ -270,6 +275,16 @@ command_options["folder"]["help2"] = ["Blabla1"]
 command_options["folder"]["alternative"] = ["folder", "f"]
 command_options["folder"]["altoption"] = [["fn","f"]]
 
+command_options["read"] = {}
+command_options["read"]["name"] = ["filename", "delimiter", "text_qualifier", "read_columns", "strip_columns", "print_data", "lines"]
+command_options["read"]["required"] = [True, False, False, False, False, False, False]
+command_options["read"]["type"] = ["str", "str", "str", "bool", "bool", "bool", "int"]
+command_options["read"]["default"] = [None, "	", None, True, True, True, None]
+command_options["read"]["help1"] = "Help for command 'folder'"
+command_options["read"]["help2"] = ["Blabla1", "Blabla2", "Blabla3", "Blabla4", "Blabla5", "Blabla6", "Blabla7"]
+command_options["read"]["alternative"] = ["read", "r"]
+command_options["read"]["altoption"] = [["f"],["d"],["t","tq"], ["r","rc"], ["s","sc"], ["p","pd"], ["l"]]
+
 command_options["set variable easy"] = {}
 command_options["set variable easy"]["name"] = ["names"]
 command_options["set variable easy"]["required"] = [True]
@@ -340,16 +355,6 @@ command_options["connect mssql"]["help1"] = "Help for command 'folder'"
 command_options["connect mssql"]["help2"] = ["Bla1", "Bla2", "Bla3", "Bla4", "Bla5", "Bla6", "Bla7"]
 command_options["connect mssql"]["alternative"] = ["c mssql", "c ms", "cmssql", "cms"]
 command_options["connect mssql"]["altoption"] = [["d"],["u"],["p"],["h"],["po"],["dr"],["o", "do"]]
-
-command_options["read"] = {}
-command_options["read"]["name"] = ["filename", "delimiter", "text_qualifier", "read_columns", "strip_columns", "lines"]
-command_options["read"]["required"] = [True, False, False, False, False, False]
-command_options["read"]["type"] = ["str", "str", "str", "bool", "bool", "int"]
-command_options["read"]["default"] = [None, "	", None, True, True, None]
-command_options["read"]["help1"] = "Help for command 'folder'"
-command_options["read"]["help2"] = ["Blabla1", "Blabla2", "Blabla3", "Blabla4", "Blabla5", "Blabla6"]
-command_options["read"]["alternative"] = ["read", "r"]
-command_options["read"]["altoption"] = [["f"],["d"],["t","tq"], ['r','rc'], ['s','sc'], ["l"]]
 
 command_options["export"] = {}
 command_options["export"]["name"] = ["filename", "delimiter", "none"]

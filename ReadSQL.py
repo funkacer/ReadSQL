@@ -1,3 +1,5 @@
+# sys.version_info[0]
+
 #conn = sqlite3.connect(":memory:", detect_types=sqlite3.PARSE_DECLTYPES) PARSE_COLNAMES
 #import socket
 #print(socket.gethostname())
@@ -2556,7 +2558,6 @@ def do_sql(sql, command_options, variables, datas = {}, output = None, logger = 
                 logger.error(text)
                 OK = 2
 
-
         elif command == "read":
             logger.debug(f"Command '{command}' passed as executed with options:\n" + str(options))
             colsp = {}  #reset columns profile
@@ -2567,6 +2568,7 @@ def do_sql(sql, command_options, variables, datas = {}, output = None, logger = 
             read_text_qualifier = options.get("text_qualifier")
             read_columns = options.get("read_columns")
             strip_columns = options.get("strip_columns")
+            print_data = options.get("print_data")
             full_filename, file_exists = check_filename(read_filename, variables["$foldername"]["options"]["value"])
             #print("Read: '{}'".format(read_filename))
             try:
@@ -2625,7 +2627,9 @@ def do_sql(sql, command_options, variables, datas = {}, output = None, logger = 
                                 sys.stdout.write(u"\u001b[1000D" +  "Lines read: " + str(row) + " ")
                                 sys.stdout.flush()
                     #print(data_new)
-                    sys.stdout.write(u"\u001b[1000D" +  "Lines read: " + str(row) + " ")
+                    cc = variables["$INVGREEN"]["options"]["value"]
+                    text = variables["$strColor"]["options"]["value"]("Lines read: " + str(row) + ", with " + str(max_columns) + " columns.", cc)
+                    sys.stdout.write(u"\u001b[1000D" + text)
                     sys.stdout.flush()
                     print()
                     # calculate cc for missing columns
@@ -2661,8 +2665,9 @@ def do_sql(sql, command_options, variables, datas = {}, output = None, logger = 
                         columns = columns_new
                         data_old = None
                         columns_old = None
-                        print()
-                        show_data(data, columns, variables)
+                        if print_data:
+                            print()
+                            show_data(data, columns, variables)
                     else:
                         variables["$printInvRed"]["options"]["value"]("! There are no data returned from this file !")
                         OK = 2
@@ -4305,6 +4310,8 @@ def main(argv):
     '''
 
     global variables
+
+    os.system('color')
 
     #do_mp = True
     #do_mp = False
