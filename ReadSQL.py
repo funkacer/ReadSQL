@@ -1549,8 +1549,7 @@ def parseValue(value, typestr):
     return value
 
 
-def data_fill(fill_formats = {}, fill_nones = {}):
-    global data
+def data_fill(variables, data, columns, fill_formats = {}, fill_nones = {}):
 
     temp_columns = set()
     if fill_formats is not None:
@@ -1642,8 +1641,10 @@ def data_fill(fill_formats = {}, fill_nones = {}):
                         proc = int((i * nrows + ri) / (ncols * nrows) * 100)
                         sys.stdout.write(u"\u001b[1000D" +  "Processed: " + str(proc) + "% ")
                         sys.stdout.flush()
+
     print()
-    print()
+
+    return data
 
 
 def data_select(data, columns, fromm, too, stepp, randd, listt, colss, noness = [], noneso = ""):
@@ -2086,6 +2087,7 @@ def parseCommand(command_line, variables, command_options, logger = None):
                         logger.debug(text)
                         errors.append(text)
                         execute = False
+                        options_list_line = ""
                     #print(options[n])
                     #options_list_line = options[n][1:-1]
                     #options_list_line = ",".join(parseText(options_list_line, " "))
@@ -2120,13 +2122,14 @@ def parseCommand(command_line, variables, command_options, logger = None):
                     if opt:
                         options[n] = var
                     #variables["$Assert"]["options"]["value"](options[n][0] == "{" and options[n][-1] == "}", "Dicts must be enclosed with {}. Probably not doing what expected!")
-                    if options[n][0] == "[" and options[n][-1] == "]":
+                    if options[n][0] == "{" and options[n][-1] == "}":
                         options_list_line = options[n][1:-1]
                     else:
-                        text = "Lists must be enclosed with []. Probably not doing what expected!"
+                        text = "Dicsts must be enclosed with {}. Probably not doing what expected!"
                         logger.debug(text)
                         errors.append(text)
                         execute = False
+                        options_list_line = ""
                     #options_list_line = options[n][1:-1]
                     #print("options_list_line", options_list_line)
                     options_list_line = ":".join(parseText(options_list_line, ":"))
@@ -2302,7 +2305,10 @@ def do_sql(sql, command_options, variables, datas = {}, output = None, logger = 
         colsp_old = datas.get("data_old").get("colsp")
 
     if logger is None:
-        logging.basicConfig(filename='log.txtx', encoding='utf-8', filemode='w', level=logging.DEBUG)
+        if sys.version_info[0] >= 3 and sys.version_info[1] >= 9:
+            logging.basicConfig(filename='log.txtx', encoding='utf-8', filemode='w', level=logging.DEBUG, format='%(asctime)s:%(name)s\n%(levelname)s:%(message)s', datefmt='%Y-%d-%m %H:%M:%S')
+        else:
+            logging.basicConfig(filename='log.txtx', filemode='w', level=logging.DEBUG, format='%(asctime)s:%(name)s\n%(levelname)s:%(message)s', datefmt='%Y-%d-%m %H:%M:%S')
         logger = logging.getLogger(__name__)
         logger.info('Started')
 
@@ -2568,7 +2574,7 @@ def do_sql(sql, command_options, variables, datas = {}, output = None, logger = 
             read_text_qualifier = options.get("text_qualifier")
             read_columns = options.get("read_columns")
             strip_columns = options.get("strip_columns")
-            print_data = options.get("print_data")
+            read_print_data = options.get("print_data")
             full_filename, file_exists = check_filename(read_filename, variables["$foldername"]["options"]["value"])
             #print("Read: '{}'".format(read_filename))
             try:
@@ -2665,7 +2671,7 @@ def do_sql(sql, command_options, variables, datas = {}, output = None, logger = 
                         columns = columns_new
                         data_old = None
                         columns_old = None
-                        if print_data:
+                        if read_print_data:
                             print()
                             show_data(data, columns, variables)
                     else:
@@ -3375,7 +3381,7 @@ def do_sql(sql, command_options, variables, datas = {}, output = None, logger = 
             nrows = len(data)
             ncols = len(columns)
 
-            data_fill(fill_formats, fill_nones)
+            data = data_fill(variables, data, columns, fill_formats, fill_nones)
             #print(rows_show)
 
             title_text = ""
@@ -3391,7 +3397,7 @@ def do_sql(sql, command_options, variables, datas = {}, output = None, logger = 
                     cc = colorCode(title_color)
                     variables["$printColor"]["options"]["value"](title_text, cc)
                 else:
-                    cc = INVGREEN
+                    cc = variables["$INVGREEN"]["options"]["value"]
                     variables["$printColor"]["options"]["value"](title_text, cc)
 
             #rows = range(1, nrows + 1)
@@ -4432,7 +4438,10 @@ but {len(command_options[key1][key2])} '{key2}'.'''
     #printInvRed("KO")
     variables["$printInvGreen"]["options"]["value"]("OK")
 
-    logging.basicConfig(filename='log.txtx', encoding='utf-8', filemode='w', level=logging.DEBUG, format='%(asctime)s:%(name)s\n%(levelname)s:%(message)s', datefmt='%Y-%d-%m %H:%M:%S')
+    if sys.version_info[0] >= 3 and sys.version_info[1] >= 9:
+        logging.basicConfig(filename='log.txtx', encoding='utf-8', filemode='w', level=logging.DEBUG, format='%(asctime)s:%(name)s\n%(levelname)s:%(message)s', datefmt='%Y-%d-%m %H:%M:%S')
+    else:
+        logging.basicConfig(filename='log.txtx', filemode='w', level=logging.DEBUG, format='%(asctime)s:%(name)s\n%(levelname)s:%(message)s', datefmt='%Y-%d-%m %H:%M:%S')
     logger = logging.getLogger(__name__)
     logger.info(f'Started')
 
