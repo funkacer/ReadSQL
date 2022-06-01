@@ -30,7 +30,19 @@ import logging
 
 from src.params import variables, command_options
 
-#print(variables["$do_mp"])
+is_np = False
+try:
+    import numpy as np
+    is_np = True
+except Exception as e:
+    traceback.print_exc()
+
+is_mpl = False
+try:
+    import matplotlib.pyplot as plt
+    is_mpl = True
+except Exception as e:
+    traceback.print_exc()
 
 #from Scipy.stats import skew
 
@@ -594,7 +606,7 @@ def data_split(colsi, colspi, combine = True):
 
 def data_profile(data, columns, variables, colsp, rowsi, colsi, purge = False):
     #global data, variables, colsp
-    import numpy as np
+    #import numpy as np
 
     proc_old = 0
     nrows = len(rowsi)
@@ -1008,7 +1020,6 @@ def data_profile_mp(inn):
     colsp = {}
     ci = 0
     colsp[ci], cir, variables, i, imax = inn[0], inn[1], inn[2], inn[3], inn[4]
-    import numpy as np
 
     RED, END = '\033[91m', '\033[0m'
     printRed = lambda sTxt: print(RED + sTxt + END)
@@ -4319,22 +4330,7 @@ def main(argv):
 
     os.system('color')
 
-    #do_mp = True
-    #do_mp = False
 
-    is_np = False
-    try:
-        import numpy as np
-        is_np = True
-    except Exception as e:
-        traceback.print_exc()
-
-    is_mpl = False
-    try:
-        import matplotlib.pyplot as plt
-        is_mpl = True
-    except Exception as e:
-        traceback.print_exc()
 
     if is_np: print("Using numpy version:", version("numpy"))
     if is_mpl: print("Using matplotlib version:", version("matplotlib"))
