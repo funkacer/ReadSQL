@@ -319,24 +319,33 @@ def data_split_prep_mp(inn):
     colspi = inn[1]
     for cspi in colspi:
         colsp[cspi]['cats'] = {}
+        '''
         for cat in colsp[cspi]['c']:
             colsp[cspi]['cats'][cat] = []  #find rows for every category
             #print(cat)
-        for av in colsp[cspi]["av"]:
+        '''
+        for av in colsp[cspi]["array_valids"]:
+            if colsp[cspi]['cats'].get(av['value']) is None:
+                colsp[cspi]['cats'][av['value']] = []
             colsp[cspi]['cats'][av['value']].append(av['row'])
 
     return [cspi, colsp[cspi]['cats']]
 
 
-def data_split_prep(colspi):
-    global colsp
+def data_split_prep(colsp, colspi):
     for cspi in colspi:
         colsp[cspi]['cats'] = {}
-        for cat in colsp[cspi]['c']:
-            colsp[cspi]['cats'][cat] = []  #find rows for every category
+        '''
+        for cat in colsp[cspi]["categ_counts"]:
+            colsp[cspi]['cats'][cat[0]] = []  #find rows for every category
             #print(cat)
-        for av in colsp[cspi]["av"]:
+        '''
+        # make better
+        for av in colsp[cspi]["array_valids"]:
+            if colsp[cspi]['cats'].get(av['value']) is None:
+                colsp[cspi]['cats'][av['value']] = []
             colsp[cspi]['cats'][av['value']].append(av['row'])
+    return colsp
 
 
 def data_split_mp(inn):
@@ -359,7 +368,7 @@ def data_split_mp(inn):
                     filterr = []
                     maxx = len(colsp[cspi]['cats'][cat])
                     print(colsp[cspi]['name'], cat, len(colsp[cspi]['cats'][cat]))
-                    for i in colsp[ci]["av"]:
+                    for i in colsp[ci]["array_valids"]:
                         if i[0] >= colsp[cspi]['cats'][cat][ind]:
                             while i[0] > colsp[cspi]['cats'][cat][ind]:
                                 ind += 1
@@ -373,14 +382,14 @@ def data_split_mp(inn):
                         else:
                             filterr.append(False)
                         if ind >= maxx: break
-                    for i in range(len(colsp[ci]["av"])-len(filterr)):
+                    for i in range(len(colsp[ci]["array_valids"])-len(filterr)):
                         filterr.append(False)
                     #colsp[ci]['split'][cspi][cat] = colsp[ci]["av"][filterr]
-                    colsp[ci]['split'][cspis][cat] = colsp[ci]["av"][filterr]
-                    if colsp[ci]['t'] == "Integer" or colsp[ci]['t'] == "Float":
-                        print(colsp[ci]['name'], cat, colsp[ci]['split'][cspis][cat][:5],round(colsp[ci]['split'][cspis][cat]['value'].mean(),2),round(colsp[ci]["av"]['value'].mean(),2))
-                    elif colsp[ci]['t'] == "Datetime" or colsp[ci]['t'] == "Date" or colsp[ci]['t'] == "Time":
-                        print(colsp[ci]['name'], cat, colsp[ci]['split'][cspis][cat][:5],colsp[ci]['split'][cspis][cat]['value'].max(),colsp[ci]["av"]['value'].max())
+                    colsp[ci]['split'][cspis][cat] = colsp[ci]["array_valids"][filterr]
+                    if colsp[ci]['type'] == "Integer" or colsp[ci]['type'] == "Float":
+                        print(colsp[ci]['name'], cat, colsp[ci]['split'][cspis][cat][:5],round(colsp[ci]['split'][cspis][cat]['value'].mean(),2),round(colsp[ci]["array_valids"]['value'].mean(),2))
+                    elif colsp[ci]['type'] == "Datetime" or colsp[ci]['type'] == "Date" or colsp[ci]['type'] == "Time":
+                        print(colsp[ci]['name'], cat, colsp[ci]['split'][cspis][cat][:5],colsp[ci]['split'][cspis][cat]['value'].max(),colsp[ci]["array_valids"]['value'].max())
                     else:
                         print(colsp[ci]['name'], cat, colsp[ci]['split'][cspis][cat][:5])
     else:
@@ -395,7 +404,7 @@ def data_split_mp(inn):
                 filterr = []
                 maxx = len(colsp[cspi]['cats'][cat])
                 print(colsp[cspi]['name'], cat, len(colsp[cspi]['cats'][cat]))
-                for i in colsp[ci]["av"]:
+                for i in colsp[ci]["array_valids"]:
                     if i[0] >= colsp[cspi]['cats'][cat][ind]:
                         while i[0] > colsp[cspi]['cats'][cat][ind]:
                             ind += 1
@@ -409,14 +418,14 @@ def data_split_mp(inn):
                     else:
                         filterr.append(False)
                     if ind >= maxx: break
-                for i in range(len(colsp[ci]["av"])-len(filterr)):
+                for i in range(len(colsp[ci]["array_valids"])-len(filterr)):
                     filterr.append(False)
                 #colsp[ci]['split'][cspi][cat] = colsp[ci]["av"][filterr]
-                colsp[ci]['split'][cspis][cat] = colsp[ci]["av"][filterr]
-                if colsp[ci]['t'] == "Integer" or colsp[ci]['t'] == "Float":
-                    print(colsp[ci]['name'], cat, colsp[ci]['split'][cspis][cat][:5],round(colsp[ci]['split'][cspis][cat]['value'].mean(),2),round(colsp[ci]["av"]['value'].mean(),2))
-                elif colsp[ci]['t'] == "Datetime" or colsp[ci]['t'] == "Date" or colsp[ci]['t'] == "Time":
-                    print(colsp[ci]['name'], cat, colsp[ci]['split'][cspis][cat][:5],colsp[ci]['split'][cspis][cat]['value'].max(),colsp[ci]["av"]['value'].max())
+                colsp[ci]['split'][cspis][cat] = colsp[ci]["array_valids"][filterr]
+                if colsp[ci]['type'] == "Integer" or colsp[ci]['type'] == "Float":
+                    print(colsp[ci]['name'], cat, colsp[ci]['split'][cspis][cat][:5],round(colsp[ci]['split'][cspis][cat]['value'].mean(),2),round(colsp[ci]["array_valids"]['value'].mean(),2))
+                elif colsp[ci]['type'] == "Datetime" or colsp[ci]['type'] == "Date" or colsp[ci]['type'] == "Time":
+                    print(colsp[ci]['name'], cat, colsp[ci]['split'][cspis][cat][:5],colsp[ci]['split'][cspis][cat]['value'].max(),colsp[ci]["array_valids"]['value'].max())
                 else:
                     print(colsp[ci]['name'], cat, colsp[ci]['split'][cspis][cat][:5])
 
@@ -475,8 +484,7 @@ def data_split_mp(inn):
     return [ci, colsp[ci]['split']]
 
 
-def data_split(colsi, colspi, combine = True):
-    global colsp
+def data_split(colsp, colsi, colspi, combine = True):
 
     if not combine:
         for cspi in colspi:
@@ -490,7 +498,7 @@ def data_split(colsi, colspi, combine = True):
                     filterr = []
                     maxx = len(colsp[cspi]['cats'][cat])
                     print(colsp[cspi]['name'], cat, len(colsp[cspi]['cats'][cat]))
-                    for i in colsp[ci]["av"]:
+                    for i in colsp[ci]["array_valids"]:
                         if i[0] >= colsp[cspi]['cats'][cat][ind]:
                             while i[0] > colsp[cspi]['cats'][cat][ind]:
                                 ind += 1
@@ -504,14 +512,14 @@ def data_split(colsi, colspi, combine = True):
                         else:
                             filterr.append(False)
                         if ind >= maxx: break
-                    for i in range(len(colsp[ci]["av"])-len(filterr)):
+                    for i in range(len(colsp[ci]["array_valids"])-len(filterr)):
                         filterr.append(False)
                     #colsp[ci]['split'][cspi][cat] = colsp[ci]["av"][filterr]
-                    colsp[ci]['split'][cspis][cat] = colsp[ci]["av"][filterr]
-                    if colsp[ci]['t'] == "Integer" or colsp[ci]['t'] == "Float":
-                        print(colsp[ci]['name'], cat, colsp[ci]['split'][cspis][cat][:5],round(colsp[ci]['split'][cspis][cat]['value'].mean(),2),round(colsp[ci]["av"]['value'].mean(),2))
-                    elif colsp[ci]['t'] == "Datetime" or colsp[ci]['t'] == "Date" or colsp[ci]['t'] == "Time":
-                        print(colsp[ci]['name'], cat, colsp[ci]['split'][cspis][cat][:5],colsp[ci]['split'][cspis][cat]['value'].max(),colsp[ci]["av"]['value'].max())
+                    colsp[ci]['split'][cspis][cat] = colsp[ci]["array_valids"][filterr]
+                    if colsp[ci]['type'] == "Integer" or colsp[ci]['type'] == "Float":
+                        print(colsp[ci]['name'], cat, colsp[ci]['split'][cspis][cat][:5],round(colsp[ci]['split'][cspis][cat]['value'].mean(),2),round(colsp[ci]["array_valids"]['value'].mean(),2))
+                    elif colsp[ci]['type'] == "Datetime" or colsp[ci]['type'] == "Date" or colsp[ci]['type'] == "Time":
+                        print(colsp[ci]['name'], cat, colsp[ci]['split'][cspis][cat][:5],colsp[ci]['split'][cspis][cat]['value'].max(),colsp[ci]["array_valids"]['value'].max())
                     else:
                         print(colsp[ci]['name'], cat, colsp[ci]['split'][cspis][cat][:5])
     else:
@@ -526,7 +534,7 @@ def data_split(colsi, colspi, combine = True):
                 filterr = []
                 maxx = len(colsp[cspi]['cats'][cat])
                 print(colsp[cspi]['name'], cat, len(colsp[cspi]['cats'][cat]))
-                for i in colsp[ci]["av"]:
+                for i in colsp[ci]["array_valids"]:
                     if i[0] >= colsp[cspi]['cats'][cat][ind]:
                         while i[0] > colsp[cspi]['cats'][cat][ind]:
                             ind += 1
@@ -540,14 +548,14 @@ def data_split(colsi, colspi, combine = True):
                     else:
                         filterr.append(False)
                     if ind >= maxx: break
-                for i in range(len(colsp[ci]["av"])-len(filterr)):
+                for i in range(len(colsp[ci]["array_valids"])-len(filterr)):
                     filterr.append(False)
                 #colsp[ci]['split'][cspi][cat] = colsp[ci]["av"][filterr]
-                colsp[ci]['split'][cspis][cat] = colsp[ci]["av"][filterr]
-                if colsp[ci]['t'] == "Integer" or colsp[ci]['t'] == "Float":
-                    print(colsp[ci]['name'], cat, colsp[ci]['split'][cspis][cat][:5],round(colsp[ci]['split'][cspis][cat]['value'].mean(),2),round(colsp[ci]["av"]['value'].mean(),2))
-                elif colsp[ci]['t'] == "Datetime" or colsp[ci]['t'] == "Date" or colsp[ci]['t'] == "Time":
-                    print(colsp[ci]['name'], cat, colsp[ci]['split'][cspis][cat][:5],colsp[ci]['split'][cspis][cat]['value'].max(),colsp[ci]["av"]['value'].max())
+                colsp[ci]['split'][cspis][cat] = colsp[ci]["array_valids"][filterr]
+                if colsp[ci]['type'] == "Integer" or colsp[ci]['type'] == "Float":
+                    print(colsp[ci]['name'], cat, colsp[ci]['split'][cspis][cat][:5],round(colsp[ci]['split'][cspis][cat]['value'].mean(),2),round(colsp[ci]["array_valids"]['value'].mean(),2))
+                elif colsp[ci]['type'] == "Datetime" or colsp[ci]['type'] == "Date" or colsp[ci]['type'] == "Time":
+                    print(colsp[ci]['name'], cat, colsp[ci]['split'][cspis][cat][:5],colsp[ci]['split'][cspis][cat]['value'].max(),colsp[ci]["array_valids"]['value'].max())
                 else:
                     print(colsp[ci]['name'], cat, colsp[ci]['split'][cspis][cat][:5])
 
@@ -603,6 +611,8 @@ def data_split(colsi, colspi, combine = True):
                                 print(colsp[ci]['name'], cat, colsp[ci]['split'][cspis][cat][:5])
                             '''
 
+    return colsp
+
 
 def data_profile(data, columns, variables, colsp, rowsi, colsi, purge = False):
     #global data, variables, colsp
@@ -620,6 +630,7 @@ def data_profile(data, columns, variables, colsp, rowsi, colsi, purge = False):
         mv = []
         rn = []
         colsp[ci]["name"] = columns[ci-1]
+        colsp[ci]['split'] = {} #use in data_split
         colsp[ci]["type"] = "Integer"
         colsp[ci]["class"] = None
         colsp[ci]["fnq"] = None
@@ -2481,11 +2492,19 @@ def do_sql(sql, command_options, variables, datas = {}, output = None, logger = 
             connstring = ""
             if driver is not None: connstring += f'DRIVER={driver};'
             if host is not None: connstring += f'Server={host};'
-            if port is not None: connstring += f'PORT={port}'
+            if port is not None: connstring += f'PORT={port};'
             if database is not None: connstring += f'Database={database};'
             if user is not None: connstring += f'UID={user};'
             if password is not None: connstring += f'PWD={password};'
             if option is not None: connstring += f'{option};'
+
+            server = socket.gethostname()
+            connstring = 'Driver={SQL Server};' + \
+              f'Server={server}\SQLEXPRESS;' + \
+              f'Database={database};' + \
+              'Trusted_Connection=yes;'
+
+            print(connstring)
 
             try:
                 print("Using pyodbc version:", version("pyodbc"))
@@ -2759,10 +2778,12 @@ def do_sql(sql, command_options, variables, datas = {}, output = None, logger = 
             if colssp is not None:
                 colspi = find_columns(colssp, columns)
             colsai = colsi + colspi
-            data_profile(range(1, len(data) + 1), colsai)
-            colsif = [ci for ci in colsi if colsp[ci]['t'] == "Integer" or colsp[ci]['t'] == "Float"]
+            #data_profile(range(1, len(data) + 1), colsai)
+            colsp = {}  #should check if not exists already
+            data, colsp = data_profile(data, columns, variables, colsp, range(1, len(data) + 1), colsai, purge = False)
+            colsif = [ci for ci in colsi if colsp[ci]['type'] == "Integer" or colsp[ci]['type'] == "Float"] #should check class
             print("colsif (final colsi):", colsif)
-            colspif = [cspi for cspi in colspi if colsp[cspi]['t'] == "Categorical"]
+            colspif = [cspi for cspi in colspi if colsp[cspi]['type'] == "Categorical"]
             if variables["$do_mp"]["options"]["value"]:
                 inn = [[colsp, [colspi]] for colspi in colspif]
                 pool = mp.Pool()
@@ -2779,18 +2800,20 @@ def do_sql(sql, command_options, variables, datas = {}, output = None, logger = 
                 for ret in returns:
                     colsp[ret[0]]['split'] = ret[1]
             else:
-                data_split_prep(colspif)
-                data_split(colsif, colspif, True)
+                colsp = data_split_prep(colsp, colspif)
+                colsp = data_split(colsp, colsif, colspif, True)
             #print(colsp[colspif[0]]['cats'])
             #data_split0(colspiff)
             #data_split(colsif, colspif, True)
 
             split_data = []
             split_rows = []
-            #split_rows = ["Type", "Class", "Valids", "Nones", "Valid %", "Sum", "Min", "Max", "Mean", "Q1", "Median", "Q3", "Range", "IQR", "Variance", "STD", "Skew", "Unique", "FirstCat"]
+            #profile_rows = ["Type", "Class", "Valids", "Nones", "Valid %", "Sum", "Min", "Max", "Range", "Mean", "Q1", "Median", "Q3", "IQR", "Variance", "STD", "Skew", "Unique", "FirstCat"]
+            #profile_rows_label = '(Stat)'
+            #stats = ["type", "class", "valid", "none", "valid%", "sum", "min", "max", "range", "mean", "q1", "q2", "q3", "iqr", "var", "std", "skew", "unique", "fnq"]
             split_rows_label = ' - '.join([colsp[cspi]['name'] for cspi in colspif])    #TODO: user split variable
             #stats = ["t", "cl", "v", "n", "v%", "sum", "min", "max", "mean", "q1", "q2", "q3", "ran", "iqr", "var", "std", "skw","uni", "fnq"]
-            stats = ["t","v","n"]
+            stats = ["type","valid","none"]
             split_columns = [colsp[ci[0]]['name']+ci[1] for ci in [(colsif[i],stats[j]) for i in range(len(colsif)) for j in range(len(stats))]]
             print(split_columns)
 
@@ -2969,7 +2992,7 @@ def do_sql(sql, command_options, variables, datas = {}, output = None, logger = 
                     elif colsp[ci]["type"] == "Time":
                         # sqlite does not use timedelta for time format, min datetime is 0001-01-01 0:0:0:
                         columns_create += "time"
-                        if colsp[ci]["class"] is not class_str:
+                        if colsp[ci]["class"] is not variables["$class_str"]["options"]["value"]:
                             #print("'" + colsp[ci]["name"] + "'", "is not class string - converting...")
                             for ri in range(1, len(data) + 1):
                                 if data[ri-1][ci-1] is not None and not isinstance(data[ri-1][ci-1], str):
@@ -3076,13 +3099,13 @@ def do_sql(sql, command_options, variables, datas = {}, output = None, logger = 
                     else:
                         columns_create += f''', "{col}" '''
                     if colsp[ci]["type"] == "Integer":
-                        columns_create += "int"
+                        columns_create += "bigint"
                     elif colsp[ci]["type"] == "Float":
                         columns_create += "real"   # this format is Approximate numerics
                         #columns_create += "decimal(10,3)"
                     elif colsp[ci]["type"] == "Datetime":
                         columns_create += "datetime"
-                        if colsp[ci]["class"] is not class_str:
+                        if colsp[ci]["class"] is not variables["$class_str"]["options"]["value"]:
                             #print("'" + colsp[ci]["name"] + "'", "is not class string - converting...")
                             for ri in range(1, len(data) + 1):
                                 if data[ri-1][ci-1] is not None and not isinstance(data[ri-1][ci-1], str):
@@ -3090,7 +3113,7 @@ def do_sql(sql, command_options, variables, datas = {}, output = None, logger = 
                                     data[ri-1][ci-1] = str(data[ri-1][ci-1])
                     elif colsp[ci]["type"] == "Date":
                         columns_create += "date"
-                        if colsp[ci]["class"] is not class_str:
+                        if colsp[ci]["class"] is not variables["$class_str"]["options"]["value"]:
                             #print("'" + colsp[ci]["name"] + "'", "is not class string - converting...")
                             for ri in range(1, len(data) + 1):
                                 if data[ri-1][ci-1] is not None and not isinstance(data[ri-1][ci-1], str):
@@ -3098,7 +3121,7 @@ def do_sql(sql, command_options, variables, datas = {}, output = None, logger = 
                                     data[ri-1][ci-1] = str(data[ri-1][ci-1])
                     elif colsp[ci]["type"] == "Time":
                         columns_create += "time"
-                        if colsp[ci]["class"] is not class_str:
+                        if colsp[ci]["class"] is not variables["$class_str"]["options"]["value"]:
                             #print("'" + colsp[ci]["name"] + "'", "is not class string - converting...")
                             for ri in range(1, len(data) + 1):
                                 if data[ri-1][ci-1] is not None and not isinstance(data[ri-1][ci-1], str):
@@ -3110,7 +3133,7 @@ def do_sql(sql, command_options, variables, datas = {}, output = None, logger = 
                     else:
                         # this leads to crash if instance is not str
                         columns_create += "ntext"
-                        if colsp[ci]["class"] is not class_str:
+                        if colsp[ci]["class"] is not variables["$class_str"]["options"]["value"]:
                             #print("'" + colsp[ci]["name"] + "'", "is not class string - converting...")
                             for ri in range(1, len(data) + 1):
                                 if data[ri-1][ci-1] is not None and not isinstance(data[ri-1][ci-1], str):
@@ -3503,7 +3526,7 @@ def do_sql(sql, command_options, variables, datas = {}, output = None, logger = 
                     cc = colorCode(title_color)
                     variables["$printColor"]["options"]["value"](title_text, cc)
                 else:
-                    cc = INVGREEN
+                    cc = variables["$INVGREEN"]["options"]["value"]
                     variables["$printColor"]["options"]["value"](title_text, cc)
 
             #rows = range(1, nrows + 1)
@@ -3625,6 +3648,7 @@ def do_sql(sql, command_options, variables, datas = {}, output = None, logger = 
                     colsp[ci]["type"] = t
                     colsp[ci]["class"] = cl
                     colsp[ci]["name"] = columns[ci-1]
+                    colsp[ci]['split'] = {} #use in data_split
                     if len(colsp[ci]["array_valids"]) == 0: colsp[ci]["type"] = None   #"Categorical"???
                     #print(colsp[ci]["name"], len(colsp[ci]["array_valids"]), colsp[ci]["type"], colsp[ci]["class"])
                     proc = int(i/len(colsp)*100)
@@ -4329,8 +4353,6 @@ def main(argv):
     global variables
 
     os.system('color')
-
-
 
     if is_np: print("Using numpy version:", version("numpy"))
     if is_mpl: print("Using matplotlib version:", version("matplotlib"))

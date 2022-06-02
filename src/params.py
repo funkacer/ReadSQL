@@ -3,6 +3,21 @@ import datetime
 
 variables = {}
 
+variables["$class_str"] = {}
+variables["$class_str"]["shorts"] = []
+variables["$class_str"]["options"] = {}
+variables["$class_str"]["options"]["value"] = type("")
+
+variables["$class_int"] = {}
+variables["$class_int"]["shorts"] = []
+variables["$class_int"]["options"] = {}
+variables["$class_int"]["options"]["value"] = type(0)
+
+variables["$class_float"] = {}
+variables["$class_float"]["shorts"] = []
+variables["$class_float"]["options"] = {}
+variables["$class_float"]["options"]["value"] = type(0.0)
+
 variables["$default_column_name"] = {}
 variables["$default_column_name"]["shorts"] = []
 variables["$default_column_name"]["options"] = {}
