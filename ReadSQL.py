@@ -61,14 +61,14 @@ def __rd(x,y=2):
         result = ''
     return result
 
-def getHistogram(ci, cspi, title='Graf'):
+def getHistogram(colsp, ci, cspi, title='Graf'):
     '''
     Takes disctionary of labels and np arrays for boxplots
     '''
     #print("Split:", colsp[ci]['split'])
     if cspi is None:
         fig, ax = plt.subplots()
-        n, bins, patches = ax.hist(colsp[ci]['m'], 50, density=True, facecolor='g', alpha=0.75)
+        n, bins, patches = ax.hist(colsp[ci]['array_valids']['value'], 50, density=True, facecolor='g', alpha=0.75)
         plt.title(title)
         plt.tight_layout()
         plt.show()
@@ -89,13 +89,13 @@ def getHistogram(ci, cspi, title='Graf'):
         plt.show()
 
 
-def getLineChartI(ci, title='Graf'):
+def getLineChartI(colsp, ci, title='Graf'):
     '''Tato funkce akceptuje df a nazvy sloupcu, vraci HTML kod vertikalniho grafu'''
     rotation = 90
     #sort_values = True
     #sort_ascending = True
     precision = 0
-    cols = [col for col in sorted(colsp[ci]['c'].keys())]
+    cols = colsp[ci]['categ_counts']['value']
     print(len(cols))
     '''
     if len(cols) > 0:
@@ -104,7 +104,7 @@ def getLineChartI(ci, title='Graf'):
         width = 1
     '''
     fig, ax = plt.subplots(figsize = (10,5))
-    ax.plot(range(len(cols)), [colsp[ci]['c'][col] for col in cols])
+    ax.plot(range(len(cols)), colsp[ci]['categ_counts']['count'])
     '''
     plt.bar(range(len(cols)), [colsp[ci]['c'][col] for col in cols])
     rects = plt.bar(range(len(cols)), [colsp[ci]['c'][col] for col in cols])
@@ -125,19 +125,19 @@ def getLineChartI(ci, title='Graf'):
     plt.show()
 
 
-def getBarChartI(ci, title='Graf'):
+def getBarChartI(colsp, ci, title='Graf'):
     '''Tato funkce akceptuje df a nazvy sloupcu, vraci HTML kod vertikalniho grafu'''
     rotation = 90
     #sort_values = True
     #sort_ascending = True
     precision = 0
-    cols = list(colsp[ci]['c'].keys())
+    cols = colsp[ci]['categ_counts']['value']
     if len(cols) > 0:
         width = 0.8/len(cols)
     else:
         width = 1
     fig, ax = plt.subplots(figsize = (10,5))
-    rects = plt.bar(range(len(cols)), [colsp[ci]['c'][col] for col in cols])
+    rects = plt.bar(range(len(cols)), colsp[ci]['categ_counts']['count'])
     for rect in rects:
         ax.annotate(text = __rd(rect.get_height(),precision), xy = (rect.get_x() + rect.get_width()/2, rect.get_height()/2), ha = 'center', va = 'bottom')
     plt.xticks(range(len(cols)), cols, rotation = rotation)
@@ -215,7 +215,7 @@ def getBarChartV(ci):
     plt.show()
 
 
-def getBoxplotI(colsi, title = 'Box Plot', boxplot_showfliers = True):
+def getBoxplotI(colsp, colsi, title = 'Box Plot', boxplot_showfliers = True):
     '''
     Takes disctionary of labels and np arrays for boxplots
     '''
@@ -246,7 +246,7 @@ def getBoxplotI(colsi, title = 'Box Plot', boxplot_showfliers = True):
         #data_part_np = data_df.iloc[data_df[data_df[column].isnull() == 0].index,data_df.columns.get_loc(column)].to_numpy()
         #data_part_np = data_df.loc[data_df[data_df[column].isnull() == 0].index, column].to_numpy()
         #data_part_np = np.array(colsp[ci]['m'])
-        data_part_np = colsp[ci]['m']
+        data_part_np = colsp[ci]['array_valids']['value']
         #print(data_part_np)
         #data_np[i] = data_part_np
         np_dict[colsp[ci]['name']] = data_part_np
@@ -2754,7 +2754,7 @@ def do_sql(sql, command_options, variables, datas = {}, output = None, logger = 
                     #print(sql)
                     #print()
                     start = time.perf_counter()
-                    variables, datas, output, logger = do_sql(sql_load, variables, command_options, datas, output, logger)
+                    variables, datas, output, logger = do_sql(sql_load, command_options, variables, datas, output, logger)
                     OK_returned = variables["$command_results"]["options"]["value"][-1]
                     end = time.perf_counter()
                     print()
@@ -2882,14 +2882,18 @@ def do_sql(sql, command_options, variables, datas = {}, output = None, logger = 
             else:
                 colsi = [ci for ci in range(1,len(columns)+1)]
             colsai = colsi
+            colspi = []
             if colssp is not None:
                 colspi = find_columns(colssp, columns)
             colsai = colsi + colspi
-            data_profile(range(1, len(data) + 1), colsai)
-            colsif = [ci for ci in colsi if colsp[ci]['t'] == "Integer" or colsp[ci]['t'] == "Float"]
+            data, colsp = data_profile(data, columns, variables, colsp, range(1, len(data) + 1), colsai)
+            colsif = [ci for ci in colsi if colsp[ci]['type'] == "Integer" or colsp[ci]['type'] == "Float"]
             print("colsif (final colsi):", colsif)
-            colspif = [cspi for cspi in colspi if colsp[cspi]['t'] == "Categorical"]
-            data_split(colsif, colspif, True)
+            colspif = [cspi for cspi in colspi if colsp[cspi]['type'] == "Categorical"]
+            print("colspif (final colspi):", colspif)
+            if len(colspif) > 0:
+                colsp = data_split_prep(colsp, colspif)
+                colsp = data_split(colsp, colsif, colspif, True)
 
             if is_mpl:
                 print("Go to plot window...")
@@ -2898,11 +2902,11 @@ def do_sql(sql, command_options, variables, datas = {}, output = None, logger = 
                         titlee = title + ": " + colsp[ci]["name"]
                     else:
                         titlee = colsp[ci]["name"]
-                    if colspif is None:
-                        getHistogram(ci, None, titlee)
-                    else:
+                    if len(colspif) > 0:
                         for cspi in colspif:
-                            getHistogram(ci, cspi, titlee)
+                            getHistogram(colsp, ci, cspi, titlee)
+                    else:
+                        getHistogram(colsp, ci, None, titlee)
                 print("All windows closed...")
             else:
                 print("Go plot support...")
@@ -2921,7 +2925,7 @@ def do_sql(sql, command_options, variables, datas = {}, output = None, logger = 
                         titlee = title + ": " + colsp[ci]["name"]
                     else:
                         titlee = colsp[ci]["name"]
-                    getLineChartI(ci, titlee)
+                    getLineChartI(colsp, ci, titlee)
 
 
         elif command == "graph boxplot":
@@ -2934,7 +2938,7 @@ def do_sql(sql, command_options, variables, datas = {}, output = None, logger = 
                 colsi = [ci for ci in range(1,len(columns)+1) if colsp[ci]['t'] == "Integer" or colsp[ci]['t'] == "Float"]
             #print("Colsi", colsi)
             if is_mpl:
-                getBoxplotI(colsi, title, boxplot_showfliers)
+                getBoxplotI(colsp, colsi, title, boxplot_showfliers)
 
 
         elif command == "graph barchart":
@@ -2951,7 +2955,7 @@ def do_sql(sql, command_options, variables, datas = {}, output = None, logger = 
                         titlee = title + ": " + colsp[ci]["name"]
                     else:
                         titlee = colsp[ci]["name"]
-                    getBarChartI(ci, titlee)
+                    getBarChartI(colsp, ci, titlee)
 
 
         elif command == "table":
@@ -3132,7 +3136,7 @@ def do_sql(sql, command_options, variables, datas = {}, output = None, logger = 
                                         data[ri-1][ci-1] = str(data[ri-1][ci-1])
                     else:
                         # this leads to crash if instance is not str
-                        columns_create += "ntext"
+                        columns_create += "nvarchar(max)"
                         if colsp[ci]["class"] is not variables["$class_str"]["options"]["value"]:
                             #print("'" + colsp[ci]["name"] + "'", "is not class string - converting...")
                             for ri in range(1, len(data) + 1):
