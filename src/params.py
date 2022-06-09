@@ -186,6 +186,7 @@ variables["$columns_all"]["data"]["print"] = {}
 variables["$columns_all"]["data"]["print data"] = {}
 variables["$columns_all"]["data"]["print data easy"] = {}
 variables["$columns_all"]["data"]["data"] = {}
+variables["$columns_all"]["data"]["data columns rename"] = {}
 variables["$columns_all"]["data"]["data select"] = {}
 variables["$columns_all"]["data"]["data select easy"] = {}
 variables["$columns_all"]["data"]["data fill"] = {}
@@ -299,6 +300,9 @@ command_options["read"]["help1"] = "Help for command 'folder'"
 command_options["read"]["help2"] = ["Blabla1", "Blabla2", "Blabla3", "Blabla4", "Blabla5", "Blabla6", "Blabla7"]
 command_options["read"]["alternative"] = ["read", "r"]
 command_options["read"]["altoption"] = [["f"],["d"],["t","tq"], ["r","rc"], ["s","sc"], ["p","pd"], ["l"]]
+
+
+
 
 command_options["set variable easy"] = {}
 command_options["set variable easy"]["name"] = ["names"]
@@ -455,14 +459,14 @@ command_options["print data"]["alternative"] = ["print", "p"]
 command_options["print data"]["altoption"] = [["w"], ["f"], ["t"], ["s"], ["r"], ["l"], ["c"], ["tt"], ["nt"], ["tc"], ["nc"]]
 
 command_options["print columns"] = {}
-command_options["print columns"]["name"] = ["what"]
-command_options["print columns"]["required"] = [True]
-command_options["print columns"]["type"] = [["columns", "c"]]
-command_options["print columns"]["default"] = [None]
+command_options["print columns"]["name"] = ["what", "how"]
+command_options["print columns"]["required"] = [True, False]
+command_options["print columns"]["type"] = [["columns", "c"], ["name", "n", "index", "i"]]
+command_options["print columns"]["default"] = [None, "name"]
 command_options["print columns"]["help1"] = "Help for command 'folder'"
-command_options["print columns"]["help2"] = ["Bla1"]
+command_options["print columns"]["help2"] = ["Bla1", "Bla2"]
 command_options["print columns"]["alternative"] = ["print", "p"]
-command_options["print columns"]["altoption"] = [["w"]]
+command_options["print columns"]["altoption"] = [["w"],["h"]]
 
 command_options["print history"] = {}
 command_options["print history"]["name"] = []
@@ -509,7 +513,7 @@ command_options["data select"] = {}
 command_options["data select"]["name"] = ["what", "from", "to", "step", "random", "list", "columns", "title", "note", "title_color", "note_color"]
 command_options["data select"]["required"] = [True, False, False, False, False, False, False, False, False, False, False]
 command_options["data select"]["type"] = [["select","se","s"], "int", "int", "int", "int", "intlist", "strlist", "str", "str", "int", "int"]
-command_options["data select"]["default"] = ["select", 0, 0, 1, 0, "[]", "[]", None, None, None, None]
+command_options["data select"]["default"] = [None, 0, 0, 1, 0, "[]", "[]", None, None, None, None]
 command_options["data select"]["help1"] = "Help for command 'folder'"
 command_options["data select"]["help2"] = ["Bla1","Bla2","Bla3","Bla4","Bla5","Bla6","Bla7","Bla8","Bla9","Bla10","Bla11"]
 command_options["data select"]["alternative"] = ["data", "d"]
@@ -527,9 +531,9 @@ command_options["data profile easy"]["altoption"] = [["f"], ["t"], ["s"], ["r"],
 
 command_options["data profile"] = {}
 command_options["data profile"]["name"] = ["what", "from", "to", "step", "random", "list", "columns", "title", "note", "title_color", "note_color"]
-command_options["data profile"]["required"] = [False, False, False, False, False, False, False, False, False, False, False]
+command_options["data profile"]["required"] = [True, False, False, False, False, False, False, False, False, False, False]
 command_options["data profile"]["type"] = [["profile","pr","p"], "int", "int", "int", "int", "intlist", "strlist", "str", "str", "int", "int"]
-command_options["data profile"]["default"] = ["profile", 0, 0, 1, 0, "[]", "[]", None, None, None, None]
+command_options["data profile"]["default"] = [None, 0, 0, 1, 0, "[]", "[]", None, None, None, None]
 command_options["data profile"]["help1"] = "Help for command 'folder'"
 command_options["data profile"]["help2"] = ["Bla1","Bla2","Bla3","Bla4","Bla5","Bla6","Bla7","Bla8","Bla9","Bla10","Bla11"]
 command_options["data profile"]["alternative"] = ["data", "d"]
@@ -539,11 +543,21 @@ command_options["data reset"] = {}
 command_options["data reset"]["name"] = ["what"]
 command_options["data reset"]["required"] = [True]
 command_options["data reset"]["type"] = [["reset","rs","r"]]
-command_options["data reset"]["default"] = ["reset"]
+command_options["data reset"]["default"] = [None]
 command_options["data reset"]["help1"] = "Help for command 'folder'"
 command_options["data reset"]["help2"] = ["Bla1"]
 command_options["data reset"]["alternative"] = ["data", "d"]
 command_options["data reset"]["altoption"] = [["w"]]
+
+command_options["data columns rename"] = {}
+command_options["data columns rename"]["name"] = ["what", "columns", "how"]
+command_options["data columns rename"]["required"] = [True, True, False]
+command_options["data columns rename"]["type"] = [["columns rename","cr","c"],"dictlist",["name","n","index","i"]]
+command_options["data columns rename"]["default"] = [None, None, "name"]
+command_options["data columns rename"]["help1"] = "Help for command 'folder'"
+command_options["data columns rename"]["help2"] = ["Bla1","Bla2","Bla3"]
+command_options["data columns rename"]["alternative"] = ["data", "d"]
+command_options["data columns rename"]["altoption"] = [["w"],["c"],["h"]]
 
 command_options["graph boxplot"] = {}
 command_options["graph boxplot"]["name"] = ["what", "columns", "title", "show_fliers"]

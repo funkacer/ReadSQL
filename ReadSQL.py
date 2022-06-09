@@ -3313,8 +3313,15 @@ def do_sql(sql, command_options, variables, datas = {}, output = None, logger = 
 
             if options["what"] == "columns":
 
-                #print(", ".join([str(c) for c in columns]))
-                print(columns)
+                print_columns_how = options.get("how")
+                if print_columns_how == "n": print_columns_how = "name"
+                if print_columns_how == "i": print_columns_how = "index"
+
+                if print_columns_how == "name":
+                    print(columns)
+                else:
+                    # print_columns_how == "index"
+                    print("{" + ", ".join([f"{i+1}:'{c}'" for i, c in enumerate(columns)]) + "}")
 
             elif options["what"] == "history":
 
@@ -3401,6 +3408,50 @@ def do_sql(sql, command_options, variables, datas = {}, output = None, logger = 
                         print(note)
 
 
+        elif command == "data columns rename":
+
+            if not data_old and not columns_old:
+                data_old = data.copy()
+                columns_old = columns.copy()
+                #data_old = copy.deepcopy(data)
+                #columns_old = copy.deepcopy(columns)
+
+            data_columns_rename_columns = options.get("columns")
+            data_columns_rename_how = options.get("how")
+
+            print(f"Columns: '{data_columns_rename_columns}', How: '{data_columns_rename_how}'.")
+
+            if data_columns_rename_how == "n": data_columns_rename_how = "name"
+            if data_columns_rename_how == "i": data_columns_rename_how = "index"
+
+            if data_columns_rename_how == "name":
+                if data_columns_rename_columns is not None:
+                    colsi = find_columns(data_columns_rename_columns, columns)
+                    for ci in colsi:
+                        columns[ci-1] = data_columns_rename_columns[columns[ci-1]]
+                else:
+                    # throw error
+                    pass
+            else:
+                # data_columns_rename_how == "index"
+                for ci_str in data_columns_rename_columns:
+                    try:
+                        ci = int(ci_str)
+                        if ci == 0:
+                            variables["$printRed"]["options"]["value"](f"Column index '{ci}' out of range '1' - '{len(columns)}'!")
+                        elif ci > len(columns):
+                            variables["$printRed"]["options"]["value"](f"Column index '{ci}' out of range '1' - '{len(columns)}'!")
+                        elif ci < -len(columns):
+                            variables["$printRed"]["options"]["value"](f"Column index '{ci}' out of range '1' - '{len(columns)}'!")
+                        else:
+                            ci -= 1
+                            columns[ci] = data_columns_rename_columns[ci_str]
+                    except Exception as e:
+                        #traceback.print_exc()
+                        variables["$printRed"]["options"]["value"](str(e))              
+                
+
+
         elif command == "data fill easy" or command == "data fill":
 
             if not data_old and not columns_old:
@@ -3453,11 +3504,13 @@ def do_sql(sql, command_options, variables, datas = {}, output = None, logger = 
 
             #print(columns, data)
 
+
         elif command == "data reset":
             if data_old and columns_old:
                 data = copy.deepcopy(data_old)
                 columns = copy.deepcopy(columns_old)
             show_data(data, columns, variables)
+
 
         elif command == "data select easy" or command == "data select":
 
