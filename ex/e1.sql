@@ -1,5 +1,5 @@
 \f C:\#Git\ReadSQL\ex;
-\cs test4.dbx;
+\cms Test;
 
 \# "Example from SPSS Modeler node Distinct PARTNER order by SPOTREBA_MWH_AKTUALNI_EE desc, include all but first.", tc= 2;
 

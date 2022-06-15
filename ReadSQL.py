@@ -2464,6 +2464,7 @@ def do_sql(sql, command_options, variables, datas = {}, output = None, logger = 
             port = options.get("port")  #3306
             driver = options.get("driver")  #"SQL Server"
             option = options.get("option")  #"trustedconn=true"
+            autocommit = options.get("autocommit")  #"trustedconn=true"
 
             '''
             driver = "FreeTDS"
@@ -2498,19 +2499,22 @@ def do_sql(sql, command_options, variables, datas = {}, output = None, logger = 
             if password is not None: connstring += f'PWD={password};'
             if option is not None: connstring += f'{option};'
 
+            '''
             server = socket.gethostname()
             connstring = 'Driver={SQL Server};' + \
               f'Server={server}\SQLEXPRESS;' + \
               f'Database={database};' + \
               'Trusted_Connection=yes;'
+            '''
 
-            print(connstring)
+            #print(connstring)
 
             try:
                 print("Using pyodbc version:", version("pyodbc"))
                 import pyodbc
                 try:
                     variables["$conn"]["options"]["value"] = pyodbc.connect(connstring)
+                    if autocommit: variables["$conn"]["options"]["value"].autocommit = True
                     #conn.autocommit = True
                     #conn = mysql.connector.connect(host = "localhost", user = "root", password="admin", use_unicode=True,charset="utf8")
                     variables["$db_version"]["options"]["value"] = f"MsSQL (Add schema!): "
@@ -3448,8 +3452,8 @@ def do_sql(sql, command_options, variables, datas = {}, output = None, logger = 
                             columns[ci] = data_columns_rename_columns[ci_str]
                     except Exception as e:
                         #traceback.print_exc()
-                        variables["$printRed"]["options"]["value"](str(e))              
-                
+                        variables["$printRed"]["options"]["value"](str(e))
+
 
 
         elif command == "data fill easy" or command == "data fill":

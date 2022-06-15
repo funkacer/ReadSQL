@@ -366,14 +366,14 @@ command_options["connect postgre"]["alternative"] = ["c postgre", "c pg", "c p",
 command_options["connect postgre"]["altoption"] = [["d"],["u"],["p"],["h"],["po"]]
 
 command_options["connect mssql"] = {}
-command_options["connect mssql"]["name"] = ["database", "user", "password", "host", "port", "driver", "option"]
-command_options["connect mssql"]["required"] = [False, False, False, False, False, False, False]
-command_options["connect mssql"]["type"] = ["str", "str", "str", "str", "int", "str", "str"]
-command_options["connect mssql"]["default"] = ["", "root", "admin", "localhost", 3306, "SQL Server", "trustedconn=true"]
+command_options["connect mssql"]["name"] = ["database", "user", "password", "host", "port", "driver", "option", "autocommit"]
+command_options["connect mssql"]["required"] = [False, False, False, False, False, False, False, False]
+command_options["connect mssql"]["type"] = ["str", "str", "str", "str", "int", "str", "str", "bool"]
+command_options["connect mssql"]["default"] = ["", None, None, f'''{variables["$mssql_host"]["options"]["value"]}\SQLEXPRESS''', None, "SQL Server", "Trusted_Connection=yes", False]
 command_options["connect mssql"]["help1"] = "Help for command 'folder'"
-command_options["connect mssql"]["help2"] = ["Bla1", "Bla2", "Bla3", "Bla4", "Bla5", "Bla6", "Bla7"]
+command_options["connect mssql"]["help2"] = ["Bla1", "Bla2", "Bla3", "Bla4", "Bla5", "Bla6", "Bla7", "Bla8"]
 command_options["connect mssql"]["alternative"] = ["c mssql", "c ms", "cmssql", "cms"]
-command_options["connect mssql"]["altoption"] = [["d"],["u"],["p"],["h"],["po"],["dr"],["o", "do"]]
+command_options["connect mssql"]["altoption"] = [["d"],["u"],["p"],["h"],["po"],["dr"],["o", "do"],["a","ac"]]
 
 command_options["export"] = {}
 command_options["export"]["name"] = ["filename", "delimiter", "none"]

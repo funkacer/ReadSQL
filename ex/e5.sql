@@ -1,5 +1,5 @@
 \f C:\#Git\ReadSQL\ex;
-\cs test4.dbx;
+\cms Test;
 
 \# "Example from SPSS Modeler node Select, Append.", tc= 2;
 
