@@ -2265,6 +2265,7 @@ def parseCommand(command_line, variables, command_options, logger = None):
 
 def get_sql_queries_dict(lst, foldername):
     sqls_local = {}
+    OK_returned = 1
     for sql_filename in lst:
         #print("SQL file:", sql_file)
         full_filename, file_exists = check_filename(sql_filename, foldername)
@@ -2277,7 +2278,8 @@ def get_sql_queries_dict(lst, foldername):
                 sqls_local[full_filename] = parseText(sql, ";")
         else:
             variables["$printRed"]["options"]["value"](f'''! SQL file '{full_filename}' does not exist !''')
-    return sqls_local
+            OK_returned = 2
+    return OK_returned, sqls_local
 
 def check_foldername(foldername, foldername_old):
     folder_exists = False
@@ -2749,26 +2751,43 @@ def do_sql(sql, command_options, variables, datas = {}, output = None, logger = 
         elif command == "load":
             #Vratit zpatky db_version a folder pred load
             foldername_return = variables["$foldername"]["options"]["value"]
+            silent_mode_return = variables["$silent_mode"]["options"]["value"]
             sql_filename = options["filename"]
-            sqls_load = get_sql_queries_dict([sql_filename], variables["$foldername"]["options"]["value"])
-            for full_filename in sqls_load.keys():
-                #OK_returned = 1
-                for i, sql_load in enumerate(sqls_load[full_filename]):
-                    variables["$printCom"]["options"]["value"](f"\n\\\\ SQL file '{full_filename}' command no {str(i+1)} \\\\")
-                    #print(sql)
-                    #print()
-                    start = time.perf_counter()
-                    variables, datas, output, logger = do_sql(sql_load, command_options, variables, datas, output, logger)
-                    OK_returned = variables["$command_results"]["options"]["value"][-1]
-                    end = time.perf_counter()
-                    print()
-                    if OK_returned == 1:
-                        print("Elapsed time: " + str(datetime.timedelta(seconds=end-start)))
-                    elif OK_returned > 1:
-                        variables["$printRed"]["options"]["value"]("Elapsed time: " + str(datetime.timedelta(seconds=end-start)))
-                        time.sleep(2)
-                    else: break
+            if options.get("silent_mode"):
+                variables["$silent_mode"]["options"]["value"] = True
+            OK_returned, sqls_load = get_sql_queries_dict([sql_filename], variables["$foldername"]["options"]["value"])
+            if OK_returned == 1:
+                for full_filename in sqls_load.keys():
+                    #OK_returned = 1
+                    for i, sql_load in enumerate(sqls_load[full_filename]):
+                        if not variables["$silent_mode"]["options"]["value"]:
+                            variables["$printCom"]["options"]["value"](f"\n\\\\ SQL file '{full_filename}' command no {str(i+1)} \\\\")
+                        #print(sql)
+                        #print()
+                        start = time.perf_counter()
+                        variables, datas, output, logger = do_sql(sql_load, command_options, variables, datas, output, logger)
+                        OK_returned = variables["$command_results"]["options"]["value"][-1]
+                        end = time.perf_counter()
+                        if OK_returned == 1:
+                            if not variables["$silent_mode"]["options"]["value"]:
+                                print()
+                                print("Elapsed time: " + str(datetime.timedelta(seconds=end-start)))
+                        elif OK_returned > 1:
+                            print()
+                            variables["$printRed"]["options"]["value"]("Elapsed time: " + str(datetime.timedelta(seconds=end-start)))
+                            print()
+                            time.sleep(2)
+                            OK = 2
+                        else: break
+            else:
+                print()
+                OK = 2
             variables["$foldername"]["options"]["value"] = foldername_return
+            variables["$silent_mode"]["options"]["value"] = silent_mode_return
+            if OK == 1:
+                variables["$printInvGreen"]["options"]["value"]("LOAD SUMMARY: All commands from loaded file were OK.")
+            else:
+                variables["$printInvRed"]["options"]["value"]("! LOAD SUMMARY: Some commands from loaded file were KO !")
 
 
         elif command == "split":
@@ -4300,7 +4319,8 @@ def do_sql(sql, command_options, variables, datas = {}, output = None, logger = 
             OK = 3
 
     else:
-        variables["$printBlue"]["options"]["value"](variables["$db_version"]["options"]["value"] + sql + "\n")
+        if not variables["$silent_mode"]["options"]["value"]:
+            variables["$printBlue"]["options"]["value"](variables["$db_version"]["options"]["value"] + sql + "\n")
         data_new = None
         columns_new = None
         error = 0
@@ -4312,19 +4332,20 @@ def do_sql(sql, command_options, variables, datas = {}, output = None, logger = 
             traceback.print_exc()
             print()
             error = 1
-        try:
-            #conn.commit()
-            #print(c.statusmessage)
-            data_new = c.fetchall()
-            if c.description:
-                columns_new = [col[0] for col in c.description]
-            #conn.close()
-        except Exception as e:
-            #traceback.print_exc()
-            #error = 1
-            pass
-        finally:
-            if variables["$conn"]["options"]["value"]: variables["$conn"]["options"]["value"].commit()
+        if variables["$fetchall"]["options"]["value"]:
+            try:
+                #conn.commit()
+                #print(c.statusmessage)
+                data_new = c.fetchall()
+                if c.description:
+                    columns_new = [col[0] for col in c.description]
+                #conn.close()
+            except Exception as e:
+                #traceback.print_exc()
+                #error = 1
+                pass
+            finally:
+                if variables["$conn"]["options"]["value"]: variables["$conn"]["options"]["value"].commit()
         if data_new or columns_new:
             if isinstance(data_new, tuple):
                 #print("Converting to list")
@@ -4342,7 +4363,8 @@ def do_sql(sql, command_options, variables, datas = {}, output = None, logger = 
             #print("Columns class", columns.__class__)
             show_data(data, columns, variables)
         elif not error:
-            variables["$printInvGreen"]["options"]["value"]("! There are no data returned from this sql query !")
+            if not variables["$silent_mode"]["options"]["value"]:
+                variables["$printInvGreen"]["options"]["value"]("! There are no data returned from this sql query !")
         else:
             variables["$printInvRed"]["options"]["value"]("! Error exexuting this sql query !")
             if OK: OK = 2
@@ -4540,11 +4562,14 @@ but {len(command_options[key1][key2])} '{key2}'.'''
                 variables, datas, output, logger = do_sql(sql, command_options, variables, datas, output, logger)
                 OK_returned = variables["$command_results"]["options"]["value"][-1]
                 end = time.perf_counter()
-                print()
                 if OK_returned == 1:
+                    print()
                     print("Elapsed time: " + str(datetime.timedelta(seconds=end-start)))
+                    print()
                 elif OK_returned > 1:
+                    print()
                     variables["$printRed"]["options"]["value"]("Elapsed time: " + str(datetime.timedelta(seconds=end-start)))
+                    print()
                     time.sleep(2)
                 else: break
         variables["$foldername"]["options"]["value"] = foldername_return
@@ -4595,11 +4620,14 @@ but {len(command_options[key1][key2])} '{key2}'.'''
                 variables, datas, output, logger = do_sql(sql, command_options, variables, datas, output, logger)
                 OK_returned = variables["$command_results"]["options"]["value"][-1]
                 end = time.perf_counter()
-                print()
                 if OK_returned == 1:
+                    print()
                     print("Elapsed time: " + str(datetime.timedelta(seconds=end-start)))
+                    print()
                 elif OK_returned > 1:
+                    print()
                     variables["$printRed"]["options"]["value"]("Elapsed time: " + str(datetime.timedelta(seconds=end-start)))
+                    print()
                     time.sleep(1)
                 else: break
             if OK_returned:

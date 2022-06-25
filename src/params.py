@@ -3,6 +3,16 @@ import datetime
 
 variables = {}
 
+variables["$silent_mode"] = {}
+variables["$silent_mode"]["shorts"] = []
+variables["$silent_mode"]["options"] = {}
+variables["$silent_mode"]["options"]["value"] = False
+
+variables["$fetchall"] = {}
+variables["$fetchall"]["shorts"] = []
+variables["$fetchall"]["options"] = {}
+variables["$fetchall"]["options"]["value"] = False
+
 variables["$class_str"] = {}
 variables["$class_str"]["shorts"] = []
 variables["$class_str"]["options"] = {}
@@ -386,14 +396,14 @@ command_options["export"]["alternative"] = ["e"]
 command_options["export"]["altoption"] = [["fn","f"],["d"],["null","n"]]
 
 command_options["load"] = {}
-command_options["load"]["name"] = ["filename"]
-command_options["load"]["required"] = [True]
-command_options["load"]["type"] = ["str"]
-command_options["load"]["default"] = [None]
+command_options["load"]["name"] = ["filename", "silent_mode"]
+command_options["load"]["required"] = [True, False]
+command_options["load"]["type"] = ["str", "bool"]
+command_options["load"]["default"] = [None, False]
 command_options["load"]["help1"] = "Help for command 'folder'"
-command_options["load"]["help2"] = ["Blabla1"]
+command_options["load"]["help2"] = ["Blabla1", "Blabla2"]
 command_options["load"]["alternative"] = ["l"]
-command_options["load"]["altoption"] = [["fn","f"]]
+command_options["load"]["altoption"] = [["fn","f"], ["sm","s"]]
 
 
 command_options["table"] = {}
