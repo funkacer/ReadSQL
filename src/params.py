@@ -11,7 +11,7 @@ variables["$silent_mode"]["options"]["value"] = False
 variables["$fetchall"] = {}
 variables["$fetchall"]["shorts"] = []
 variables["$fetchall"]["options"] = {}
-variables["$fetchall"]["options"]["value"] = False
+variables["$fetchall"]["options"]["value"] = True
 
 variables["$class_str"] = {}
 variables["$class_str"]["shorts"] = []
