@@ -1556,7 +1556,13 @@ def parseValue(value, typestr):
     dstring = "."
     if typestr == "auto":
         if len(value) > 0:
-            if value[0] in ["-","0","1","2","3","4","5","6","7","8","9"] and dstring not in value:
+            if value == 'True':
+                value = True
+            elif value == 'False':
+                value = False
+            elif value == 'None':
+                value = None
+            elif value[0] in ["-","0","1","2","3","4","5","6","7","8","9"] and dstring not in value:
                 try:
                     value = int(value)
                 except Exception as e:
@@ -1882,13 +1888,10 @@ def parseVariable(variables, command, options, n, vartest, logger = None):
                             else:
                                 opt = 0
                     if opt:
-                        if variables[variable][context]["value"] is not None:
-                            if variable == "$now":
-                                ret = str(variables["$now"]["user"]["value"](None))
-                            else:
-                                ret = str(variables[variable][context]["value"]) # must look like string input from user
+                        if variable == "$now":
+                            ret = str(variables["$now"]["user"]["value"](None))
                         else:
-                            ret = None
+                            ret = str(variables[variable][context]["value"]) # must look like string input from user
         elif vartest[0] == "@":
             # function
             for f in functions:
@@ -2172,7 +2175,15 @@ def parseCommand(command_line, variables, command_options, logger = None):
                             var, opt = parseVariable(variables, command, options, n, str(lst[0]), logger)
                             if opt:
                                 lst[0] = var
-                            if lst[0][0] == '[' and lst[0][-1] == ']':
+                                #parse list from var
+                                if lst[0][0] == '[' and lst[0][-1] == ']':
+                                    #its a list, mrs walker, its a list
+                                    left_list_line = lst[0][1:-1]
+                                    #left_list_line = ",".join(parseText(left_list_line, " "))
+                                    ll = parseText(left_list_line, ",")
+                                else:
+                                    l = lst[0]
+                            elif lst[0][0] == '[' and lst[0][-1] == ']':
                                 #its a list, mrs walker, its a list
                                 left_list_line = lst[0][1:-1]
                                 #left_list_line = ",".join(parseText(left_list_line, " "))
@@ -2186,28 +2197,35 @@ def parseCommand(command_line, variables, command_options, logger = None):
                             var, opt = parseVariable(variables, command, options, n, str(lst[1]), logger)
                             if opt:
                                 lst[1] = var
-                            if lst[1] is not None:
+                                #parse list from var
                                 if lst[1][0] == '[' and lst[1][-1] == ']':
                                     #its a list, mrs walker, its a list
                                     right_list_line = lst[1][1:-1]
                                     #right_list_line = ",".join(parseText(right_list_line, " "))
                                     rr = parseText(right_list_line, ",")
-                                elif len(lst[1]) == 0:
-                                    r = ""
-                                elif lst[1][0] == '"' and lst[1][-1] == '"':
-                                    r = lst[1].strip('"')
-                                elif lst[1][0] == "'" and lst[1][-1] == "'":
-                                    r = lst[1].strip("'")
                                 else:
-                                    r = parseValue(lst[1], variables["$parse_value_type"]["options"]["value"])
-                            if l is not None and rr is None:
+                                    r = lst[1]
+                            elif lst[1][0] == '[' and lst[1][-1] == ']':
+                                #its a list, mrs walker, its a list
+                                right_list_line = lst[1][1:-1]
+                                #right_list_line = ",".join(parseText(right_list_line, " "))
+                                rr = parseText(right_list_line, ",")
+                            elif len(lst[1]) == 0:
+                                r = ""
+                            elif lst[1][0] == '"' and lst[1][-1] == '"':
+                                r = lst[1].strip('"')
+                            elif lst[1][0] == "'" and lst[1][-1] == "'":
+                                r = lst[1].strip("'")
+                            else:
+                                r = parseValue(lst[1], variables["$parse_value_type"]["options"]["value"])
+                            if l is not None and r is not None:
                                 lst_new[l] = r
-                            if ll is not None and rr is None:
+                            if ll is not None and r is not None:
                                 for l in ll:
                                     var, opt = parseVariable(variables, command, options, n, str(l), logger)
                                     if opt:
                                         l = var
-                                    if l[0] == '"' and l[-1] == '"':
+                                    elif l[0] == '"' and l[-1] == '"':
                                         l = l.strip('"')
                                     elif l[0] == "'" and l[-1] == "'":
                                         l = l.strip("'")
@@ -2220,19 +2238,21 @@ def parseCommand(command_line, variables, command_options, logger = None):
                                     var, opt = parseVariable(variables, command, options, n, str(l), logger)
                                     if opt:
                                         l = var
-                                    if l[0] == '"' and l[-1] == '"':
+                                    elif l[0] == '"' and l[-1] == '"':
                                         l = l.strip('"')
                                     elif l[0] == "'" and l[-1] == "'":
                                         l = l.strip("'")
                                     var, opt = parseVariable(variables, command, options, n, str(r), logger)
                                     if opt:
                                         r = var
-                                    if len(r) == 0:
+                                    elif len(r) == 0:
                                         r = ""
                                     elif r[0] == '"' and r[-1] == '"':
                                         r = r.strip('"')
                                     elif r[0] == "'" and r[-1] == "'":
                                         r = r.strip("'")
+                                    else:
+                                        r = parseValue(r, variables["$parse_value_type"]["options"]["value"])
                                     lst_new[l] = r
                         else:
                             variables["$printRed"]["options"]["value"](f"Error parsing dictlist option {lst}. Check results carefully!!!")
@@ -2530,32 +2550,63 @@ def do_sql(sql, command_options, variables, datas = {}, output = None, logger = 
         elif command == "set variable easy" or command == "set variable":
 
             set_variable_names = options.get("names")
-            set_variable_type = variables["$parse_value_type"]["options"]["value"]
+            #set_variable_type = variables["$parse_value_type"]["options"]["value"]
 
             for vn in set_variable_names:
                 if len(vn) > 0:
-                    print(vn)
+                    print(vn + ": " + str(set_variable_names[vn]))
                     if vn[0] != "$":
                         v = "$" + vn
                     else:
                         v = vn
-            if v not in variables:
-                variables[v] = {}
-                variables[v]["shorts"] = []
-            variables[v]["user"] = {}
-            variables[v]["user"]["value"] = set_variable_names[vn]
+                if v not in variables:
+                    variables[v] = {}
+                    variables[v]["shorts"] = []
+                variables[v]["user"] = {}
+                variables[v]["user"]["value"] = set_variable_names[vn]
+
+
+        elif command == "set option easy" or command == "set option":
+
+            set_option_names = options.get("names")
+            #set_option_type = variables["$parse_value_type"]["options"]["value"]
+
+            for vn in set_option_names:
+                if len(vn) > 0:
+                    print(vn + ": " + str(set_option_names[vn]))
+                    if vn[0] != "$":
+                        v = "$" + vn
+                    else:
+                        v = vn
+                if v not in variables:
+                    variables[v] = {}
+                    variables[v]["shorts"] = []
+                variables[v]["options"] = {}
+                variables[v]["options"]["value"] = set_option_names[vn]
 
 
         elif command == "print variables easy" or command == "print variables":
 
-            print_variable_names = options.get("names")
+            print_variables_names = options.get("names")
 
-            if print_variable_names is not None:
+            if print_variables_names is not None:
                 pass
             else:
                 #print(",\n".join(str(v) for v in [vi for vi in variables.items()]))
-                print(",\n".join(str(v) for v in variables.items()))
+                # print except pure option (has keys "options" and "shorts", e.g. len == 2)
+                print(",\n".join(str(v) for v in variables.items() if "options" not in v[1] or len(v[1]) > 2))
 
+
+        elif command == "print options easy" or command == "print options":
+
+            print_options_names = options.get("names")
+
+            if print_options_names is not None:
+                pass
+            else:
+                #print(",\n".join(str(v) for v in [vi for vi in variables.items()]))
+                # print except pure option (has keys "options" and "shorts", e.g. len == 2)
+                print(",\n".join(str(v) for v in variables.items() if "options" in v[1]))
 
 
         elif command == "folder":

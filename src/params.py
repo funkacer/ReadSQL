@@ -255,10 +255,12 @@ variables["$thousands_separator"]["shorts"] = ["$ts"]
 variables["$thousands_separator"]["user"] = {}
 variables["$thousands_separator"]["user"]["value"] = ","
 
+'''
 variables["$none"] = {}
 variables["$none"]["shorts"] = ["$n", "$no"]
 variables["$none"]["user"] = {}
 variables["$none"]["user"]["value"] = None
+'''
 
 variables["$now"] = {}
 variables["$now"]["shorts"] = ["$now"]
@@ -312,8 +314,6 @@ command_options["read"]["alternative"] = ["read", "r"]
 command_options["read"]["altoption"] = [["f"],["d"],["t","tq"], ["r","rc"], ["s","sc"], ["p","pd"], ["l"]]
 
 
-
-
 command_options["set variable easy"] = {}
 command_options["set variable easy"]["name"] = ["names"]
 command_options["set variable easy"]["required"] = [True]
@@ -324,7 +324,6 @@ command_options["set variable easy"]["help2"] = ["Bla1"]
 command_options["set variable easy"]["alternative"] = ["set variable", "sv"]
 command_options["set variable easy"]["altoption"] = [["n"]]
 
-
 command_options["set variable"] = {}
 command_options["set variable"]["name"] = ["what", "names"]
 command_options["set variable"]["required"] = [True, True]
@@ -334,6 +333,28 @@ command_options["set variable"]["help1"] = "Help for command 'set'"
 command_options["set variable"]["help2"] = ["Bla1", "Bla2"]
 command_options["set variable"]["alternative"] = ["set", "s"]
 command_options["set variable"]["altoption"] = [["w"], ["n"]]
+
+
+command_options["set option easy"] = {}
+command_options["set option easy"]["name"] = ["names"]
+command_options["set option easy"]["required"] = [True]
+command_options["set option easy"]["type"] = ["dictlist"]
+command_options["set option easy"]["default"] = [None]
+command_options["set option easy"]["help1"] = "Help for command 'set'"
+command_options["set option easy"]["help2"] = ["Bla1"]
+command_options["set option easy"]["alternative"] = ["set option", "so"]
+command_options["set option easy"]["altoption"] = [["n"]]
+
+command_options["set option"] = {}
+command_options["set option"]["name"] = ["what", "names"]
+command_options["set option"]["required"] = [True, True]
+command_options["set option"]["type"] = [["option", "o"], "dictlist"]
+command_options["set option"]["default"] = [None, None]
+command_options["set option"]["help1"] = "Help for command 'set'"
+command_options["set option"]["help2"] = ["Bla1", "Bla2"]
+command_options["set option"]["alternative"] = ["set", "s"]
+command_options["set option"]["altoption"] = [["w"], ["n"]]
+
 
 command_options["connect sqlite3"] = {}
 command_options["connect sqlite3"]["name"] = ["what", "filename", "parse_formats"]
@@ -489,6 +510,16 @@ command_options["print history"]["alternative"] = ["print h", "p h", "ph"]
 command_options["print history"]["altoption"] = []
 
 
+command_options["print variables easy"] = {}
+command_options["print variables easy"]["name"] = []
+command_options["print variables easy"]["required"] = []
+command_options["print variables easy"]["type"] = []
+command_options["print variables easy"]["default"] = []
+command_options["print variables easy"]["help1"] = "Help for command 'folder'"
+command_options["print variables easy"]["help2"] = []
+command_options["print variables easy"]["alternative"] = ["pv"]
+command_options["print variables easy"]["altoption"] = []
+
 command_options["print variables"] = {}
 command_options["print variables"]["name"] = ["what"]
 command_options["print variables"]["required"] = [True]
@@ -498,6 +529,28 @@ command_options["print variables"]["help1"] = "Help for command 'folder'"
 command_options["print variables"]["help2"] = ["Bla1"]
 command_options["print variables"]["alternative"] = ["print", "p"]
 command_options["print variables"]["altoption"] = [["w"]]
+
+
+command_options["print options easy"] = {}
+command_options["print options easy"]["name"] = []
+command_options["print options easy"]["required"] = []
+command_options["print options easy"]["type"] = []
+command_options["print options easy"]["default"] = []
+command_options["print options easy"]["help1"] = "Help for command 'folder'"
+command_options["print options easy"]["help2"] = []
+command_options["print options easy"]["alternative"] = ["po"]
+command_options["print options easy"]["altoption"] = []
+
+command_options["print options"] = {}
+command_options["print options"]["name"] = ["what"]
+command_options["print options"]["required"] = [True]
+command_options["print options"]["type"] = [["options", "o"]]
+command_options["print options"]["default"] = [None]
+command_options["print options"]["help1"] = "Help for command 'folder'"
+command_options["print options"]["help2"] = ["Bla1"]
+command_options["print options"]["alternative"] = ["print", "p"]
+command_options["print options"]["altoption"] = [["w"]]
+
 
 command_options["data fill easy"] = {}
 command_options["data fill easy"]["name"] = ["formats", "nones", "title", "note", "title_color", "note_color"]
